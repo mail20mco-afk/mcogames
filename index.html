@@ -3,168 +3,941 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#07111f">
   <title>MCO GAMES - Catálogo Oficial</title>
+
   <style>
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
-      font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    :root {
+      --bg: #07111f;
+      --card: #0d1b2e;
+      --card-2: #10233b;
+      --line: rgba(255,255,255,.09);
+      --text: #f5f7fb;
+      --muted: #9aa9bd;
+      --primary: #20c997;
+      --primary-dark: #0fa878;
+      --danger: #ff5d73;
+      --gold: #ffc857;
     }
 
     body {
-      background-color: #0f172a;
-      color: #f8fafc;
-      padding: 20px;
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at top right, rgba(32,201,151,.10), transparent 30%),
+        radial-gradient(circle at top left, rgba(54,113,255,.10), transparent 28%),
+        var(--bg);
+      color: var(--text);
+      font-family: "Segoe UI", Roboto, Arial, sans-serif;
     }
 
-    header {
-      text-align: center;
-      padding: 20px 0 30px;
+    button, input, select {
+      font: inherit;
     }
 
-    header h1 {
-      color: #38bdf8;
-      font-size: 2rem;
-      margin-bottom: 8px;
+    .header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      backdrop-filter: blur(14px);
+      background: rgba(7,17,31,.88);
+      border-bottom: 1px solid var(--line);
     }
 
-    header p {
-      color: #94a3b8;
-      font-size: 0.95rem;
-    }
-
-    .container {
-      max-width: 1200px;
-      margin: 0 auto;
-    }
-
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    .header-inner {
+      width: min(1400px, 94%);
+      margin: auto;
+      padding: 18px 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
       gap: 20px;
     }
 
-    .card {
-      background-color: #1e293b;
-      border-radius: 12px;
-      overflow: hidden;
-      border: 1px solid #334155;
-      display: flex;
-      flex-direction: column;
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    .logo {
+      font-size: clamp(1.5rem, 3vw, 2.2rem);
+      font-weight: 900;
+      letter-spacing: 1px;
     }
 
-    .card:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 10px 20px rgba(0,0,0,0.4);
+    .logo span {
+      color: var(--primary);
     }
 
-    .card-img {
+    .subtitle {
+      color: var(--muted);
+      font-size: .82rem;
+      margin-top: 3px;
+    }
+
+    .status {
+      color: var(--muted);
+      font-size: .8rem;
+      text-align: right;
+    }
+
+    .container {
+      width: min(1400px, 94%);
+      margin: auto;
+      padding: 28px 0 60px;
+    }
+
+    .hero {
+      margin-bottom: 24px;
+    }
+
+    .hero h1 {
+      font-size: clamp(1.5rem, 4vw, 2.5rem);
+      margin-bottom: 7px;
+    }
+
+    .hero p {
+      color: var(--muted);
+    }
+
+    .controls {
+      display: grid;
+      grid-template-columns: minmax(220px, 1fr) 210px;
+      gap: 12px;
+      margin: 22px 0;
+    }
+
+    .control {
       width: 100%;
-      height: 260px;
-      object-fit: cover;
-      background-color: #0f172a;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: rgba(13,27,46,.9);
+      color: var(--text);
+      padding: 13px 15px;
+      outline: none;
     }
 
-    .card-body {
-      padding: 15px;
+    .control:focus {
+      border-color: rgba(32,201,151,.7);
+    }
+
+    .categories {
       display: flex;
-      flex-direction: column;
-      flex-grow: 1;
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 5px;
+      margin-bottom: 28px;
+      scrollbar-width: thin;
     }
 
-    .card-title {
-      font-size: 1.05rem;
+    .category-btn {
+      flex: 0 0 auto;
+      border: 1px solid var(--line);
+      background: var(--card);
+      color: var(--muted);
+      padding: 10px 16px;
+      border-radius: 999px;
+      cursor: pointer;
+      transition: .2s ease;
+    }
+
+    .category-btn:hover,
+    .category-btn.active {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: #06150f;
       font-weight: 700;
-      color: #ffffff;
-      margin-bottom: 10px;
+    }
+
+    .section {
+      margin-bottom: 38px;
+    }
+
+    .section-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 15px;
+    }
+
+    .section-title h2 {
+      font-size: 1.25rem;
+    }
+
+    .count {
+      color: var(--muted);
+      font-size: .8rem;
+    }
+
+    .games {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+      gap: 16px;
+    }
+
+    .game-card {
+      overflow: hidden;
+      background: linear-gradient(180deg, var(--card-2), var(--card));
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      box-shadow: 0 10px 35px rgba(0,0,0,.16);
+      transition: transform .22s ease, border-color .22s ease, box-shadow .22s ease;
+    }
+
+    .game-card:hover {
+      transform: translateY(-4px);
+      border-color: rgba(32,201,151,.4);
+      box-shadow: 0 15px 45px rgba(0,0,0,.28);
+    }
+
+    .cover-wrap {
+      position: relative;
+      aspect-ratio: 3 / 4;
+      background: #091522;
+      overflow: hidden;
+    }
+
+    .cover {
+      width: 100%;
+      height: 100%;
+      display: block;
+      object-fit: cover;
+      transition: transform .3s ease;
+    }
+
+    .game-card:hover .cover {
+      transform: scale(1.035);
+    }
+
+    .badge {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background: var(--danger);
+      color: white;
+      font-weight: 800;
+      font-size: .7rem;
+      padding: 5px 8px;
+      border-radius: 7px;
+      text-transform: uppercase;
+    }
+
+    .content {
+      padding: 13px;
+    }
+
+    .title {
+      font-size: 1rem;
       line-height: 1.3;
+      font-weight: 800;
+      min-height: 42px;
     }
 
-    .card-price {
-      font-size: 1.1rem;
-      color: #4ade80;
-      font-weight: bold;
-      margin-top: auto;
-      margin-bottom: 12px;
+    .platform {
+      color: var(--muted);
+      font-size: .78rem;
+      margin-top: 4px;
+      min-height: 18px;
     }
 
-    .btn-zap {
-      display: inline-flex;
+    .old-price {
+      color: #718096;
+      text-decoration: line-through;
+      font-size: .78rem;
+      margin-top: 10px;
+    }
+
+    .prices {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .price-box {
+      background: rgba(255,255,255,.045);
+      border: 1px solid var(--line);
+      border-radius: 9px;
+      padding: 8px;
+    }
+
+    .price-label {
+      color: var(--muted);
+      font-size: .65rem;
+      text-transform: uppercase;
+      font-weight: 700;
+    }
+
+    .price {
+      margin-top: 2px;
+      font-size: 1rem;
+      font-weight: 900;
+      color: var(--primary);
+    }
+
+    .stock {
+      margin-top: 3px;
+      color: var(--muted);
+      font-size: .66rem;
+    }
+
+    .buy-buttons {
+      display: grid;
+      gap: 7px;
+      margin-top: 12px;
+    }
+
+    .whatsapp {
+      display: flex;
       align-items: center;
       justify-content: center;
-      background-color: #22c55e;
-      color: #ffffff;
       text-decoration: none;
-      font-weight: 600;
-      padding: 10px;
-      border-radius: 8px;
-      font-size: 0.9rem;
-      transition: background-color 0.2s;
+      background: var(--primary);
+      color: #04140e;
+      font-weight: 800;
+      font-size: .8rem;
+      border-radius: 9px;
+      padding: 10px 8px;
+      transition: .2s ease;
     }
 
-    .btn-zap:hover {
-      background-color: #16a34a;
+    .whatsapp:hover {
+      background: var(--primary-dark);
+      color: white;
+    }
+
+    .whatsapp.secondary {
+      background: transparent;
+      color: var(--primary);
+      border: 1px solid rgba(32,201,151,.4);
+    }
+
+    .whatsapp.secondary:hover {
+      background: rgba(32,201,151,.1);
+      color: var(--primary);
+    }
+
+    .empty,
+    .loading,
+    .error {
+      text-align: center;
+      padding: 45px 20px;
+      color: var(--muted);
+      border: 1px dashed var(--line);
+      border-radius: 15px;
+      background: rgba(13,27,46,.45);
+    }
+
+    .error {
+      color: #ff9aaa;
+    }
+
+    .footer {
+      text-align: center;
+      color: #66768b;
+      font-size: .75rem;
+      padding-top: 15px;
+    }
+
+    @media (max-width: 650px) {
+      .header-inner {
+        align-items: flex-start;
+      }
+
+      .status {
+        display: none;
+      }
+
+      .controls {
+        grid-template-columns: 1fr;
+      }
+
+      .games {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+      }
+
+      .content {
+        padding: 10px;
+      }
+
+      .title {
+        font-size: .88rem;
+        min-height: 38px;
+      }
+
+      .prices {
+        grid-template-columns: 1fr;
+      }
+
+      .price-box:nth-child(2) {
+        display: none;
+      }
+    }
+
+    @media (max-width: 360px) {
+      .games {
+        grid-template-columns: 1fr;
+      }
     }
   </style>
 </head>
+
 <body>
-
-  <div class="container">
-    <header>
-      <h1>MCO GAMES</h1>
-      <p>Confira nossos jogos em destaque e faça seu pedido pelo WhatsApp</p>
-    </header>
-
-    <div id="catalogo" class="grid">
-      <!-- Os cards dos jogos serão gerados aqui -->
+  <header class="header">
+    <div class="header-inner">
+      <div>
+        <div class="logo">MCO <span>GAMES</span></div>
+        <div class="subtitle">Catálogo Oficial</div>
+      </div>
+      <div class="status" id="status">Carregando catálogo...</div>
     </div>
-  </div>
+  </header>
+
+  <main class="container">
+    <section class="hero">
+      <h1>Encontre seu próximo jogo</h1>
+      <p>Escolha o jogo, confira a disponibilidade e fale conosco pelo WhatsApp.</p>
+    </section>
+
+    <div class="controls">
+      <input id="search" class="control" type="search" placeholder="🔎 Pesquisar jogo...">
+      <select id="platform" class="control">
+        <option value="">Todas as plataformas</option>
+      </select>
+    </div>
+
+    <nav class="categories" id="categories"></nav>
+
+    <div id="catalog">
+      <div class="loading">Carregando jogos da planilha...</div>
+    </div>
+
+    <div class="footer">
+      MCO GAMES • Catálogo atualizado automaticamente pela planilha
+    </div>
+  </main>
 
   <script>
-    // Configuração dos jogos (Pode adicionar ou alterar os itens abaixo)
-    const jogos = [
-      {
-        titulo: "Resident Evil 4 Remake",
-        preco: "A partir de R$ 120,00",
-        imagem: "https://m.media-amazon.com/images/I/811SuvY4zBL._AC_SX342_.jpg",
-        whatsapp: "https://wa.me/5599999999999?text=Olá,%20tenho%20interesse%20no%20Resident%20Evil%204"
-      },
-      {
-        titulo: "GTA V",
-        preco: "A partir de R$ 80,00",
-        imagem: "https://m.media-amazon.com/images/I/81qA6R9Mh-L._AC_SX342_.jpg",
-        whatsapp: "https://wa.me/5599999999999?text=Olá,%20tenho%20interesse%20no%20GTA%20V"
+    /*
+      ============================================================
+      CONFIGURAÇÃO
+      ============================================================
+    */
+
+    const PLANILHA_PUBLICADA =
+      "https://docs.google.com/spreadsheets/d/e/2PACX-1vTbnddE66aBmhilS8BtFkch5qx41mzkZOiVtVeMxzHJRXljT3qevVZFGf4jU8o1LNZHuHL_3bnIGqRg/pub";
+
+    // Se sua aba principal não for a primeira aba publicada,
+    // coloque aqui o nome dela. Ex.: "Página1"
+    const NOME_DA_ABA = "";
+
+    // Número informado para receber os pedidos no WhatsApp.
+    const WHATSAPP_NUMERO = "5599981810222";
+
+    let jogos = [];
+    let categoriaAtual = "TODOS";
+
+    /*
+      ============================================================
+      FUNÇÕES AUXILIARES
+      ============================================================
+    */
+
+    function normalizar(texto) {
+      return String(texto ?? "")
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .trim()
+        .toLowerCase();
+    }
+
+    function numero(valor) {
+      if (valor === null || valor === undefined || valor === "") return null;
+
+      let texto = String(valor).trim()
+        .replace(/[R$\s]/g, "");
+
+      // Aceita formatos 37,90 e 37.90
+      if (texto.includes(",") && texto.includes(".")) {
+        texto = texto.replace(/\./g, "").replace(",", ".");
+      } else if (texto.includes(",")) {
+        texto = texto.replace(",", ".");
       }
-    ];
 
-    const container = document.getElementById('catalogo');
+      const n = parseFloat(texto.replace(/[^\d.-]/g, ""));
+      return Number.isFinite(n) ? n : null;
+    }
 
-    function carregarCatalogo() {
-      container.innerHTML = '';
-      
-      jogos.forEach(jogo => {
-        const card = document.createElement('div');
-        card.className = 'card';
+    function moeda(valor) {
+      const n = numero(valor);
+      if (n === null) return "—";
 
-        card.innerHTML = `
-          <img src="${jogo.imagem}" alt="${jogo.titulo}" class="card-img" onerror="this.src='https://via.placeholder.com/300x400?text=Sem+Imagem'">
-          <div class="card-body">
-            <h2 class="card-title">${jogo.titulo}</h2>
-            <div class="card-price">${jogo.preco}</div>
-            <a href="${jogo.whatsapp}" target="_blank" class="btn-zap">
-              Compartilhar no Zap
-            </a>
-          </div>
-        `;
-
-        container.appendChild(card);
+      return n.toLocaleString("pt-BR", {
+        style: "currency",
+        currency: "BRL"
       });
     }
 
-    // Executa a montagem do catálogo assim que a página carrega
-    document.addEventListener('DOMContentLoaded', carregarCatalogo);
+    function extrairUrl(valor) {
+      if (!valor) return "";
+
+      const texto = String(valor).trim();
+
+      // Caso venha como [URL](URL)
+      const markdown = texto.match(/\]\((https?:\/\/[^)]+)\)/i);
+      if (markdown) return markdown[1];
+
+      // Caso venha diretamente como URL
+      const url = texto.match(/https?:\/\/[^\s)]+/i);
+      return url ? url[0] : texto;
+    }
+
+    function escapar(texto) {
+      return String(texto ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    function textoCelula(cell) {
+      if (!cell) return "";
+      if (cell.f !== undefined && cell.f !== null) return String(cell.f);
+      if (cell.v !== undefined && cell.v !== null) return String(cell.v);
+      return "";
+    }
+
+    /*
+      ============================================================
+      GOOGLE SHEETS
+      ============================================================
+    */
+
+    async function carregarPlanilha() {
+      const aba = NOME_DA_ABA
+        ? "&sheet=" + encodeURIComponent(NOME_DA_ABA)
+        : "";
+
+      const url =
+        PLANILHA_PUBLICADA +
+        "/gviz/tq?tqx=out:json" +
+        aba;
+
+      const resposta = await fetch(url, {
+        cache: "no-store"
+      });
+
+      if (!resposta.ok) {
+        throw new Error("Não foi possível acessar a planilha.");
+      }
+
+      const texto = await resposta.text();
+
+      const inicio = texto.indexOf("{");
+      const fim = texto.lastIndexOf("}");
+
+      if (inicio === -1 || fim === -1) {
+        throw new Error("Resposta da planilha inválida.");
+      }
+
+      return JSON.parse(texto.substring(inicio, fim + 1));
+    }
+
+    function converterTabela(json) {
+      const tabela = json.table;
+      const headers = tabela.cols.map((col, index) => {
+        return normalizar(col.label || `coluna_${index}`);
+      });
+
+      return tabela.rows.map(row => {
+        const objeto = {};
+
+        headers.forEach((header, index) => {
+          objeto[header] = textoCelula(row.c[index]);
+        });
+
+        return objeto;
+      });
+    }
+
+    /*
+      ============================================================
+      LEITURA DAS COLUNAS DA SUA PLANILHA
+      ============================================================
+    */
+
+    function transformarJogo(linha) {
+      return {
+        id: linha["id"],
+        nome: linha["nome"],
+        plataforma: linha["plataforma"],
+        categoria: linha["categoria"],
+        precoAntigo: linha["preco antigo"],
+        primaria: linha["preco primaria"],
+        qtdPrimaria: linha["qtd. primaria"],
+        secundaria: linha["preco secundaria"],
+        qtdSecundaria: linha["qtd. secundaria"],
+        data: linha["data"],
+        imagem: extrairUrl(linha["link da imagem"])
+      };
+    }
+
+    /*
+      ============================================================
+      WHATSAPP
+      ============================================================
+    */
+
+    function whatsapp(jogo, tipo) {
+      const preco =
+        tipo === "Primária"
+          ? moeda(jogo.primaria)
+          : moeda(jogo.secundaria);
+
+      const mensagem =
+        `Olá! Tenho interesse no jogo *${jogo.nome}* ` +
+        `(${jogo.plataforma}), na modalidade *${tipo}*` +
+        (preco !== "—" ? `, no valor de *${preco}*.` : ".");
+
+      return `https://wa.me/${WHATSAPP_NUMERO}?text=${encodeURIComponent(mensagem)}`;
+    }
+
+    /*
+      ============================================================
+      CARD
+      ============================================================
+    */
+
+    function criarCard(jogo) {
+      const primaria = numero(jogo.primaria);
+      const secundaria = numero(jogo.secundaria);
+
+      const temPrimaria = primaria !== null;
+      const temSecundaria = secundaria !== null;
+
+      const imagem =
+        jogo.imagem ||
+        "https://via.placeholder.com/600x800/0d1b2e/ffffff?text=MCO+GAMES";
+
+      const badge =
+        normalizar(jogo.categoria).includes("promoc") ||
+        normalizar(jogo.categoria).includes("oferta")
+          ? `<span class="badge">Oferta</span>`
+          : "";
+
+      return `
+        <article class="game-card">
+          <div class="cover-wrap">
+            <img
+              class="cover"
+              src="${escapar(imagem)}"
+              alt="${escapar(jogo.nome)}"
+              loading="lazy"
+              onerror="this.onerror=null;this.src='https://via.placeholder.com/600x800/0d1b2e/ffffff?text=MCO+GAMES';"
+            >
+            ${badge}
+          </div>
+
+          <div class="content">
+            <div class="title">${escapar(jogo.nome || "Jogo sem nome")}</div>
+
+            <div class="platform">
+              🎮 ${escapar(jogo.plataforma || "Plataforma não informada")}
+            </div>
+
+            ${
+              numero(jogo.precoAntigo) !== null
+                ? `<div class="old-price">${moeda(jogo.precoAntigo)}</div>`
+                : ""
+            }
+
+            <div class="prices">
+              <div class="price-box">
+                <div class="price-label">Primária</div>
+                <div class="price">${temPrimaria ? moeda(jogo.primaria) : "—"}</div>
+                ${
+                  jogo.qtdPrimaria
+                    ? `<div class="stock">${escapar(jogo.qtdPrimaria)} disponível(is)</div>`
+                    : ""
+                }
+              </div>
+
+              <div class="price-box">
+                <div class="price-label">Secundária</div>
+                <div class="price">${temSecundaria ? moeda(jogo.secundaria) : "—"}</div>
+                ${
+                  jogo.qtdSecundaria
+                    ? `<div class="stock">${escapar(jogo.qtdSecundaria)} disponível(is)</div>`
+                    : ""
+                }
+              </div>
+            </div>
+
+            <div class="buy-buttons">
+              ${
+                temPrimaria
+                  ? `<a class="whatsapp" target="_blank" rel="noopener" href="${whatsapp(jogo, "Primária")}">WhatsApp • Primária</a>`
+                  : ""
+              }
+
+              ${
+                temSecundaria
+                  ? `<a class="whatsapp secondary" target="_blank" rel="noopener" href="${whatsapp(jogo, "Secundária")}">WhatsApp • Secundária</a>`
+                  : ""
+              }
+            </div>
+          </div>
+        </article>
+      `;
+    }
+
+    /*
+      ============================================================
+      FILTROS
+      ============================================================
+    */
+
+    function preencherPlataformas() {
+      const select = document.getElementById("platform");
+
+      const plataformas = [...new Set(
+        jogos
+          .map(j => j.plataforma)
+          .filter(Boolean)
+      )].sort((a, b) =>
+        a.localeCompare(b, "pt-BR")
+      );
+
+      select.innerHTML =
+        `<option value="">Todas as plataformas</option>` +
+        plataformas
+          .map(p => `<option value="${escapar(p)}">${escapar(p)}</option>`)
+          .join("");
+    }
+
+    function preencherCategorias() {
+      const container = document.getElementById("categories");
+
+      const categorias = [...new Set(
+        jogos
+          .map(j => j.categoria)
+          .filter(Boolean)
+      )];
+
+      const ordemPreferida = [
+        "Promoção",
+        "Lançamentos em Oferta",
+        "Pré-Venda",
+        "Catálogo (Mais Jogos)"
+      ];
+
+      categorias.sort((a, b) => {
+        const ia = ordemPreferida.findIndex(x => normalizar(x) === normalizar(a));
+        const ib = ordemPreferida.findIndex(x => normalizar(x) === normalizar(b));
+
+        if (ia !== -1 && ib !== -1) return ia - ib;
+        if (ia !== -1) return -1;
+        if (ib !== -1) return 1;
+
+        return a.localeCompare(b, "pt-BR");
+      });
+
+      container.innerHTML = `
+        <button class="category-btn active" data-category="TODOS">
+          Todos <span>(${jogos.length})</span>
+        </button>
+      `;
+
+      categorias.forEach(categoria => {
+        const quantidade = jogos.filter(
+          j => normalizar(j.categoria) === normalizar(categoria)
+        ).length;
+
+        container.innerHTML += `
+          <button
+            class="category-btn"
+            data-category="${escapar(categoria)}"
+          >
+            ${escapar(categoria)} <span>(${quantidade})</span>
+          </button>
+        `;
+      });
+
+      container.querySelectorAll(".category-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+          container.querySelectorAll(".category-btn")
+            .forEach(b => b.classList.remove("active"));
+
+          btn.classList.add("active");
+          categoriaAtual = btn.dataset.category;
+          renderizar();
+        });
+      });
+    }
+
+    /*
+      ============================================================
+      RENDERIZAÇÃO
+      ============================================================
+    */
+
+    function renderizar() {
+      const catalogo = document.getElementById("catalog");
+      const busca = normalizar(document.getElementById("search").value);
+      const plataforma = document.getElementById("platform").value;
+
+      let filtrados = jogos.filter(jogo => {
+        const bateCategoria =
+          categoriaAtual === "TODOS" ||
+          normalizar(jogo.categoria) === normalizar(categoriaAtual);
+
+        const batePlataforma =
+          !plataforma ||
+          normalizar(jogo.plataforma) === normalizar(plataforma);
+
+        const texto =
+          normalizar(
+            `${jogo.nome} ${jogo.plataforma} ${jogo.categoria}`
+          );
+
+        const bateBusca = !busca || texto.includes(busca);
+
+        return bateCategoria && batePlataforma && bateBusca;
+      });
+
+      if (!filtrados.length) {
+        catalogo.innerHTML = `
+          <div class="empty">
+            Nenhum jogo encontrado com os filtros selecionados.
+          </div>
+        `;
+        return;
+      }
+
+      /*
+        Quando há pesquisa ou filtro de plataforma/categoria,
+        mostramos os resultados juntos.
+      */
+      const usandoFiltro =
+        busca ||
+        plataforma ||
+        categoriaAtual !== "TODOS";
+
+      if (usandoFiltro) {
+        catalogo.innerHTML = `
+          <section class="section">
+            <div class="section-title">
+              <h2>Resultados</h2>
+              <span class="count">${filtrados.length} jogo(s)</span>
+            </div>
+            <div class="games">
+              ${filtrados.map(criarCard).join("")}
+            </div>
+          </section>
+        `;
+        return;
+      }
+
+      /*
+        Sem filtros: organiza automaticamente por categoria.
+      */
+      const grupos = {};
+
+      filtrados.forEach(jogo => {
+        const categoria = jogo.categoria || "Outros";
+
+        if (!grupos[categoria]) {
+          grupos[categoria] = [];
+        }
+
+        grupos[categoria].push(jogo);
+      });
+
+      const ordem = [
+        "Promoção",
+        "Lançamentos em Oferta",
+        "Pré-Venda",
+        "Catálogo (Mais Jogos)"
+      ];
+
+      const categorias = Object.keys(grupos).sort((a, b) => {
+        const ia = ordem.findIndex(x => normalizar(x) === normalizar(a));
+        const ib = ordem.findIndex(x => normalizar(x) === normalizar(b));
+
+        if (ia !== -1 && ib !== -1) return ia - ib;
+        if (ia !== -1) return -1;
+        if (ib !== -1) return 1;
+
+        return a.localeCompare(b, "pt-BR");
+      });
+
+      catalogo.innerHTML = categorias.map(categoria => `
+        <section class="section">
+          <div class="section-title">
+            <h2>${escapar(categoria)}</h2>
+            <span class="count">${grupos[categoria].length} jogo(s)</span>
+          </div>
+
+          <div class="games">
+            ${grupos[categoria].map(criarCard).join("")}
+          </div>
+        </section>
+      `).join("");
+    }
+
+    /*
+      ============================================================
+      INICIALIZAÇÃO
+      ============================================================
+    */
+
+    async function iniciar() {
+      const status = document.getElementById("status");
+
+      try {
+        const dados = await carregarPlanilha();
+
+        const linhas = converterTabela(dados);
+
+        jogos = linhas
+          .map(transformarJogo)
+          .filter(jogo => jogo.nome && jogo.nome.trim());
+
+        if (!jogos.length) {
+          throw new Error("Nenhum jogo encontrado na planilha.");
+        }
+
+        preencherPlataformas();
+        preencherCategorias();
+        renderizar();
+
+        status.textContent =
+          `${jogos.length} jogos • atualizado pela planilha`;
+
+      } catch (erro) {
+        console.error(erro);
+
+        document.getElementById("catalog").innerHTML = `
+          <div class="error">
+            <strong>Não foi possível carregar o catálogo.</strong><br><br>
+            Verifique se a planilha continua publicada na web.
+          </div>
+        `;
+
+        status.textContent = "Erro ao carregar catálogo";
+      }
+    }
+
+    document.getElementById("search")
+      .addEventListener("input", renderizar);
+
+    document.getElementById("platform")
+      .addEventListener("change", renderizar);
+
+    iniciar();
   </script>
 </body>
 </html>
