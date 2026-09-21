@@ -1,355 +1,170 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MCO GAMES - Catálogo</title>
-    <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        body { background-color: #0f141c; color: #fff; padding: 20px; }
-        
-        .catalog-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-            gap: 20px;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MCO GAMES - Catálogo Oficial</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    }
 
-        .card {
-            background-color: #1a222d;
-            border-radius: 10px;
-            overflow: hidden;
-            border: 1px solid #2a3545;
-            display: flex;
-            flex-direction: column;
-            transition: transform 0.2s, border-color 0.2s;
-        }
+    body {
+      background-color: #0f172a;
+      color: #f8fafc;
+      padding: 20px;
+    }
 
-        .card:hover { transform: translateY(-5px); border-color: #00ff88; }
-        .card.selected { border: 2px solid #00ff88; box-shadow: 0 0 10px rgba(0,255,136,0.3); }
+    header {
+      text-align: center;
+      padding: 20px 0 30px;
+    }
 
-        .card-img-container { position: relative; width: 100%; height: 260px; background-color: #000; }
-        .card-img { width: 100%; height: 100%; object-fit: cover; }
+    header h1 {
+      color: #38bdf8;
+      font-size: 2rem;
+      margin-bottom: 8px;
+    }
 
-        .platform-tag {
-            position: absolute; top: 10px; left: 10px;
-            background: rgba(0, 0, 0, 0.8); color: #fff;
-            padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: bold;
-        }
+    header p {
+      color: #94a3b8;
+      font-size: 0.95rem;
+    }
 
-        .discount-badge {
-            position: absolute; top: 10px; right: 10px;
-            background: #ff0055; color: #fff;
-            padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: bold;
-        }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
 
-        .card-info { padding: 15px; display: flex; flex-direction: column; flex-grow: 1; justify-content: space-between; gap: 10px; }
-        .card-title { font-size: 15px; font-weight: bold; color: #fff; height: 40px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 20px;
+    }
 
-        .price-container { display: flex; flex-direction: column; }
-        .old-price { text-decoration: line-through; color: #8a99ad; font-size: 12px; }
-        .current-price { color: #00ff88; font-size: 18px; font-weight: bold; }
+    .card {
+      background-color: #1e293b;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid #334155;
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
 
-        .card-timer {
-            background: #253346; color: #00ff88; padding: 6px;
-            border-radius: 5px; font-size: 12px; text-align: center; font-weight: bold;
-        }
-        .card-timer.preorder { color: #00d9ff; }
+    .card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 10px 20px rgba(0,0,0,0.4);
+    }
 
-        .type-selector { display: flex; gap: 5px; margin-top: 5px; }
-        .type-btn {
-            flex: 1; background: #253346; border: 1px solid #3a4b61;
-            color: #fff; padding: 8px 4px; border-radius: 5px;
-            cursor: pointer; font-size: 11px; text-align: center;
-        }
-        .type-btn:hover { background: #32445d; }
-        .type-btn.active { background: #00ff88; color: #000; font-weight: bold; border-color: #00ff88; }
+    .card-img {
+      width: 100%;
+      height: 260px;
+      object-fit: cover;
+      background-color: #0f172a;
+    }
 
-        .share-btn {
-            background: #25d366; color: #fff; border: none;
-            padding: 10px; border-radius: 5px; font-weight: bold;
-            cursor: pointer; width: 100%; font-size: 13px; margin-top: 5px;
-        }
-        .share-btn:hover { background: #1eb857; }
+    .card-body {
+      padding: 15px;
+      display: flex;
+      flex-direction: column;
+      flex-grow: 1;
+    }
 
-        .loading-text { text-align: center; width: 100%; grid-column: 1 / -1; padding: 50px; font-size: 18px; color: #8a99ad; }
-    </style>
+    .card-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #ffffff;
+      margin-bottom: 10px;
+      line-height: 1.3;
+    }
+
+    .card-price {
+      font-size: 1.1rem;
+      color: #4ade80;
+      font-weight: bold;
+      margin-top: auto;
+      margin-bottom: 12px;
+    }
+
+    .btn-zap {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background-color: #22c55e;
+      color: #ffffff;
+      text-decoration: none;
+      font-weight: 600;
+      padding: 10px;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      transition: background-color 0.2s;
+    }
+
+    .btn-zap:hover {
+      background-color: #16a34a;
+    }
+  </style>
 </head>
 <body>
 
-    <div id="catalogContainer" class="catalog-grid">
-        <div class="loading-text">A carregar catálogo...</div>
+  <div class="container">
+    <header>
+      <h1>MCO GAMES</h1>
+      <p>Confira nossos jogos em destaque e faça seu pedido pelo WhatsApp</p>
+    </header>
+
+    <div id="catalogo" class="grid">
+      <!-- Os cards dos jogos serão gerados aqui -->
     </div>
+  </div>
 
-<script>
-// Altere para o ID correto da sua planilha publicada
-const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vR6U9v6U-EXEMPLO/pub?output=csv";
+  <script>
+    // Configuração dos jogos (Pode adicionar ou alterar os itens abaixo)
+    const jogos = [
+      {
+        titulo: "Resident Evil 4 Remake",
+        preco: "A partir de R$ 120,00",
+        imagem: "https://m.media-amazon.com/images/I/811SuvY4zBL._AC_SX342_.jpg",
+        whatsapp: "https://wa.me/5599999999999?text=Olá,%20tenho%20interesse%20no%20Resident%20Evil%204"
+      },
+      {
+        titulo: "GTA V",
+        preco: "A partir de R$ 80,00",
+        imagem: "https://m.media-amazon.com/images/I/81qA6R9Mh-L._AC_SX342_.jpg",
+        whatsapp: "https://wa.me/5599999999999?text=Olá,%20tenho%20interesse%20no%20GTA%20V"
+      }
+    ];
 
-let games = [];
-let selectedCart = [];
+    const container = document.getElementById('catalogo');
 
-function parsePrice(val) {
-    if (!val) return 0;
-    let clean = val.toString().replace(/[^\d,\.]/g, '').replace(',', '.');
-    return parseFloat(clean) || 0;
-}
+    function carregarCatalogo() {
+      container.innerHTML = '';
+      
+      jogos.forEach(jogo => {
+        const card = document.createElement('div');
+        card.className = 'card';
 
-function parseCSVLine(text) {
-    let result = [];
-    let cur = '';
-    let inQuotes = false;
-    for (let i = 0; i < text.length; i++) {
-        let c = text[i];
-        if (c === '"') {
-            inQuotes = !inQuotes;
-        } else if (c === ',' && !inQuotes) {
-            result.push(cur);
-            cur = '';
-        } else {
-            cur += c;
-        }
-    }
-    result.push(cur);
-    return result;
-}
-
-function parseBrazilianDate(dateStr) {
-    if (!dateStr) return null;
-    if (dateStr.includes('-')) return new Date(dateStr);
-    
-    const parts = dateStr.split('/');
-    if (parts.length === 3) {
-        const day = parseInt(parts[0], 10);
-        const month = parseInt(parts[1], 10) - 1;
-        const year = parseInt(parts[2], 10);
-        return new Date(year, month, day, 23, 59, 59);
-    }
-    return new Date(dateStr);
-}
-
-function getTimeRemainingString(targetDateStr, isPreorder = false) {
-    if (!targetDateStr) return "";
-    
-    const targetDate = parseBrazilianDate(targetDateStr);
-    if (!targetDate || isNaN(targetDate.getTime())) return "";
-
-    const now = new Date().getTime();
-    const distance = targetDate.getTime() - now;
-
-    if (distance < 0) return isPreorder ? "🚀 Já Lançado!" : "Oferta Encerrada";
-
-    const days = Math.floor(distance / (1000 * 60 * 60 * 24));
-    const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-    const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-    const seconds = Math.floor((distance % (1000 * 60)) / 1000);
-
-    const prefix = isPreorder ? "🚀 Lança em:" : "⏳ Expira em:";
-    
-    if (days > 0) {
-        return `${prefix} ${days}d ${hours}h ${minutes}m`;
-    } else {
-        return `${prefix} ${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-    }
-}
-
-async function fetchGamesFromSheet() {
-    try {
-        const response = await fetch(SHEET_CSV_URL + "&t=" + new Date().getTime());
-        const data = await response.text();
-        
-        const lines = data.split(/\r?\n/);
-        games = [];
-        
-        for (let i = 1; i < lines.length; i++) {
-            if (!lines[i].trim()) continue;
-            
-            const row = parseCSVLine(lines[i]);
-            if (row.length >= 2 && row[1]) {
-                // Mapeamento exato da tabela:
-                // A: ID (0) | B: Nome (1) | C: Plataforma (2) | D: Categoria (3)
-                // E: Preço Antigo (4) | F: Preço Primária (5) | G: Qtd Primária (6)
-                // H: Preço Secundária (7) | I: Qtd Secundária (8) | J: Data (9)
-                // K: URL da Imagem (10)
-                
-                const imgRaw = row[10] ? row[10].replace(/^"|"$/g, '').trim() : '';
-                const imgUrl = (imgRaw && imgRaw.startsWith('http')) 
-                    ? imgRaw 
-                    : "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTnOXAQFE6SWdIZy6b4OpXDWYJUjkIbnYx7gQLCRunJ3w&s=10";
-
-                let rawCat = row[3] ? row[3].replace(/^"|"$/g, '').trim() : 'Promoção';
-                let targetDate = row[9] ? row[9].replace(/^"|"$/g, '').trim() : '';
-
-                let pricePrimary = parsePrice(row[5]);
-                let stockPrimary = row[6] ? parseInt(row[6].replace(/\D/g, '')) || 0 : 0;
-
-                let priceSecondary = parsePrice(row[7]);
-                let stockSecondary = row[8] ? parseInt(row[8].replace(/\D/g, '')) || 0 : 0;
-
-                games.push({
-                    id: row[0] ? row[0].replace(/^"|"$/g, '').trim() : `game-${i}`,
-                    name: row[1].replace(/^"|"$/g, '').trim(),
-                    platform: row[2] ? row[2].replace(/^"|"$/g, '').trim() : 'PS4 / PS5',
-                    category: rawCat || 'Promoção',
-                    oldPrice: parsePrice(row[4]),
-                    pricePrimary: pricePrimary,
-                    stockPrimary: stockPrimary,
-                    priceSecondary: priceSecondary,
-                    stockSecondary: stockSecondary,
-                    targetDate: targetDate,
-                    img: imgUrl
-                });
-            }
-        }
-
-        renderGames();
-        startTimerUpdates();
-
-    } catch (error) {
-        console.error("Erro ao carregar planilha:", error);
-        document.getElementById('catalogContainer').innerHTML = '<div class="loading-text" style="color:#ff0055">Erro ao carregar catálogo. Verifique a planilha.</div>';
-    }
-}
-
-function toggleSelectType(gameId, type) {
-    const idx = selectedCart.findIndex(i => i.gameId === gameId && i.type === type);
-    if (idx > -1) {
-        selectedCart.splice(idx, 1);
-    } else {
-        selectedCart = selectedCart.filter(i => i.gameId !== gameId); // Seleciona apenas 1 tipo por jogo
-        selectedCart.push({ gameId, type });
-    }
-    renderGames();
-}
-
-function createCardElement(game) {
-    const card = document.createElement('div');
-    card.className = 'card';
-
-    const isPreorder = game.category.toLowerCase().includes('pré') || game.category.toLowerCase().includes('pre');
-    
-    let timerHtml = '';
-    if (game.targetDate) {
-        const timeText = getTimeRemainingString(game.targetDate, isPreorder);
-        if (timeText) {
-            const timerClass = isPreorder ? "card-timer preorder" : "card-timer";
-            timerHtml = `<div class="${timerClass}" data-date="${game.targetDate}" data-preorder="${isPreorder}">${timeText}</div>`;
-        }
-    }
-
-    const primarySelected = selectedCart.some(i => i.gameId === game.id && i.type === 'Primária');
-    const secondarySelected = selectedCart.some(i => i.gameId === game.id && i.type === 'Secundária');
-
-    let mainPrice = game.pricePrimary > 0 ? game.pricePrimary : game.priceSecondary;
-    const discount = (game.oldPrice > mainPrice) ? Math.round(((game.oldPrice - mainPrice) / game.oldPrice) * 100) : 0;
-
-    let buttonsHtml = '';
-    const primaryTxt = `Primária (${game.stockPrimary} vagas)<br>R$ ${game.pricePrimary.toFixed(2).replace('.', ',')}`;
-    const secondaryTxt = `Secundária (${game.stockSecondary} vagas)<br>R$ ${game.priceSecondary.toFixed(2).replace('.', ',')}`;
-
-    if (game.pricePrimary > 0 && game.priceSecondary > 0) {
-        buttonsHtml = `
-            <div class="type-selector">
-                <button class="type-btn ${primarySelected ? 'active' : ''}" onclick="toggleSelectType('${game.id}', 'Primária')">
-                    ${primaryTxt}
-                </button>
-                <button class="type-btn ${secondarySelected ? 'active' : ''}" onclick="toggleSelectType('${game.id}', 'Secundária')">
-                    ${secondaryTxt}
-                </button>
-            </div>
+        card.innerHTML = `
+          <img src="${jogo.imagem}" alt="${jogo.titulo}" class="card-img" onerror="this.src='https://via.placeholder.com/300x400?text=Sem+Imagem'">
+          <div class="card-body">
+            <h2 class="card-title">${jogo.titulo}</h2>
+            <div class="card-price">${jogo.preco}</div>
+            <a href="${jogo.whatsapp}" target="_blank" class="btn-zap">
+              Compartilhar no Zap
+            </a>
+          </div>
         `;
-    } else if (game.pricePrimary > 0) {
-        buttonsHtml = `
-            <div class="type-selector">
-                <button class="type-btn ${primarySelected ? 'active' : ''}" style="width:100%" onclick="toggleSelectType('${game.id}', 'Primária')">
-                    ${primaryTxt}
-                </button>
-            </div>
-        `;
-    } else if (game.priceSecondary > 0) {
-        buttonsHtml = `
-            <div class="type-selector">
-                <button class="type-btn ${secondarySelected ? 'active' : ''}" style="width:100%" onclick="toggleSelectType('${game.id}', 'Secundária')">
-                    ${secondaryTxt}
-                </button>
-            </div>
-        `;
+
+        container.appendChild(card);
+      });
     }
 
-    if (primarySelected || secondarySelected) {
-        card.classList.add('selected');
-    }
-
-    card.innerHTML = `
-        <div class="card-img-container">
-            <span class="platform-tag">${game.platform}</span>
-            ${discount > 0 ? `<span class="discount-badge">-${discount}%</span>` : ''}
-            <img src="${game.img}" alt="${game.name}" class="card-img" crossorigin="anonymous" onerror="this.src='https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTnOXAQFE6SWdIZy6b4OpXDWYJUjkIbnYx7gQLCRunJ3w&s=10'">
-        </div>
-        <div class="card-info">
-            <div class="card-title">${game.name}</div>
-            <div class="price-container">
-                ${game.oldPrice > 0 ? `<span class="old-price">R$ ${game.oldPrice.toFixed(2).replace('.', ',')}</span>` : ''}
-                <span class="current-price">A partir de R$ ${mainPrice.toFixed(2).replace('.', ',')}</span>
-            </div>
-            ${timerHtml}
-            ${buttonsHtml}
-            <button class="share-btn" onclick="shareGameCard('${game.id}')">
-                📲 Compartilhar no Zap
-            </button>
-        </div>
-    `;
-    return card;
-}
-
-function renderGames() {
-    const container = document.getElementById('catalogContainer');
-    container.innerHTML = '';
-    
-    if (games.length === 0) {
-        container.innerHTML = '<div class="loading-text">Nenhum jogo encontrado.</div>';
-        return;
-    }
-
-    games.forEach(game => {
-        container.appendChild(createCardElement(game));
-    });
-}
-
-function startTimerUpdates() {
-    setInterval(() => {
-        const timers = document.querySelectorAll('.card-timer');
-        timers.forEach(timer => {
-            const dateStr = timer.getAttribute('data-date');
-            const isPreorder = timer.getAttribute('data-preorder') === 'true';
-            if (dateStr) {
-                const text = getTimeRemainingString(dateStr, isPreorder);
-                if (text) timer.innerText = text;
-            }
-        });
-    }, 1000);
-}
-
-function shareGameCard(gameId) {
-    const game = games.find(g => g.id === gameId);
-    if (!game) return;
-
-    let msg = `🔥 *${game.name}* (${game.platform})\n\n`;
-    if (game.pricePrimary > 0) msg += `🎮 Primária (${game.stockPrimary} vagas): R$ ${game.pricePrimary.toFixed(2).replace('.', ',')}\n`;
-    if (game.priceSecondary > 0) msg += `🎮 Secundária (${game.stockSecondary} vagas): R$ ${game.priceSecondary.toFixed(2).replace('.', ',')}\n`;
-    
-    const timeText = getTimeRemainingString(game.targetDate, game.category.toLowerCase().includes('pré'));
-    if (timeText) msg += `\n${timeText}\n`;
-
-    msg += `\nGaranta já o seu na MCO GAMES!`;
-
-    window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(msg)}`, '_blank');
-}
-
-// Inicializar ao carregar a página
-window.onload = () => {
-    fetchGamesFromSheet();
-};
-</script>
+    // Executa a montagem do catálogo assim que a página carrega
+    document.addEventListener('DOMContentLoaded', carregarCatalogo);
+  </script>
 </body>
 </html>
