@@ -6,7 +6,7 @@
     <title>MCO GAMES | Sua Loja Digital</title>
     
     <!-- Meta Tags para redes sociais e WhatsApp -->
-    <meta property="og:title" content="MCO GAMES | Catálogo Oficial">
+    <meta property="og:title" content="MCO GAMES | Sua Loja Digital">
     <meta property="og:description" content="Jogos digitais de PS4 e PS5 com os melhores preços. Ativação Instantânea!">
     <meta property="og:image" content="https://mco-games.netlify.app/PS-Store.jpg">
 
@@ -14,10 +14,10 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
     
-    <!-- PapaParse para leitura do CSV -->
+    <!-- PapaParse para leitura robusta do CSV sem bloqueio de CORS -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
-    
-    <!-- html2canvas para gerar a imagem/print em PNG do Card -->
+
+    <!-- html2canvas para gerar print PNG dos cards -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
     <style>
@@ -161,6 +161,16 @@
             color: var(--error-red);
         }
 
+        .status-box h3 {
+            font-size: 1.1rem;
+            margin-bottom: 8px;
+        }
+
+        .status-box p {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
         .carousel-section {
             margin-bottom: 32px;
         }
@@ -190,8 +200,8 @@
         }
 
         .carousel-grid .card {
-            min-width: 230px;
-            max-width: 240px;
+            min-width: 220px;
+            max-width: 230px;
             flex-shrink: 0;
         }
 
@@ -240,11 +250,10 @@
 
         .grid-games {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
             gap: 18px;
         }
 
-        /* ESTILO DO CARD PARA PRINT */
         .card {
             background-color: var(--card-bg);
             border: 2px solid var(--border-color);
@@ -255,18 +264,6 @@
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-        }
-
-        .card-watermark {
-            background-color: #0d1015;
-            padding: 6px 12px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 0.65rem;
-            font-weight: 800;
-            color: var(--accent-green);
-            border-bottom: 1px solid var(--border-color);
         }
 
         .card:hover {
@@ -319,6 +316,7 @@
             z-index: 2;
         }
 
+        /* Estilo do Relógio de Pré-Venda / Promoção */
         .timer-badge {
             background-color: rgba(255, 170, 0, 0.12);
             color: var(--timer-orange);
@@ -403,51 +401,29 @@
             border-color: var(--accent-green);
         }
 
-        /* BOTÕES DO CARD */
-        .card-actions {
-            display: flex;
-            gap: 6px;
-            margin-top: 6px;
-            padding-top: 8px;
-            border-top: 1px solid var(--border-color);
-        }
-
-        .btn-card-action {
-            flex: 1;
+        /* Botão para Compartilhar / Baixar Print do Card */
+        .btn-share-card {
+            background-color: rgba(255, 255, 255, 0.06);
+            border: 1px solid var(--border-color);
+            color: var(--text-muted);
+            border-radius: 6px;
+            padding: 6px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 4px;
-            padding: 8px 6px;
-            border-radius: 6px;
-            font-size: 0.72rem;
-            font-weight: 800;
-            cursor: pointer;
-            border: none;
+            gap: 5px;
             transition: all 0.2s ease;
-            text-decoration: none;
+            margin-top: 4px;
+            width: 100%;
         }
 
-        .btn-card-wa {
-            background-color: rgba(37, 211, 102, 0.15);
-            color: #25d366;
-            border: 1px solid rgba(37, 211, 102, 0.35);
-        }
-
-        .btn-card-wa:hover {
-            background-color: #25d366;
-            color: #000;
-        }
-
-        .btn-card-print {
+        .btn-share-card:hover {
             background-color: rgba(0, 230, 118, 0.15);
             color: var(--accent-green);
-            border: 1px solid rgba(0, 230, 118, 0.35);
-        }
-
-        .btn-card-print:hover {
-            background-color: var(--accent-green);
-            color: #000;
+            border-color: var(--accent-green);
         }
 
         .bottom-bar {
@@ -769,6 +745,7 @@
             return parseFloat(clean) || 0;
         }
 
+        // --- FUNÇÕES DE DATA E CONTAGEM REGRESSIVA (COLUNA J) ---
         function parseTargetDate(dateStr) {
             if (!dateStr) return null;
             let str = dateStr.toString().trim();
@@ -805,7 +782,9 @@
             const now = new Date();
             const diff = target.getTime() - now.getTime();
 
-            if (diff <= 0) return "Encerrado / Lançado";
+            if (diff <= 0) {
+                return "Encerrado / Lançado";
+            }
 
             const days = Math.floor(diff / (1000 * 60 * 60 * 24));
             const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
@@ -835,6 +814,7 @@
                 }
             });
         }
+        // -----------------------------------------------------
 
         function fetchCatalogFromSheets() {
             Papa.parse(SHEET_CSV_URL, {
@@ -888,14 +868,11 @@
                 }
 
                 const mainPrice = validPrices.length > 0 ? Math.min(...validPrices) : (pricePrimary || priceSecondary || 0);
+
                 const targetDate = row[9] ? row[9].trim() : '';
 
-                // Limpeza de ID seguro para seletores DOM
-                const rawId = row[0] && row[0].trim() ? row[0].trim() : `game-${i}`;
-                const safeId = rawId.replace(/[^a-zA-Z0-9_-]/g, '_');
-
                 games.push({
-                    id: safeId,
+                    id: row[0] && row[0].trim() ? row[0].trim() : `game-${i}`,
                     name: name,
                     platform: row[2] ? row[2].trim() : 'PS4 / PS5',
                     category: row[3] ? row[3].trim() : 'Geral',
@@ -964,42 +941,72 @@
             updateBottomBar();
         }
 
-        // --- FUNÇÃO PARA GERAR E DESCARREGAR PRINT DO CARD (PNG) ---
-        function downloadCardPrint(gameId) {
-            const cardElement = document.getElementById(`card-node-${gameId}`);
-            if (!cardElement) {
-                alert("Erro ao localizar o card para geração de print.");
-                return;
+        // --- FUNÇÃO PARA GERAR E COMPARTILHAR PRINT DO CARD ---
+        async function shareCardPrint(event, gameId) {
+            event.stopPropagation();
+            const cardEl = event.currentTarget.closest('.card');
+            if (!cardEl) return;
+
+            const printBtn = cardEl.querySelector('.btn-share-card');
+            if (printBtn) printBtn.style.display = 'none'; // Oculta o botão temporariamente durante o print
+
+            try {
+                const canvas = await html2canvas(cardEl, {
+                    scale: 2, // Alta qualidade HD
+                    useCORS: true,
+                    backgroundColor: '#13171d'
+                });
+
+                const game = games.find(g => g.id === gameId);
+                const safeName = game ? game.name.replace(/[^a-zA-Z0-9]/g, '_') : 'jogo';
+                const fileName = `MCO_GAMES_${safeName}.png`;
+
+                canvas.toBlob(async (blob) => {
+                    if (!blob) {
+                        if (printBtn) printBtn.style.display = 'flex';
+                        return;
+                    }
+
+                    const file = new File([blob], fileName, { type: 'image/png' });
+
+                    // Tenta o compartilhamento nativo do celular (WhatsApp, etc)
+                    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                        try {
+                            await navigator.share({
+                                files: [file],
+                                title: game ? game.name : 'MCO GAMES',
+                                text: `Confira essa oferta na MCO GAMES: ${game ? game.name : ''}`
+                            });
+                        } catch (shareErr) {
+                            // Se o usuário cancelar ou o envio falhar, faz o download do arquivo
+                            downloadBlob(blob, fileName);
+                        }
+                    } else {
+                        // Fallback para PC / navegadores sem API de Share
+                        downloadBlob(blob, fileName);
+                    }
+
+                    if (printBtn) printBtn.style.display = 'flex';
+                }, 'image/png');
+
+            } catch (err) {
+                console.error("Erro ao gerar print do card:", err);
+                if (printBtn) printBtn.style.display = 'flex';
             }
-
-            // Oculta temporariamente os botões de ação para a imagem sair limpa
-            const actionsElement = cardElement.querySelector('.card-actions');
-            if (actionsElement) actionsElement.style.display = 'none';
-
-            html2canvas(cardElement, {
-                useCORS: true,
-                scale: 2, // Maior definição da imagem (HD)
-                backgroundColor: '#13171d'
-            }).then(canvas => {
-                // Restaura os botões de ação no card
-                if (actionsElement) actionsElement.style.display = 'flex';
-
-                const link = document.createElement('a');
-                link.download = `MCO_GAMES_${gameId}.png`;
-                link.href = canvas.toDataURL('image/png');
-                link.click();
-            }).catch(err => {
-                if (actionsElement) actionsElement.style.display = 'flex';
-                console.error("Erro ao gerar print:", err);
-                alert("Não foi possível gerar a imagem automaticamente.");
-            });
         }
 
-        function createCardElement(game, instancePrefix = 'main') {
+        function downloadBlob(blob, fileName) {
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = fileName;
+            link.click();
+            URL.revokeObjectURL(link.href);
+        }
+        // -----------------------------------------------------
+
+        function createCardElement(game) {
             const card = document.createElement('div');
             card.className = 'card';
-            const nodeUniqueId = `${instancePrefix}-${game.id}`;
-            card.id = `card-node-${nodeUniqueId}`;
 
             const primarySelected = selectedCart.some(i => i.gameId === game.id && i.type === 'Primária');
             const secondarySelected = selectedCart.some(i => i.gameId === game.id && i.type === 'Secundária');
@@ -1050,22 +1057,11 @@
                 timerHtml = `<div class="timer-badge" data-target="${game.targetDate}">⏳ Carregando...</div>`;
             }
 
-            const waMsg = encodeURIComponent(
-                `🔥 *MCO GAMES* 🔥\n\n` +
-                `Olá! Quero comprar/consultar este jogo:\n` +
-                `🎮 *${game.name}* (${game.platform})\n` +
-                `💰 A partir de R$ ${game.mainPrice.toFixed(2).replace('.', ',')}`
-            );
-
             card.innerHTML = `
-                <div class="card-watermark">
-                    <span>🎮 MCO GAMES</span>
-                    <span>OFICIAL</span>
-                </div>
                 <div class="card-img-container">
                     <span class="platform-tag">${game.platform}</span>
                     ${discount > 0 ? `<span class="discount-badge">-${discount}%</span>` : ''}
-                    <img src="${game.img}" alt="${game.name}" class="card-img" loading="lazy" crossorigin="anonymous" onerror="this.src='https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTnOXAQFE6SWdIZy6b4OpXDWYJUjkIbnYx7gQLCRunJ3w&s=10'">
+                    <img src="${game.img}" alt="${game.name}" class="card-img" loading="lazy" onerror="this.src='https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTnOXAQFE6SWdIZy6b4OpXDWYJUjkIbnYx7gQLCRunJ3w&s=10'">
                 </div>
                 <div class="card-info">
                     <div class="card-title">${game.name}</div>
@@ -1075,15 +1071,9 @@
                         <span class="current-price">A partir de R$ ${game.mainPrice.toFixed(2).replace('.', ',')}</span>
                     </div>
                     ${buttonsHtml}
-                    
-                    <div class="card-actions">
-                        <a href="https://wa.me/${PHONE_NUMBER}?text=${waMsg}" target="_blank" class="btn-card-action btn-card-wa" title="Comprar no WhatsApp">
-                            💬 Comprar
-                        </a>
-                        <button class="btn-card-action btn-card-print" onclick="event.stopPropagation(); downloadCardPrint('${nodeUniqueId}')" title="Descarregar imagem do card">
-                            📸 Baixar Print
-                        </button>
-                    </div>
+                    <button class="btn-share-card" onclick="shareCardPrint(event, '${game.id}')" title="Compartilhar Print da Oferta">
+                        📸 Print / Compartilhar
+                    </button>
                 </div>
             `;
             return card;
@@ -1096,7 +1086,7 @@
 
             const featuredGames = games.slice(0, 10);
             featuredGames.forEach(game => {
-                container.appendChild(createCardElement(game, 'carousel'));
+                container.appendChild(createCardElement(game));
             });
             updateTimers();
         }
@@ -1104,7 +1094,7 @@
         function startAutoScroll() {
             const container = document.getElementById('carouselGrid');
             if (!container) return;
-            const cardWidth = 246;
+            const cardWidth = 236;
 
             setInterval(() => {
                 if (container.scrollLeft + container.clientWidth >= container.scrollWidth - 10) {
@@ -1144,7 +1134,7 @@
                     grid.className = 'grid-games';
 
                     filteredGames.forEach(game => {
-                        grid.appendChild(createCardElement(game, 'catalog'));
+                        grid.appendChild(createCardElement(game));
                     });
 
                     catalogContainer.appendChild(grid);
@@ -1224,6 +1214,7 @@
             document.getElementById('modalDrawer').classList.remove('active');
         }
 
+        // Executa a leitura inicial do catálogo
         fetchCatalogFromSheets();
     </script>
 </body>
