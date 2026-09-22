@@ -3,17 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MCO GAMES | Promoção Tokyo Game Show</title>
+    <title>MCO GAMES | Catálogo Oficial</title>
     
-    <!-- Meta Tags para Preview no WhatsApp (Substitua a URL após publicar no GitHub) -->
-    <meta property="og:title" content="MCO GAMES | Promoção Tokyo Game Show">
-    <meta property="og:description" content="Jogos digitais de PS4 e PS5 com até 75% OFF. Ativação Instantânea!">
+    <!-- Meta Tags para redes sociais e WhatsApp -->
+    <meta property="og:title" content="MCO GAMES | Catálogo Oficial">
+    <meta property="og:description" content="Jogos digitais de PS4 e PS5 com os melhores preços. Ativação Instantânea!">
     <meta property="og:image" content="https://mco-games.netlify.app/PS-Store.jpg">
-    <meta property="og:url" content="https://seu-usuario.github.io/mco-games/">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <!-- PapaParse para leitura do CSV do Google Sheets -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+
     <style>
         :root {
             --bg-color: #0b0d10;
@@ -25,6 +28,7 @@
             --text-muted: #8c96a3;
             --badge-discount: #ff0055;
             --whatsapp-bg: #25d366;
+            --error-red: #ff4d4d;
         }
 
         * {
@@ -118,53 +122,49 @@
             font-weight: 700;
         }
 
-        .promo-banner {
-            background: linear-gradient(90deg, #ff0055 0%, #990033 100%);
-            padding: 12px 20px;
-            text-align: center;
-            font-size: 0.85rem;
-            color: #fff;
-            font-weight: 700;
-        }
-
         .container {
             max-width: 1300px;
             margin: 0 auto;
             padding: 24px 20px;
         }
 
-        .community-banner {
-            background: rgba(37, 211, 102, 0.1);
-            border: 1px solid var(--whatsapp-bg);
-            border-radius: 12px;
-            padding: 16px 20px;
+        .hero-section {
             margin-bottom: 24px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 15px;
-            flex-wrap: wrap;
         }
 
-        .community-banner-text h4 {
-            color: var(--whatsapp-bg);
-            font-size: 1rem;
-            font-weight: 800;
+        .hero-title {
+            font-size: 2rem;
+            font-weight: 900;
+            margin-bottom: 6px;
         }
 
-        .community-banner-text p {
-            font-size: 0.8rem;
+        .hero-subtitle {
             color: var(--text-muted);
+            font-size: 0.95rem;
         }
 
-        .community-banner-btn {
-            background-color: var(--whatsapp-bg);
-            color: #000;
-            padding: 10px 18px;
-            border-radius: 8px;
+        .status-box {
+            background-color: var(--card-bg);
+            border: 1px dashed var(--border-color);
+            border-radius: 12px;
+            padding: 40px 20px;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .status-box.error {
+            border-color: var(--error-red);
+            color: var(--error-red);
+        }
+
+        .status-box h3 {
+            font-size: 1.1rem;
+            margin-bottom: 8px;
+        }
+
+        .status-box p {
             font-size: 0.85rem;
-            font-weight: 800;
-            text-decoration: none;
+            color: var(--text-muted);
         }
 
         .carousel-section {
@@ -586,6 +586,7 @@
             .grid-games { grid-template-columns: repeat(2, 1fr); gap: 10px; }
             .modal-drawer { max-width: 100%; }
             .header-tag { display: none; }
+            .hero-title { font-size: 1.5rem; }
         }
     </style>
 </head>
@@ -596,7 +597,7 @@
             <div class="brand-icon">🎮</div>
             <div>
                 <div class="brand-title">MCO GAMES</div>
-                <div class="brand-subtitle">Venda de Jogos Digitais</div>
+                <div class="brand-subtitle">Catálogo Oficial</div>
             </div>
         </div>
         <div class="header-actions">
@@ -607,40 +608,39 @@
         </div>
     </header>
 
-    <div class="promo-banner">
-        🔥 SUPER PROMOÇÃO TOKYO GAME SHOW! | Oferta até 23/09 ou durarem os estoques.
-    </div>
-
     <div class="container">
 
-        <div class="community-banner">
-            <div class="community-banner-text">
-                <h4>Entra no nosso Grupo VIP do WhatsApp! 🚀</h4>
-                <p>Receba ofertas relâmpago, descontos exclusivos e lançamentos em primeira mão.</p>
+        <div class="hero-section">
+            <h1 class="hero-title">Encontre seu próximo jogo</h1>
+            <p class="hero-subtitle">Escolha o jogo, confira a disponibilidade e fale conosco pelo WhatsApp.</p>
+        </div>
+
+        <div id="loadingContainer" class="status-box">
+            <h3>⏳ A carregar catálogo...</h3>
+            <p>Por favor, aguarde alguns segundos enquanto sincronizamos com a planilha.</p>
+        </div>
+
+        <div id="errorContainer" class="status-box error" style="display: none;">
+            <h3>Não foi possível carregar o catálogo.</h3>
+            <p>Verifique se a planilha continua publicada na web como CSV.</p>
+        </div>
+
+        <div id="mainContent" style="display: none;">
+            
+            <div class="carousel-section" id="carouselSection">
+                <div class="carousel-title">🔥 Destaques em Promoção (Deslize ➔)</div>
+                <div id="carouselGrid" class="carousel-grid"></div>
             </div>
-            <a href="https://chat.whatsapp.com/IREOzjw9jh55ekz95Nv3Pd" target="_blank" class="community-banner-btn">
-                Entrar no Grupo
-            </a>
-        </div>
 
-        <div class="carousel-section">
-            <div class="carousel-title">🔥 Ofertas em Destaque (Deslize ➔)</div>
-            <div id="carouselGrid" class="carousel-grid"></div>
-        </div>
+            <div class="controls">
+                <input type="text" id="searchInput" class="search-input" placeholder="🔍 Pesquisar jogo..." oninput="renderGames()">
+                <select id="categorySelect" class="category-select" onchange="renderGames()">
+                    <option value="ALL">Todas as Categorias</option>
+                </select>
+            </div>
 
-        <div class="controls">
-            <input type="text" id="searchInput" class="search-input" placeholder="🔍 Pesquisar jogo..." oninput="renderGames()">
-            <select id="categorySelect" class="category-select" onchange="renderGames()">
-                <option value="ALL">Todas as Categorias</option>
-                <option value="Destaques">🔥 Destaques da Promoção</option>
-                <option value="Lançamentos & PS5 Exclusivo">Lançamentos & PS5 Exclusivo</option>
-                <option value="Ação, Aventura & RPG">Ação, Aventura & RPG</option>
-                <option value="Franquia Call of Duty">Franquia Call of Duty</option>
-                <option value="Corrida, Esportes & Luta">Corrida, Esportes & Luta</option>
-            </select>
+            <div id="catalogContainer"></div>
         </div>
-
-        <div id="catalogContainer"></div>
     </div>
 
     <div class="bottom-bar" id="bottomBar">
@@ -682,63 +682,159 @@
 
     <script>
         const PHONE_NUMBER = "5599981810222";
+        
+        // Link CSV direto da planilha publicada no Google Sheets
+        const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTbnddE66aBmhilS8BtFkch5qx41mzkZOiVtVeMxzHJRXIjT3qevVZFGf4jU8o1LNZHuHL_3bnIgQRg/pub?output=csv";
 
-        const games = [
-            { id: 1, name: "Resident Evil 4 Remake", platform: "PS4/PS5", category: "Destaques", oldPrice: 80.00, price: 37.90, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTnOXAQFE6SWdIZy6b4OpXDWYJUjkIbnYx7gQLCRunJ3w&s=10" },
-            { id: 2, name: "Hogwarts Legacy", platform: "PS4/PS5", category: "Destaques", oldPrice: 90.00, price: 37.90, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTDj6BedHy6lFY2FFjwxiGV1zcmtK1kTQ_GPF4LUKZgOg&s" },
-            { id: 3, name: "Cyberpunk 2077", platform: "PS4/PS5", category: "Destaques", oldPrice: 110.00, price: 67.90, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTMayA2Ii9XTlpaclA72rdm8Vx4S5yFRPFjb83aM2WGkw&s" },
-            { id: 4, name: "GTA V", platform: "PS4/PS5", category: "Destaques", oldPrice: 90.00, price: 67.90, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTD_2TSyucbjkBbxV0-asAkbJvbV7DJ4zra-B8YRAXxAw&s=10" },
-            { id: 5, name: "Call of Duty: Black Ops 6", platform: "PS4/PS5", category: "Destaques", oldPrice: 150.00, price: 97.90, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSIYU09C_GbjXgQoT0CtxzW4IDsG-szlkFlC_HfG2lGfw&s=10" },
-            { id: 6, name: "SILENT HILL 2", platform: "PS5", category: "Destaques", oldPrice: 160.00, price: 107.90, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRsSNGVDDSA992HE4NhDCjXSDOSdTfQuq6pdhj2a_QnfQ&s" },
-            { id: 7, name: "Dying Light: The Beast", platform: "PS5", category: "Lançamentos & PS5 Exclusivo", oldPrice: 160.00, price: 107.90, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSk5D29Jtl67ZjayzS4DX2AK0ihUqy47fJr4r2cB4nX7Q&s=10" },
-            { id: 8, name: "Demon Slayer: Hinokami Chronicles 2", platform: "PS4/PS5", category: "Lançamentos & PS5 Exclusivo", oldPrice: 160.00, price: 107.90, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT1ZZm8p0xCKW-pWrr2-Xa2CgpkiciTQevGl60MgSJCDA&s=10" },
-            { id: 9, name: "SILENT HILL f", platform: "PS5", category: "Lançamentos & PS5 Exclusivo", oldPrice: 200.00, price: 147.90, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSb7lugy8ebNl_Mvk9HZQu360lJ-5AP-csWGVUo-jcCDw&s=10" },
-            { id: 10, name: "PRAGMATA", platform: "PS5", category: "Lançamentos & PS5 Exclusivo", oldPrice: 230.00, price: 177.90, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRL3YkBaYSL3linYwsyi3NOwo_W58o0UKtDruhfA41-iw&s=10" },
-            { id: 11, name: "Resident Evil Requiem", platform: "PS5", category: "Lançamentos & PS5 Exclusivo", oldPrice: 230.00, price: 177.90, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQxGhTZukhdnD6qRmMYA1LpZp_JuranbtTbSPZycTEdEg&s=10" },
-            { id: 12, name: "Death Stranding 2: On the Beach", platform: "PS5", category: "Lançamentos & PS5 Exclusivo", oldPrice: 230.00, price: 177.90, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT4dDgl6F7BLoR2UQuA2XG6tjGI4x6PACbzhOLZ_gBeIg&s=10" },
-            { id: 13, name: "007 First Light", platform: "PS5", category: "Lançamentos & PS5 Exclusivo", oldPrice: 280.00, price: 217.90, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR8HBjVb1KtMfX74UUOHgt5dv_A_S9gGUTGLwqnC9BRTA&s=10" },
-            { id: 14, name: "FF XV Royal Edition", platform: "PS4/PS5", category: "Ação, Aventura & RPG", oldPrice: 70.00, price: 37.90, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRuc4Z487g300UU_r8ziEwMR_W1FN6y8N_cn-XOuTX7JA&s=10" },
-            { id: 15, name: "Tom Clancy's Ghost Recon Wildlands", platform: "PS4/PS5", category: "Ação, Aventura & RPG", oldPrice: 70.00, price: 37.90, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRFvUggY8_32UEnssEip3NZRvIjv1lMShdlsw0WkmFVSA&s=10" },
-            { id: 16, name: "Assassin's Creed Valhalla", platform: "PS4/PS5", category: "Ação, Aventura & RPG", oldPrice: 110.00, price: 67.90, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQEQjVrZjnQIAwrGV6GWUwVoCp5hzF0-vPcxfId3lC9_g&s=10" },
-            { id: 17, name: "Dragon Ball Z: Kakarot", platform: "PS4/PS5", category: "Ação, Aventura & RPG", oldPrice: 110.00, price: 67.90, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTaDWnfquDHrnCM9JKGNTvYYcTQ4Z7NRKigmHakvsRRNg&s=10" },
-            { id: 18, name: "Death Stranding Director’s Cut", platform: "PS5", category: "Ação, Aventura & RPG", oldPrice: 120.00, price: 73.90, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQO9IMarIiGTHTXpyzCIIeCjyJLr539P-2uCTOgwR7OOw&s=10" },
-            { id: 19, name: "Dark Souls: Remastered", platform: "PS4/PS5", category: "Ação, Aventura & RPG", oldPrice: 130.00, price: 87.90, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQPNGG_l4qJt4FWLoUxoT0W0-WqN6xcs4h612hhQjZ-Yw&s=10" },
-            { id: 20, name: "Horizon Zero Dawn Remastered", platform: "PS5", category: "Ação, Aventura & RPG", oldPrice: 130.00, price: 87.90, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSXt1LLH4gi6DDSgwEGyLuWBK10jcNi3TJaFNNkujPAQw&s=10" },
-            { id: 21, name: "No Man's Sky", platform: "PS4/PS5", category: "Ação, Aventura & RPG", oldPrice: 130.00, price: 87.90, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR-QDRNurbgTY39la8c9-xTcQwcg4_Ner8MgGfNtCp0_Q&s=10" },
-            { id: 22, name: "BLEACH Rebirth of Souls", platform: "PS4/PS5", category: "Ação, Aventura & RPG", oldPrice: 160.00, price: 107.90, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQZr8GpZW7QhZ86ROFPYKj1g9zudMUnLiWmzo4Ufy8rig&s=10" },
-            { id: 23, name: "Dark Souls III", platform: "PS4/PS5", category: "Ação, Aventura & RPG", oldPrice: 170.00, price: 117.90, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSkDcgqeMtemPwCtApIioFifCo6jx8MBAf0KuDw9_0NQQ&s=10" },
-            { id: 24, name: "Dragon Ball: Sparking! ZERO", platform: "PS5", category: "Ação, Aventura & RPG", oldPrice: 180.00, price: 127.90, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTDJZSPJUK2Z-oJT-JMDBKOpxIBCkOEDYQWohlXcDFDPQ&s=10" },
-            { id: 25, name: "Ghost of Tsushima Director's Cut", platform: "PS4/PS5", category: "Ação, Aventura & RPG", oldPrice: 220.00, price: 167.90, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS3aK5Zr4F7fRSSiN9R1SUQyCPZlcI4WnZzxlrEqK8lGg&s=10" },
-            { id: 26, name: "Metal Gear Solid: Master Collection Vol.1", platform: "PS4/PS5", category: "Ação, Aventura & RPG", oldPrice: 220.00, price: 167.90, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT6PLNNby6zdSS3XFRE2LNBIxGWrNZ1X2ElhTAsmWXlzQ&s=10" },
-            { id: 27, name: "COD: Infinite Warfare", platform: "PS4/PS5", category: "Franquia Call of Duty", oldPrice: 90.00, price: 57.90, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTwdcqPPDyL_No5OCLNieW7iFXx5WIJVmR0fdun225xJw&s=10" },
-            { id: 28, name: "COD: Modern Warfare", platform: "PS4/PS5", category: "Franquia Call of Duty", oldPrice: 90.00, price: 57.90, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRmIy8joUQm8E_iQpTj99xbkRYKdUZpn2kmAvJj5Q8wnA&s=10" },
-            { id: 29, name: "COD: WWII", platform: "PS4/PS5", category: "Franquia Call of Duty", oldPrice: 90.00, price: 57.90, img: "https://i.redd.it/485pucnuimee1.jpeg" },
-            { id: 30, name: "COD: Black Ops 4", platform: "PS4/PS5", category: "Franquia Call of Duty", oldPrice: 90.00, price: 57.90, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSyaUFxXOqHEcVW-0FFSgza3lusfKGDCyQM8fuV49zMvA&s=10" },
-            { id: 31, name: "COD: Black Ops Cold War", platform: "PS4/PS5", category: "Franquia Call of Duty", oldPrice: 100.00, price: 67.90, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ6snFkVRNMBN7cqKllJr7r88hNwYJPNR9y8MPmabDUyA&s=10" },
-            { id: 32, name: "COD: Black Ops III", platform: "PS4/PS5", category: "Franquia Call of Duty", oldPrice: 100.00, price: 67.90, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR6FKNkNKS8b1lcfFQJbj6JypX7zOrJsCRCMT6DpdPiEA&s=10" },
-            { id: 33, name: "COD: Black Ops 6", platform: "PS4/PS5", category: "Franquia Call of Duty", oldPrice: 180.00, price: 127.90, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSAi8ahEdvPpAZOs9hjJI43LBgdEnCi-D27r2Tk1By2UQ&s=10" },
-            { id: 34, name: "Crash Team Racing Nitro-Fueled", platform: "PS4/PS5", category: "Corrida, Esportes & Luta", oldPrice: 80.00, price: 47.90, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ-rc2NGfXuLGwI5NIIChAmUtsFjtdsiXwStPjoJLyQ5Q&s=10" },
-            { id: 35, name: "Marvel vs. Capcom Fighting Collection", platform: "PS4/PS5", category: "Corrida, Esportes & Luta", oldPrice: 100.00, price: 67.90, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQGvQIMeGwxkqm-whwiKXD4y7d4whk3R7yOJWlHuGH2Jg&s=10" },
-            { id: 36, name: "Forza Horizon 5", platform: "PS5", category: "Corrida, Esportes & Luta", oldPrice: 110.00, price: 73.90, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTB4z-9HFX99WmJ4AaZnJgd9_tz0PgkumCbTp0nn5sAAQ&s=10" },
-            { id: 37, name: "Kingdom Hearts III", platform: "PS4/PS5", category: "Corrida, Esportes & Luta", oldPrice: 110.00, price: 73.90, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRtvmISZm9lHAm5gFsVQDDhP5mRQZuauWW7gRp02Pavbg&s=10" },
-            { id: 38, name: "Sonic Racing: CrossWorlds", platform: "PS4/PS5", category: "Corrida, Esportes & Luta", oldPrice: 140.00, price: 97.90, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTqS5F5ILMzxDOsV6WgCyXILmcIYirzEgJ5iqyOL7rqBw&s=10" },
-            { id: 39, name: "WWE 2K26", platform: "PS5", category: "Corrida, Esportes & Luta", oldPrice: 190.00, price: 137.90, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQy6xg3nDV99cdRXvEriWSFC7tAQNKYwFAeOMs9uvL0JA&s=10" },
-            { id: 40, name: "Undisputed", platform: "PS5", category: "Corrida, Esportes & Luta", oldPrice: 220.00, price: 167.90, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRKyxJjO-DO6vbK43o0d7SwO9wvVZmY07cf_6Zd6R-yGQ&s=10" }
-        ];
-
+        let games = [];
         let selectedGameIds = [];
+
+        async function fetchCatalogFromSheets() {
+            try {
+                const response = await fetch(SHEET_CSV_URL);
+                if (!response.ok) throw new Error("Erro na rede ao aceder à planilha.");
+
+                const csvText = await response.text();
+
+                Papa.parse(csvText, {
+                    header: false,
+                    skipEmptyLines: true,
+                    complete: function(results) {
+                        if (results.data && results.data.length > 0) {
+                            parseCsvData(results.data);
+                        } else {
+                            showError();
+                        }
+                    },
+                    error: function() {
+                        showError();
+                    }
+                });
+            } catch (err) {
+                showError();
+            }
+        }
+
+        function parseCsvData(rows) {
+            games = [];
+
+            rows.forEach((row, index) => {
+                if (!row || row.length < 2) return;
+
+                const rowStr = row.join(' ').toLowerCase();
+                // Ignorar linha de cabeçalho
+                if (index === 0 && (rowStr.includes('nome') || rowStr.includes('jogo') || rowStr.includes('plataforma'))) {
+                    return;
+                }
+
+                let name = "";
+                let platform = "PS4/PS5";
+                let category = "Geral";
+                let price = 0;
+                let oldPrice = 0;
+                let img = "";
+
+                // Detetar imagem URL (http/https)
+                row.forEach(cell => {
+                    const str = String(cell).trim();
+                    if (str.startsWith("http://") || str.startsWith("https://")) {
+                        img = str;
+                    }
+                });
+
+                // Detetar plataforma
+                row.forEach(cell => {
+                    const str = String(cell).trim().toUpperCase();
+                    if (str === "PS4" || str === "PS5" || str === "PS4/PS5" || str.includes("XBOX") || str.includes("NINTENDO")) {
+                        platform = str;
+                    }
+                });
+
+                // Nome do Jogo (Geralmente Coluna B / índice 1 ou Coluna A / índice 0)
+                name = String(row[1] || row[0] || "").trim();
+                if (!name || name.toLowerCase() === 'nome' || name.toLowerCase() === 'jogo') return;
+
+                // Preços
+                const foundPrices = [];
+                row.forEach(cell => {
+                    const clean = String(cell).replace('R$', '').replace('$', '').replace(/\s/g, '').replace(',', '.');
+                    const val = parseFloat(clean);
+                    if (!isNaN(val) && val > 0 && val < 3000 && !cell.includes('http')) {
+                        foundPrices.push(val);
+                    }
+                });
+
+                if (foundPrices.length >= 2) {
+                    oldPrice = Math.max(...foundPrices);
+                    price = Math.min(...foundPrices);
+                } else if (foundPrices.length === 1) {
+                    price = foundPrices[0];
+                    oldPrice = price * 1.3;
+                }
+
+                // Categoria
+                if (row[3] && String(row[3]).trim().length > 2 && !String(row[3]).startsWith('http')) {
+                    category = String(row[3]).trim();
+                } else if (row[2] && !row[2].includes('PS') && String(row[2]).trim().length > 2) {
+                    category = String(row[2]).trim();
+                }
+
+                if (name && name.length > 1) {
+                    games.push({
+                        id: index + 1,
+                        name: name,
+                        platform: platform,
+                        category: category || "Destaques",
+                        oldPrice: oldPrice > 0 ? oldPrice : price * 1.3,
+                        price: price > 0 ? price : 49.90,
+                        img: img || "https://via.placeholder.com/300x300?text=Sem+Imagem"
+                    });
+                }
+            });
+
+            if (games.length === 0) {
+                showError();
+                return;
+            }
+
+            document.getElementById('loadingContainer').style.display = 'none';
+            document.getElementById('mainContent').style.display = 'block';
+
+            populateCategories();
+            renderCarousel();
+            renderGames();
+            startAutoScroll();
+        }
+
+        function showError() {
+            document.getElementById('loadingContainer').style.display = 'none';
+            document.getElementById('errorContainer').style.display = 'block';
+        }
+
+        function populateCategories() {
+            const select = document.getElementById('categorySelect');
+            select.innerHTML = '<option value="ALL">Todas as Categorias</option>';
+            
+            const categories = [...new Set(games.map(g => g.category))];
+            categories.forEach(cat => {
+                const opt = document.createElement('option');
+                opt.value = cat;
+                opt.innerText = cat;
+                select.appendChild(opt);
+            });
+        }
 
         function renderCarousel() {
             const carouselContainer = document.getElementById('carouselGrid');
             if (!carouselContainer) return;
             carouselContainer.innerHTML = '';
 
-            const featuredGames = games.filter(g => g.category === "Destaques");
+            const featuredGames = games.slice(0, 10); // Primeiros 10 jogos como destaque
 
             featuredGames.forEach(game => {
                 const isSelected = selectedGameIds.includes(game.id);
                 const discount = Math.round(((game.oldPrice - game.price) / game.oldPrice) * 100);
-                const card = createCardElement(game, isSelected, discount);
+                const card = createCardElement(game, isSelected, discount > 0 ? discount : 20);
                 carouselContainer.appendChild(card);
             });
         }
@@ -811,7 +907,7 @@
                     filteredGames.forEach(game => {
                         const isSelected = selectedGameIds.includes(game.id);
                         const discount = Math.round(((game.oldPrice - game.price) / game.oldPrice) * 100);
-                        const card = createCardElement(game, isSelected, discount);
+                        const card = createCardElement(game, isSelected, discount > 0 ? discount : 20);
                         grid.appendChild(card);
                     });
 
@@ -890,12 +986,12 @@
 
             totalPriceEl.innerText = `R$ ${total.toFixed(2).replace('.', ',')}`;
 
-            const message = `🔥 *PEDIDO - PROMOÇÃO TOKYO GAME SHOW* 🔥\n\n` +
-                            `Olá! Quero aproveitar a promoção e comprar os seguintes jogos:\n\n` +
+            const message = `🔥 *PEDIDO - MCO GAMES* 🔥\n\n` +
+                            `Olá! Quero comprar os seguintes jogos do catálogo:\n\n` +
                             `📦 *Itens Escolhidos:*\n` +
                             messageItems.join('\n') + `\n\n` +
                             `💰 *Valor Total (Pix):* R$ ${total.toFixed(2).replace('.', ',')}\n\n` +
-                            `Aguardo os dados para pagamento!`;
+                            `Aguardo as instruções para pagamento!`;
 
             whatsappBtn.href = `https://wa.me/${PHONE_NUMBER}?text=${encodeURIComponent(message)}`;
 
@@ -908,9 +1004,8 @@
             document.getElementById('modalDrawer').classList.remove('active');
         }
 
-        renderCarousel();
-        renderGames();
-        startAutoScroll();
+        // Iniciar a procura do catálogo ao carregar a página
+        fetchCatalogFromSheets();
     </script>
 </body>
 </html>
