@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MCO GAMES | Sua Loja Digital</title>
+    <title>MCO GAMES | Catálogo Oficial</title>
     
     <!-- Meta Tags para redes sociais e WhatsApp -->
     <meta property="og:title" content="MCO GAMES | Sua Loja Digital">
@@ -14,7 +14,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
     
-    <!-- PapaParse para leitura robusta do CSV sem bloqueio de CORS -->
+    <!-- PapaParse para leitura robusta do CSV -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 
     <!-- html2canvas para gerar print PNG dos cards -->
@@ -316,7 +316,6 @@
             z-index: 2;
         }
 
-        /* Estilo do Relógio de Pré-Venda / Promoção */
         .timer-badge {
             background-color: rgba(255, 170, 0, 0.12);
             color: var(--timer-orange);
@@ -401,29 +400,54 @@
             border-color: var(--accent-green);
         }
 
-        /* Botão para Compartilhar / Baixar Print do Card */
-        .btn-share-card {
-            background-color: rgba(255, 255, 255, 0.06);
-            border: 1px solid var(--border-color);
-            color: var(--text-muted);
-            border-radius: 6px;
-            padding: 6px;
-            font-size: 0.72rem;
-            font-weight: 700;
+        /* --- LINHA DE AÇÕES DO CARD (COMPRAR + CIRCULO DO ZAP) --- */
+        .card-actions-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 6px;
+        }
+
+        .btn-buy-direct {
+            flex: 1;
+            background-color: var(--accent-green);
+            color: #000;
+            border: none;
+            border-radius: 8px;
+            padding: 9px 10px;
+            font-size: 0.82rem;
+            font-weight: 800;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 5px;
             transition: all 0.2s ease;
-            margin-top: 4px;
-            width: 100%;
         }
 
-        .btn-share-card:hover {
-            background-color: rgba(0, 230, 118, 0.15);
-            color: var(--accent-green);
-            border-color: var(--accent-green);
+        .btn-buy-direct:hover {
+            background-color: var(--accent-green-dark);
+            transform: scale(1.02);
+        }
+
+        .btn-share-circle {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            background-color: var(--whatsapp-bg);
+            color: #000;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            flex-shrink: 0;
+            transition: transform 0.2s ease;
+            box-shadow: 0 2px 8px rgba(37, 211, 102, 0.3);
+        }
+
+        .btn-share-circle:hover {
+            transform: scale(1.1);
         }
 
         .bottom-bar {
@@ -745,7 +769,6 @@
             return parseFloat(clean) || 0;
         }
 
-        // --- FUNÇÕES DE DATA E CONTAGEM REGRESSIVA (COLUNA J) ---
         function parseTargetDate(dateStr) {
             if (!dateStr) return null;
             let str = dateStr.toString().trim();
@@ -814,7 +837,6 @@
                 }
             });
         }
-        // -----------------------------------------------------
 
         function fetchCatalogFromSheets() {
             Papa.parse(SHEET_CSV_URL, {
@@ -941,18 +963,38 @@
             updateBottomBar();
         }
 
-        // --- FUNÇÃO PARA GERAR E COMPARTILHAR PRINT DO CARD ---
+        // --- COMPRA DIRETA NO WHATSAPP PELO CARD ---
+        function buyGameDirect(event, gameId) {
+            event.stopPropagation();
+            const game = games.find(g => g.id === gameId);
+            if (!game) return;
+
+            const cartItem = selectedCart.find(i => i.gameId === gameId);
+            let typeStr = cartItem ? cartItem.type : (game.pricePrimary > 0 ? 'Primária' : 'Secundária');
+            let priceVal = cartItem ? cartItem.price : game.mainPrice;
+
+            const message = `🔥 *COMPRA DIRETA - MCO GAMES* 🔥\n\n` +
+                            `Olá! Quero comprar o jogo:\n` +
+                            `🎮 *${game.name}* (${game.platform})\n` +
+                            `📌 Mídia: *${typeStr}*\n` +
+                            `💰 Valor: *R$ ${priceVal.toFixed(2).replace('.', ',')}*\n\n` +
+                            `Como faço para efetuar o pagamento?`;
+
+            window.open(`https://wa.me/${PHONE_NUMBER}?text=${encodeURIComponent(message)}`, '_blank');
+        }
+
+        // --- GERAR PRINT DO CARD E COMPARTILHAR ---
         async function shareCardPrint(event, gameId) {
             event.stopPropagation();
             const cardEl = event.currentTarget.closest('.card');
             if (!cardEl) return;
 
-            const printBtn = cardEl.querySelector('.btn-share-card');
-            if (printBtn) printBtn.style.display = 'none'; // Oculta o botão temporariamente durante o print
+            const actionsRow = cardEl.querySelector('.card-actions-row');
+            if (actionsRow) actionsRow.style.display = 'none'; // Oculta a linha de botões durante o print
 
             try {
                 const canvas = await html2canvas(cardEl, {
-                    scale: 2, // Alta qualidade HD
+                    scale: 2,
                     useCORS: true,
                     backgroundColor: '#13171d'
                 });
@@ -963,13 +1005,12 @@
 
                 canvas.toBlob(async (blob) => {
                     if (!blob) {
-                        if (printBtn) printBtn.style.display = 'flex';
+                        if (actionsRow) actionsRow.style.display = 'flex';
                         return;
                     }
 
                     const file = new File([blob], fileName, { type: 'image/png' });
 
-                    // Tenta o compartilhamento nativo do celular (WhatsApp, etc)
                     if (navigator.canShare && navigator.canShare({ files: [file] })) {
                         try {
                             await navigator.share({
@@ -978,20 +1019,18 @@
                                 text: `Confira essa oferta na MCO GAMES: ${game ? game.name : ''}`
                             });
                         } catch (shareErr) {
-                            // Se o usuário cancelar ou o envio falhar, faz o download do arquivo
                             downloadBlob(blob, fileName);
                         }
                     } else {
-                        // Fallback para PC / navegadores sem API de Share
                         downloadBlob(blob, fileName);
                     }
 
-                    if (printBtn) printBtn.style.display = 'flex';
+                    if (actionsRow) actionsRow.style.display = 'flex';
                 }, 'image/png');
 
             } catch (err) {
                 console.error("Erro ao gerar print do card:", err);
-                if (printBtn) printBtn.style.display = 'flex';
+                if (actionsRow) actionsRow.style.display = 'flex';
             }
         }
 
@@ -1002,7 +1041,6 @@
             link.click();
             URL.revokeObjectURL(link.href);
         }
-        // -----------------------------------------------------
 
         function createCardElement(game) {
             const card = document.createElement('div');
@@ -1020,8 +1058,8 @@
                 : 0;
 
             let buttonsHtml = '';
-            const primaryTxt = `Primária (${game.stockPrimary} Un)<br>R$ ${game.pricePrimary.toFixed(2).replace('.', ',')}`;
-            const secondaryTxt = `Secundária (${game.stockSecondary} Un)<br>R$ ${game.priceSecondary.toFixed(2).replace('.', ',')}`;
+            const primaryTxt = `Primária (${game.stockPrimary} Unid)<br>R$ ${game.pricePrimary.toFixed(2).replace('.', ',')}`;
+            const secondaryTxt = `Secundária (${game.stockSecondary} Unid)<br>R$ ${game.priceSecondary.toFixed(2).replace('.', ',')}`;
 
             if (game.pricePrimary > 0 && game.priceSecondary > 0) {
                 buttonsHtml = `
@@ -1071,9 +1109,16 @@
                         <span class="current-price">A partir de R$ ${game.mainPrice.toFixed(2).replace('.', ',')}</span>
                     </div>
                     ${buttonsHtml}
-                    <button class="btn-share-card" onclick="shareCardPrint(event, '${game.id}')" title="Compartilhar Print da Oferta">
-                        📸 Print / Compartilhar
-                    </button>
+                    <div class="card-actions-row">
+                        <button class="btn-buy-direct" onclick="buyGameDirect(event, '${game.id}')">
+                            🛒 Comprar
+                        </button>
+                        <button class="btn-share-circle" onclick="shareCardPrint(event, '${game.id}')" title="Gerar Print / Compartilhar Oferta">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12.012 2c-5.506 0-9.989 4.478-9.99 9.984 0 1.762.459 3.48 1.332 5.001l-1.416 5.17 5.291-1.387c1.467.8 3.123 1.22 4.78 1.22h.005c5.507 0 9.991-4.479 9.992-9.985 0-2.667-1.038-5.175-2.925-7.063C17.195 3.039 14.68 2 12.012 2zm5.833 14.283c-.244.686-1.42 1.309-1.96 1.365-.506.052-1.168.082-3.376-.826-2.825-1.162-4.636-4.04-4.776-4.228-.14-.188-1.141-1.517-1.141-2.893 0-1.376.721-2.054.978-2.336.257-.282.56-.352.747-.352.187 0 .374.002.538.01.176.008.412-.067.644.49.245.589.842 2.052.915 2.202.073.15.122.327.024.524-.098.198-.147.32-.293.491-.147.171-.309.383-.442.514-.148.148-.302.308-.13.603.172.295.766 1.265 1.644 2.047 1.13 1.005 2.083 1.317 2.378 1.464.295.148.467.123.639-.074.172-.197.737-.859.933-1.154.196-.295.393-.246.664-.148.27.098 1.716.81 2.011.957.295.148.491.221.564.344.073.123.073.712-.171 1.398z"/>
+                            </svg>
+                        </button>
+                    </div>
                 </div>
             `;
             return card;
@@ -1214,7 +1259,6 @@
             document.getElementById('modalDrawer').classList.remove('active');
         }
 
-        // Executa a leitura inicial do catálogo
         fetchCatalogFromSheets();
     </script>
 </body>
