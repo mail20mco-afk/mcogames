@@ -29,6 +29,7 @@
             --badge-discount: #ff0055;
             --whatsapp-bg: #25d366;
             --error-red: #ff4d4d;
+            --timer-orange: #ffaa00;
         }
 
         * {
@@ -310,6 +311,22 @@
             padding: 3px 6px;
             border-radius: 4px;
             z-index: 2;
+        }
+
+        /* Estilo do Relógio de Pré-Venda / Promoção */
+        .timer-badge {
+            background-color: rgba(255, 170, 0, 0.12);
+            color: var(--timer-orange);
+            border: 1px solid rgba(255, 170, 0, 0.35);
+            font-size: 0.7rem;
+            font-weight: 800;
+            padding: 4px 8px;
+            border-radius: 6px;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            width: fit-content;
+            margin-top: 2px;
         }
 
         .card-info {
@@ -700,6 +717,79 @@
             return parseFloat(clean) || 0;
         }
 
+        // --- FUNÇÕES DE DATA E CONTAGEM REGRESSIVA (COLUNA J) ---
+        function parseTargetDate(dateStr) {
+            if (!dateStr) return null;
+            let str = dateStr.toString().trim();
+            if (!str) return null;
+
+            // Suporta formato brasileiro DD/MM/AAAA ou DD/MM/AAAA HH:mm:ss
+            if (str.includes('/')) {
+                const parts = str.split(' ');
+                const dateParts = parts[0].split('/');
+                if (dateParts.length === 3) {
+                    const day = parseInt(dateParts[0], 10);
+                    const month = parseInt(dateParts[1], 10) - 1;
+                    const year = parseInt(dateParts[2], 10);
+                    let hours = 0, minutes = 0, seconds = 0;
+
+                    if (parts[1]) {
+                        const timeParts = parts[1].split(':');
+                        hours = parseInt(timeParts[0], 10) || 0;
+                        minutes = parseInt(timeParts[1], 10) || 0;
+                        seconds = parseInt(timeParts[2], 10) || 0;
+                    }
+
+                    return new Date(year, month, day, hours, minutes, seconds);
+                }
+            }
+
+            // Suporta formato ISO/padrão JS (AAAA-MM-DD)
+            const parsed = new Date(str);
+            return isNaN(parsed.getTime()) ? null : parsed;
+        }
+
+        function getCountdownString(targetDateStr) {
+            const target = parseTargetDate(targetDateStr);
+            if (!target) return null;
+
+            const now = new Date();
+            const diff = target.getTime() - now.getTime();
+
+            if (diff <= 0) {
+                return "Encerrado / Lançado";
+            }
+
+            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+            const minutes = Math.floor((diff / (1000 * 60)) % 60);
+            const seconds = Math.floor((diff / 1000) % 60);
+
+            const pad = num => String(num).padStart(2, '0');
+
+            if (days > 0) {
+                return `${days}d ${pad(hours)}h ${pad(minutes)}m ${pad(seconds)}s`;
+            }
+            return `${pad(hours)}h ${pad(minutes)}m ${pad(seconds)}s`;
+        }
+
+        function updateTimers() {
+            const timerElements = document.querySelectorAll('.timer-badge');
+            timerElements.forEach(el => {
+                const targetStr = el.getAttribute('data-target');
+                if (targetStr) {
+                    const countdown = getCountdownString(targetStr);
+                    if (countdown) {
+                        el.innerHTML = `⏳ ${countdown}`;
+                        el.style.display = 'inline-flex';
+                    } else {
+                        el.style.display = 'none';
+                    }
+                }
+            });
+        }
+        // -----------------------------------------------------
+
         function fetchCatalogFromSheets() {
             Papa.parse(SHEET_CSV_URL, {
                 download: true,
@@ -742,19 +832,20 @@
 
                 const oldPrice = parsePrice(row[4]);
 
-                // --- LÓGICA DO MENOR PREÇO CORRIGIDA ---
+                // Lógica do menor preço disponível
                 let validPrices = [];
                 if (pricePrimary > 0 && stockPrimary > 0) validPrices.push(pricePrimary);
                 if (priceSecondary > 0 && stockSecondary > 0) validPrices.push(priceSecondary);
 
-                // Se o estoque não estiver informado na planilha, considera qualquer preço maior que zero
                 if (validPrices.length === 0) {
                     if (pricePrimary > 0) validPrices.push(pricePrimary);
                     if (priceSecondary > 0) validPrices.push(priceSecondary);
                 }
 
                 const mainPrice = validPrices.length > 0 ? Math.min(...validPrices) : (pricePrimary || priceSecondary || 0);
-                // ---------------------------------------
+
+                // Coluna J (índice 9) -> Data limite para Pré-Venda ou Promoção
+                const targetDate = row[9] ? row[9].trim() : '';
 
                 games.push({
                     id: row[0] && row[0].trim() ? row[0].trim() : `game-${i}`,
@@ -767,7 +858,7 @@
                     priceSecondary: priceSecondary,
                     stockSecondary: stockSecondary,
                     mainPrice: mainPrice,
-                    targetDate: row[9] ? row[9].trim() : '',
+                    targetDate: targetDate,
                     img: imgUrl
                 });
             }
@@ -784,6 +875,10 @@
             renderCarousel();
             renderGames();
             startAutoScroll();
+
+            // Inicia a atualização contínua dos relógios
+            updateTimers();
+            setInterval(updateTimers, 1000);
         }
 
         function showError() {
@@ -871,6 +966,12 @@
                 `;
             }
 
+            // Render do relógio de tempo restante se houver data na Coluna J
+            let timerHtml = '';
+            if (game.targetDate) {
+                timerHtml = `<div class="timer-badge" data-target="${game.targetDate}">⏳ Carregando...</div>`;
+            }
+
             card.innerHTML = `
                 <div class="card-img-container">
                     <span class="platform-tag">${game.platform}</span>
@@ -879,6 +980,7 @@
                 </div>
                 <div class="card-info">
                     <div class="card-title">${game.name}</div>
+                    ${timerHtml}
                     <div class="price-container">
                         ${game.oldPrice > 0 ? `<span class="old-price">R$ ${game.oldPrice.toFixed(2).replace('.', ',')}</span>` : ''}
                         <span class="current-price">A partir de R$ ${game.mainPrice.toFixed(2).replace('.', ',')}</span>
@@ -898,6 +1000,7 @@
             featuredGames.forEach(game => {
                 container.appendChild(createCardElement(game));
             });
+            updateTimers();
         }
 
         function startAutoScroll() {
@@ -949,6 +1052,7 @@
                     catalogContainer.appendChild(grid);
                 }
             });
+            updateTimers();
         }
 
         function calculateTotal() {
