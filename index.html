@@ -3,39 +3,72 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Card de Produto - MCO Games</title>
+  <title>MCO Games - Loja Digital</title>
   <style>
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
     }
 
     body {
       background-color: #0f141d;
-      display: flex;
-      justify-content: center;
-      align-items: center;
+      color: #ffffff;
+      padding: 40px 20px;
       min-height: 100vh;
     }
 
-    /* Estilização do Card */
+    .store-container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .store-header {
+      margin-bottom: 32px;
+      border-bottom: 2px solid #1f2738;
+      padding-bottom: 16px;
+    }
+
+    .store-title {
+      font-size: 28px;
+      font-weight: 800;
+      color: #ffffff;
+      letter-spacing: 0.5px;
+    }
+
+    /* Grelha do Catálogo de Jogos */
+    .products-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+      gap: 24px;
+    }
+
+    /* Card do Produto */
     .product-card {
-      width: 280px;
       background-color: #161c28;
       border-radius: 12px;
       overflow: hidden;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
       border: 1px solid #222b3d;
-      color: #ffffff;
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.2s, border-color 0.2s;
+    }
+
+    .product-card:hover {
+      transform: translateY(-4px);
+      border-color: #2e3c54;
     }
 
     .card-banner {
       position: relative;
       width: 100%;
-      height: 260px;
-      background-color: #0d1117;
+      height: 280px;
+      background-color: #1a2232;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     .card-banner img {
@@ -44,7 +77,7 @@
       object-fit: cover;
     }
 
-    /* Badges da imagem */
+    /* Badges */
     .badge-platform {
       position: absolute;
       top: 12px;
@@ -55,6 +88,7 @@
       font-weight: 700;
       padding: 4px 8px;
       border-radius: 4px;
+      z-index: 2;
     }
 
     .badge-discount {
@@ -67,18 +101,22 @@
       font-weight: 800;
       padding: 4px 8px;
       border-radius: 4px;
+      z-index: 2;
     }
 
-    /* Corpo do Card */
+    /* Informações do Jogo */
     .card-info {
       padding: 16px;
+      display: flex;
+      flex-direction: column;
+      flex-grow: 1;
     }
 
     .product-title {
       font-size: 18px;
       font-weight: 800;
-      margin-bottom: 12px;
-      letter-spacing: 0.5px;
+      margin-bottom: 10px;
+      color: #ffffff;
     }
 
     .price-original {
@@ -91,15 +129,16 @@
     .price-from {
       font-size: 18px;
       font-weight: 800;
-      color: #00e676; /* Verde em destaque */
+      color: #00e676;
       margin-bottom: 16px;
     }
 
-    /* Grade de Variações */
+    /* Variações de Licença */
     .variations-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 8px;
+      margin-top: auto;
     }
 
     .variation-item {
@@ -108,12 +147,6 @@
       border-radius: 8px;
       padding: 8px 6px;
       text-align: center;
-      transition: border-color 0.2s, background-color 0.2s;
-    }
-
-    .variation-item:hover {
-      border-color: #00e676;
-      background-color: #253046;
     }
 
     .variation-title {
@@ -130,98 +163,115 @@
     }
 
     .out-of-stock {
-      opacity: 0.4;
-      pointer-events: none;
+      opacity: 0.35;
     }
   </style>
 </head>
 <body>
 
-  <!-- Estrutura do Card -->
-  <div class="product-card" id="card-nba2k27">
-    <div class="card-banner">
-      <span class="badge-platform" id="platform-badge">PS5</span>
-      <span class="badge-discount" id="discount-badge">-0%</span>
-      <img src="https://via.placeholder.com/280x260/111/fff?text=NBA+2K27" alt="Capa do Jogo" id="cover-img">
-    </div>
-    
-    <div class="card-info">
-      <h3 class="product-title" id="product-title">NBA 2K27</h3>
-      
-      <div class="price-original" id="price-original">R$ 0,00</div>
-      <div class="price-from" id="price-from">A partir de R$ 0,00</div>
+  <main class="store-container">
+    <header class="store-header">
+      <h1 class="store-title">MCO GAMES</h1>
+    </header>
 
-      <div class="variations-grid" id="variations-container">
-        <!-- Variações renderizadas dinamicamente pelo JS -->
-      </div>
-    </div>
-  </div>
+    <!-- Catálogo de Jogos -->
+    <div class="products-grid" id="store-catalog"></div>
+  </main>
 
   <script>
-    // 1. Dados do produto (simulando retorno de banco de dados ou API)
-    const produtoData = {
-      titulo: "NBA 2K27",
-      plataforma: "PS5",
-      precoDeTabela: 349.00,
-      imagemUrl: "https://via.placeholder.com/280x260/0d1117/00e676?text=NBA+2K27",
-      variacoes: [
-        { id: "primaria", nome: "Primária", estoque: 1, preco: 257.90 },
-        { id: "secundaria", nome: "Secundária", estoque: 1, preco: 187.90 }
-      ]
-    };
+    // Catálogo de Jogos (Lista de produtos)
+    const produtosData = [
+      {
+        id: "nba2k27",
+        titulo: "NBA 2K27",
+        plataforma: "PS5",
+        precoDeTabela: 349.00,
+        imagemUrl: "https://images.unsplash.com/photo-1546519638-68e109498ffc?w=500&q=80",
+        variacoes: [
+          { id: "primaria", nome: "Primária", estoque: 1, preco: 257.90 },
+          { id: "secundaria", nome: "Secundária", estoque: 1, preco: 187.90 }
+        ]
+      },
+      {
+        id: "gta6",
+        titulo: "GTA VI",
+        plataforma: "PS5",
+        precoDeTabela: 499.00,
+        imagemUrl: "https://images.unsplash.com/photo-1538481199705-c710c4e965fc?w=500&q=80",
+        variacoes: [
+          { id: "primaria", nome: "Primária", estoque: 1, preco: 399.90 },
+          { id: "secundaria", nome: "Secundária", estoque: 1, preco: 299.90 }
+        ]
+      },
+      {
+        id: "eafc27",
+        titulo: "EA Sports FC 27",
+        plataforma: "PS5",
+        precoDeTabela: 350.00,
+        imagemUrl: "https://images.unsplash.com/photo-1579952363873-27f3bade9f55?w=500&q=80",
+        variacoes: [
+          { id: "primaria", nome: "Primária", estoque: 1, preco: 260.00 },
+          { id: "secundaria", nome: "Secundária", estoque: 0, preco: 190.00 }
+        ]
+      }
+    ];
 
-    // Função de formatação para Moeda Brasileira (R$)
+    // Formatação de moeda BRL
     function formatarMoeda(valor) {
       return valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
     }
 
-    // 2. Função principal para renderizar o Card Corretamente
-    function renderizarCardProduto(produto) {
-      // Filtrar apenas variações em estoque
+    // Função de geração do HTML do Card
+    function criarCardHtml(produto) {
+      // Filtrar apenas variações com estoque > 0
       const disponiveis = produto.variacoes.filter(item => item.estoque > 0);
+      
+      let precoDeExibicao = "Esgotado";
+      let percentualDesconto = 0;
+      let temEstoque = disponiveis.length > 0;
 
-      if (disponiveis.length === 0) {
-        document.getElementById('price-from').innerText = "Esgotado";
-        document.getElementById('discount-badge').style.display = 'none';
-        return;
+      if (temEstoque) {
+        // Cálculo do Menor Preço e Porcentagem de Desconto Real
+        const menorPreco = Math.min(...disponiveis.map(item => item.preco));
+        precoDeExibicao = `A partir de ${formatarMoeda(menorPreco)}`;
+        percentualDesconto = Math.round(((produto.precoDeTabela - menorPreco) / produto.precoDeTabela) * 100);
       }
 
-      // LÓGICA CHAVE: Pegar o menor valor entre as opções disponíveis
-      const menorPreco = Math.min(...disponiveis.map(item => item.preco));
-
-      // LÓGICA CHAVE: Recalcular a porcentagem de desconto baseada no menor preço
-      const percentualDesconto = Math.round(((produto.precoDeTabela - menorPreco) / produto.precoDeTabela) * 100);
-
-      // Atualizar Textos do Card
-      document.getElementById('product-title').innerText = produto.titulo;
-      document.getElementById('platform-badge').innerText = produto.plataforma;
-      document.getElementById('price-original').innerText = formatarMoeda(produto.precoDeTabela);
-      
-      // Atualizar o "A partir de" com o menor valor calculado
-      document.getElementById('price-from').innerText = `A partir de ${formatarMoeda(menorPreco)}`;
-      
-      // Atualizar o badge de desconto
-      document.getElementById('discount-badge').innerText = `-${percentualDesconto}%`;
-
-      // Renderizar as caixas de variações
-      const containerVariacoes = document.getElementById('variations-container');
-      containerVariacoes.innerHTML = ''; // Limpar antes de renderizar
-
-      produto.variacoes.forEach(v => {
-        const itemDiv = document.createElement('div');
-        itemDiv.className = `variation-item ${v.estoque <= 0 ? 'out-of-stock' : ''}`;
-        
-        itemDiv.innerHTML = `
+      // Renderização do bloco das opções de licença
+      const variacoesHtml = produto.variacoes.map(v => `
+        <div class="variation-item ${v.estoque <= 0 ? 'out-of-stock' : ''}">
           <span class="variation-title">${v.nome} (${v.estoque} unid.)</span>
           <span class="variation-price">${formatarMoeda(v.preco)}</span>
-        `;
-        
-        containerVariacoes.appendChild(itemDiv);
-      });
+        </div>
+      `).join('');
+
+      return `
+        <div class="product-card">
+          <div class="card-banner">
+            <span class="badge-platform">${produto.plataforma}</span>
+            ${temEstoque ? `<span class="badge-discount">-${percentualDesconto}%</span>` : ''}
+            <img src="${produto.imagemUrl}" alt="${produto.titulo}">
+          </div>
+          
+          <div class="card-info">
+            <h3 class="product-title">${produto.titulo}</h3>
+            <div class="price-original">${formatarMoeda(produto.precoDeTabela)}</div>
+            <div class="price-from">${precoDeExibicao}</div>
+            <div class="variations-grid">
+              ${variacoesHtml}
+            </div>
+          </div>
+        </div>
+      `;
     }
 
-    // Executa a função passando os dados do produto
-    renderizarCardProduto(produtoData);
+    // Renderizar o catálogo na página
+    document.addEventListener('DOMContentLoaded', () => {
+      const catalogContainer = document.getElementById('store-catalog');
+      if (catalogContainer) {
+        catalogContainer.innerHTML = produtosData.map(p => criarCardHtml(p)).join('');
+      }
+    });
   </script>
 </body>
 </html>
