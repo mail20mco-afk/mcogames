@@ -14,7 +14,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
     
-    <!-- PapaParse para leitura do CSV do Google Sheets -->
+    <!-- PapaParse para leitura robusta do CSV -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 
     <style>
@@ -196,8 +196,8 @@
         }
 
         .carousel-grid .card {
-            min-width: 200px;
-            max-width: 220px;
+            min-width: 220px;
+            max-width: 230px;
             flex-shrink: 0;
         }
 
@@ -246,7 +246,7 @@
 
         .grid-games {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
             gap: 18px;
         }
 
@@ -255,7 +255,6 @@
             border: 2px solid var(--border-color);
             border-radius: 12px;
             overflow: hidden;
-            cursor: pointer;
             position: relative;
             transition: all 0.2s ease;
             display: flex;
@@ -313,48 +312,30 @@
             z-index: 2;
         }
 
-        .checkmark {
-            position: absolute;
-            bottom: 10px;
-            right: 10px;
-            width: 28px;
-            height: 28px;
-            background-color: var(--accent-green);
-            color: #000;
-            border-radius: 50%;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            font-weight: 900;
-            font-size: 0.9rem;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.5);
-            z-index: 2;
-        }
-
-        .card.selected .checkmark {
-            display: flex;
-        }
-
         .card-info {
             padding: 12px;
             display: flex;
             flex-direction: column;
-            gap: 6px;
+            gap: 8px;
+            flex-grow: 1;
+            justify-content: space-between;
         }
 
         .card-title {
-            font-size: 0.85rem;
+            font-size: 0.88rem;
             font-weight: 700;
             color: #fff;
-            white-space: nowrap;
+            line-height: 1.2;
+            min-height: 2.2em;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
             overflow: hidden;
-            text-overflow: ellipsis;
         }
 
         .price-container {
             display: flex;
-            align-items: baseline;
-            gap: 8px;
+            flex-direction: column;
         }
 
         .old-price {
@@ -364,14 +345,40 @@
         }
 
         .current-price {
-            font-size: 1.1rem;
+            font-size: 1.05rem;
             font-weight: 800;
             color: var(--accent-green);
         }
 
-        .payment-info {
+        .type-selector {
+            display: flex;
+            gap: 6px;
+            margin-top: 4px;
+        }
+
+        .type-btn {
+            flex: 1;
+            background-color: #1a202c;
+            border: 1px solid var(--border-color);
+            color: #fff;
+            padding: 6px 4px;
+            border-radius: 6px;
+            cursor: pointer;
             font-size: 0.68rem;
-            color: var(--text-muted);
+            text-align: center;
+            transition: all 0.2s;
+            line-height: 1.3;
+        }
+
+        .type-btn:hover {
+            background-color: #263040;
+        }
+
+        .type-btn.active {
+            background-color: var(--accent-green);
+            color: #000;
+            font-weight: 800;
+            border-color: var(--accent-green);
         }
 
         .bottom-bar {
@@ -612,17 +619,17 @@
 
         <div class="hero-section">
             <h1 class="hero-title">Encontre seu próximo jogo</h1>
-            <p class="hero-subtitle">Escolha o jogo, confira a disponibilidade e fale conosco pelo WhatsApp.</p>
+            <p class="hero-subtitle">Escolha o jogo, selecione o tipo de mídia e conclua pelo WhatsApp.</p>
         </div>
 
         <div id="loadingContainer" class="status-box">
-            <h3>⏳ A carregar catálogo...</h3>
-            <p>Por favor, aguarde alguns segundos enquanto sincronizamos com a planilha.</p>
+            <h3>⏳ A carregar catálogo completo...</h3>
+            <p>Sincronizando todos os jogos da sua planilha do Google Sheets.</p>
         </div>
 
         <div id="errorContainer" class="status-box error" style="display: none;">
             <h3>Não foi possível carregar o catálogo.</h3>
-            <p>Verifique se a planilha continua publicada na web como CSV.</p>
+            <p>Verifique o link de publicação da sua planilha do Google Sheets.</p>
         </div>
 
         <div id="mainContent" style="display: none;">
@@ -645,9 +652,9 @@
 
     <div class="bottom-bar" id="bottomBar">
         <div class="selected-info">
-            <h4 id="barSelectedCount">0 jogo(s) selecionado(s)</h4>
+            <h4 id="barSelectedCount">0 item(ns) selecionado(s)</h4>
             <p id="barSelectedTotal">Total: R$ 0,00</p>
-            <div class="card-fee-note">*Valores para PIX. Cartão com pequeno acréscimo.</div>
+            <div class="card-fee-note">*Valores para PIX. Cartão de crédito possui taxa da máquina.</div>
         </div>
         <button class="btn-continue" onclick="openModal()">Finalizar Pedido ➔</button>
     </div>
@@ -671,7 +678,7 @@
                 <span>Valor no PIX:</span>
                 <div>
                     <h3 id="drawerTotalPrice">R$ 0,00</h3>
-                    <div class="card-fee-note" style="text-align: right;">Cartão de crédito possui taxa da máquina.</div>
+                    <div class="card-fee-note" style="text-align: right;">Cartão de crédito com pequeno acréscimo.</div>
                 </div>
             </div>
             <a href="#" id="whatsappLink" target="_blank" class="btn-whatsapp">
@@ -682,17 +689,21 @@
 
     <script>
         const PHONE_NUMBER = "5599981810222";
-        
-        // Link CSV direto da planilha publicada no Google Sheets
         const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTbnddE66aBmhilS8BtFkch5qx41mzkZOiVtVeMxzHJRXIjT3qevVZFGf4jU8o1LNZHuHL_3bnIgQRg/pub?output=csv";
 
         let games = [];
-        let selectedGameIds = [];
+        let selectedCart = []; // [{ gameId, type, price }]
+
+        function parsePrice(val) {
+            if (!val) return 0;
+            let clean = val.toString().replace(/[^\d,\.]/g, '').replace(',', '.');
+            return parseFloat(clean) || 0;
+        }
 
         async function fetchCatalogFromSheets() {
             try {
-                const response = await fetch(SHEET_CSV_URL);
-                if (!response.ok) throw new Error("Erro na rede ao aceder à planilha.");
+                const response = await fetch(SHEET_CSV_URL + "&t=" + new Date().getTime());
+                if (!response.ok) throw new Error("Erro de rede.");
 
                 const csvText = await response.text();
 
@@ -718,79 +729,47 @@
         function parseCsvData(rows) {
             games = [];
 
-            rows.forEach((row, index) => {
-                if (!row || row.length < 2) return;
+            for (let i = 1; i < rows.length; i++) {
+                const row = rows[i];
+                if (!row || row.length < 2) continue;
 
-                const rowStr = row.join(' ').toLowerCase();
-                // Ignorar linha de cabeçalho
-                if (index === 0 && (rowStr.includes('nome') || rowStr.includes('jogo') || rowStr.includes('plataforma'))) {
-                    return;
-                }
+                const name = row[1] ? row[1].trim() : '';
+                if (!name || name.toLowerCase() === 'nome' || name.toLowerCase() === 'jogo') continue;
 
-                let name = "";
-                let platform = "PS4/PS5";
-                let category = "Geral";
-                let price = 0;
-                let oldPrice = 0;
-                let img = "";
+                // Mapeamento exato das 11 colunas da tabela:
+                // A(0): ID | B(1): Nome | C(2): Plataforma | D(3): Categoria
+                // E(4): Preço Antigo | F(5): Preço Primária | G(6): Qtd Primária
+                // H(7): Preço Secundária | I(8): Qtd Secundária | J(9): Data | K(10): Imagem
 
-                // Detetar imagem URL (http/https)
-                row.forEach(cell => {
-                    const str = String(cell).trim();
-                    if (str.startsWith("http://") || str.startsWith("https://")) {
-                        img = str;
-                    }
+                const imgRaw = row[10] ? row[10].trim() : '';
+                const imgUrl = (imgRaw && imgRaw.startsWith('http')) 
+                    ? imgRaw 
+                    : "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTnOXAQFE6SWdIZy6b4OpXDWYJUjkIbnYx7gQLCRunJ3w&s=10";
+
+                const pricePrimary = parsePrice(row[5]);
+                const stockPrimary = row[6] ? (parseInt(row[6].toString().replace(/\D/g, '')) || 0) : 0;
+
+                const priceSecondary = parsePrice(row[7]);
+                const stockSecondary = row[8] ? (parseInt(row[8].toString().replace(/\D/g, '')) || 0) : 0;
+
+                const oldPrice = parsePrice(row[4]);
+                const mainPrice = pricePrimary > 0 ? pricePrimary : priceSecondary;
+
+                games.push({
+                    id: row[0] && row[0].trim() ? row[0].trim() : `game-${i}`,
+                    name: name,
+                    platform: row[2] ? row[2].trim() : 'PS4 / PS5',
+                    category: row[3] ? row[3].trim() : 'Geral',
+                    oldPrice: oldPrice > 0 ? oldPrice : (mainPrice * 1.3),
+                    pricePrimary: pricePrimary,
+                    stockPrimary: stockPrimary,
+                    priceSecondary: priceSecondary,
+                    stockSecondary: stockSecondary,
+                    mainPrice: mainPrice,
+                    targetDate: row[9] ? row[9].trim() : '',
+                    img: imgUrl
                 });
-
-                // Detetar plataforma
-                row.forEach(cell => {
-                    const str = String(cell).trim().toUpperCase();
-                    if (str === "PS4" || str === "PS5" || str === "PS4/PS5" || str.includes("XBOX") || str.includes("NINTENDO")) {
-                        platform = str;
-                    }
-                });
-
-                // Nome do Jogo (Geralmente Coluna B / índice 1 ou Coluna A / índice 0)
-                name = String(row[1] || row[0] || "").trim();
-                if (!name || name.toLowerCase() === 'nome' || name.toLowerCase() === 'jogo') return;
-
-                // Preços
-                const foundPrices = [];
-                row.forEach(cell => {
-                    const clean = String(cell).replace('R$', '').replace('$', '').replace(/\s/g, '').replace(',', '.');
-                    const val = parseFloat(clean);
-                    if (!isNaN(val) && val > 0 && val < 3000 && !cell.includes('http')) {
-                        foundPrices.push(val);
-                    }
-                });
-
-                if (foundPrices.length >= 2) {
-                    oldPrice = Math.max(...foundPrices);
-                    price = Math.min(...foundPrices);
-                } else if (foundPrices.length === 1) {
-                    price = foundPrices[0];
-                    oldPrice = price * 1.3;
-                }
-
-                // Categoria
-                if (row[3] && String(row[3]).trim().length > 2 && !String(row[3]).startsWith('http')) {
-                    category = String(row[3]).trim();
-                } else if (row[2] && !row[2].includes('PS') && String(row[2]).trim().length > 2) {
-                    category = String(row[2]).trim();
-                }
-
-                if (name && name.length > 1) {
-                    games.push({
-                        id: index + 1,
-                        name: name,
-                        platform: platform,
-                        category: category || "Destaques",
-                        oldPrice: oldPrice > 0 ? oldPrice : price * 1.3,
-                        price: price > 0 ? price : 49.90,
-                        img: img || "https://via.placeholder.com/300x300?text=Sem+Imagem"
-                    });
-                }
-            });
+            }
 
             if (games.length === 0) {
                 showError();
@@ -824,25 +803,106 @@
             });
         }
 
+        function toggleSelectType(gameId, type) {
+            const game = games.find(g => g.id === gameId);
+            if (!game) return;
+
+            const price = type === 'Primária' ? game.pricePrimary : game.priceSecondary;
+
+            const idx = selectedCart.findIndex(i => i.gameId === gameId && i.type === type);
+            if (idx > -1) {
+                selectedCart.splice(idx, 1);
+            } else {
+                selectedCart = selectedCart.filter(i => i.gameId !== gameId); // Seleciona 1 vaga por jogo
+                selectedCart.push({ gameId: gameId, name: game.name, platform: game.platform, type: type, price: price });
+            }
+
+            renderCarousel();
+            renderGames();
+            updateBottomBar();
+        }
+
+        function createCardElement(game) {
+            const card = document.createElement('div');
+            card.className = 'card';
+
+            const primarySelected = selectedCart.some(i => i.gameId === game.id && i.type === 'Primária');
+            const secondarySelected = selectedCart.some(i => i.gameId === game.id && i.type === 'Secundária');
+
+            if (primarySelected || secondarySelected) {
+                card.classList.add('selected');
+            }
+
+            const discount = (game.oldPrice > game.mainPrice) 
+                ? Math.round(((game.oldPrice - game.mainPrice) / game.oldPrice) * 100) 
+                : 0;
+
+            let buttonsHtml = '';
+            const primaryTxt = `Primária (${game.stockPrimary} vagas)<br>R$ ${game.pricePrimary.toFixed(2).replace('.', ',')}`;
+            const secondaryTxt = `Secundária (${game.stockSecondary} vagas)<br>R$ ${game.priceSecondary.toFixed(2).replace('.', ',')}`;
+
+            if (game.pricePrimary > 0 && game.priceSecondary > 0) {
+                buttonsHtml = `
+                    <div class="type-selector">
+                        <button class="type-btn ${primarySelected ? 'active' : ''}" onclick="toggleSelectType('${game.id}', 'Primária')">
+                            ${primaryTxt}
+                        </button>
+                        <button class="type-btn ${secondarySelected ? 'active' : ''}" onclick="toggleSelectType('${game.id}', 'Secundária')">
+                            ${secondaryTxt}
+                        </button>
+                    </div>
+                `;
+            } else if (game.pricePrimary > 0) {
+                buttonsHtml = `
+                    <div class="type-selector">
+                        <button class="type-btn ${primarySelected ? 'active' : ''}" style="width:100%" onclick="toggleSelectType('${game.id}', 'Primária')">
+                            ${primaryTxt}
+                        </button>
+                    </div>
+                `;
+            } else if (game.priceSecondary > 0) {
+                buttonsHtml = `
+                    <div class="type-selector">
+                        <button class="type-btn ${secondarySelected ? 'active' : ''}" style="width:100%" onclick="toggleSelectType('${game.id}', 'Secundária')">
+                            ${secondaryTxt}
+                        </button>
+                    </div>
+                `;
+            }
+
+            card.innerHTML = `
+                <div class="card-img-container">
+                    <span class="platform-tag">${game.platform}</span>
+                    ${discount > 0 ? `<span class="discount-badge">-${discount}%</span>` : ''}
+                    <img src="${game.img}" alt="${game.name}" class="card-img" loading="lazy" onerror="this.src='https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTnOXAQFE6SWdIZy6b4OpXDWYJUjkIbnYx7gQLCRunJ3w&s=10'">
+                </div>
+                <div class="card-info">
+                    <div class="card-title">${game.name}</div>
+                    <div class="price-container">
+                        ${game.oldPrice > 0 ? `<span class="old-price">R$ ${game.oldPrice.toFixed(2).replace('.', ',')}</span>` : ''}
+                        <span class="current-price">A partir de R$ ${game.mainPrice.toFixed(2).replace('.', ',')}</span>
+                    </div>
+                    ${buttonsHtml}
+                </div>
+            `;
+            return card;
+        }
+
         function renderCarousel() {
-            const carouselContainer = document.getElementById('carouselGrid');
-            if (!carouselContainer) return;
-            carouselContainer.innerHTML = '';
+            const container = document.getElementById('carouselGrid');
+            if (!container) return;
+            container.innerHTML = '';
 
-            const featuredGames = games.slice(0, 10); // Primeiros 10 jogos como destaque
-
+            const featuredGames = games.slice(0, 10);
             featuredGames.forEach(game => {
-                const isSelected = selectedGameIds.includes(game.id);
-                const discount = Math.round(((game.oldPrice - game.price) / game.oldPrice) * 100);
-                const card = createCardElement(game, isSelected, discount > 0 ? discount : 20);
-                carouselContainer.appendChild(card);
+                container.appendChild(createCardElement(game));
             });
         }
 
         function startAutoScroll() {
             const container = document.getElementById('carouselGrid');
             if (!container) return;
-            const cardWidth = 216;
+            const cardWidth = 236;
 
             setInterval(() => {
                 if (container.scrollLeft + container.clientWidth >= container.scrollWidth - 10) {
@@ -853,33 +913,10 @@
             }, 3500);
         }
 
-        function createCardElement(game, isSelected, discount) {
-            const card = document.createElement('div');
-            card.className = `card ${isSelected ? 'selected' : ''}`;
-            card.onclick = () => toggleSelectGame(game.id);
-
-            card.innerHTML = `
-                <div class="card-img-container">
-                    <span class="platform-tag">${game.platform}</span>
-                    <span class="discount-badge">-${discount}%</span>
-                    <div class="checkmark">✓</div>
-                    <img src="${game.img}" alt="${game.name}" class="card-img" loading="lazy">
-                </div>
-                <div class="card-info">
-                    <div class="card-title">${game.name}</div>
-                    <div class="price-container">
-                        <span class="old-price">R$ ${game.oldPrice.toFixed(2).replace('.', ',')}</span>
-                        <span class="current-price">R$ ${game.price.toFixed(2).replace('.', ',')}</span>
-                    </div>
-                    <div class="payment-info">à vista no Pix (ou Cartão*)</div>
-                </div>
-            `;
-            return card;
-        }
-
         function renderGames() {
             const catalogContainer = document.getElementById('catalogContainer');
             if (!catalogContainer) return;
+
             const searchVal = document.getElementById('searchInput').value.toLowerCase();
             const catVal = document.getElementById('categorySelect').value;
 
@@ -905,10 +942,7 @@
                     grid.className = 'grid-games';
 
                     filteredGames.forEach(game => {
-                        const isSelected = selectedGameIds.includes(game.id);
-                        const discount = Math.round(((game.oldPrice - game.price) / game.oldPrice) * 100);
-                        const card = createCardElement(game, isSelected, discount > 0 ? discount : 20);
-                        grid.appendChild(card);
+                        grid.appendChild(createCardElement(game));
                     });
 
                     catalogContainer.appendChild(grid);
@@ -916,22 +950,8 @@
             });
         }
 
-        function toggleSelectGame(id) {
-            if (selectedGameIds.includes(id)) {
-                selectedGameIds = selectedGameIds.filter(gameId => gameId !== id);
-            } else {
-                selectedGameIds.push(id);
-            }
-            renderCarousel();
-            renderGames();
-            updateBottomBar();
-        }
-
         function calculateTotal() {
-            return selectedGameIds.reduce((acc, id) => {
-                const game = games.find(g => g.id === id);
-                return acc + (game ? game.price : 0);
-            }, 0);
+            return selectedCart.reduce((acc, item) => acc + item.price, 0);
         }
 
         function updateBottomBar() {
@@ -940,8 +960,8 @@
             const totalText = document.getElementById('barSelectedTotal');
             const total = calculateTotal();
 
-            if (selectedGameIds.length > 0) {
-                countText.innerText = `${selectedGameIds.length} jogo(s) selecionado(s)`;
+            if (selectedCart.length > 0) {
+                countText.innerText = `${selectedCart.length} item(ns) selecionado(s)`;
                 totalText.innerText = `Total: R$ ${total.toFixed(2).replace('.', ',')}`;
                 bottomBar.classList.add('active');
             } else {
@@ -950,7 +970,7 @@
         }
 
         function openModal() {
-            if (selectedGameIds.length === 0) {
+            if (selectedCart.length === 0) {
                 closeModal();
                 return;
             }
@@ -965,29 +985,26 @@
             let total = 0;
             let messageItems = [];
 
-            selectedGameIds.forEach((id, index) => {
-                const game = games.find(g => g.id === id);
-                if (game) {
-                    total += game.price;
-                    messageItems.push(`${index + 1}. ${game.name} (${game.platform}) — R$ ${game.price.toFixed(2).replace('.', ',')}`);
+            selectedCart.forEach((item, index) => {
+                total += item.price;
+                messageItems.push(`${index + 1}. ${item.name} (${item.platform}) - [${item.type}] — R$ ${item.price.toFixed(2).replace('.', ',')}`);
 
-                    const item = document.createElement('div');
-                    item.className = 'selected-item-card';
-                    item.innerHTML = `
-                        <div>
-                            <h5>${game.name}</h5>
-                            <p>R$ ${game.price.toFixed(2).replace('.', ',')}</p>
-                        </div>
-                        <span class="remove-item" onclick="event.stopPropagation(); toggleSelectGame(${game.id}); openModal();">✕</span>
-                    `;
-                    drawerList.appendChild(item);
-                }
+                const cardEl = document.createElement('div');
+                cardEl.className = 'selected-item-card';
+                cardEl.innerHTML = `
+                    <div>
+                        <h5>${item.name}</h5>
+                        <p>${item.type} — R$ ${item.price.toFixed(2).replace('.', ',')}</p>
+                    </div>
+                    <span class="remove-item" onclick="event.stopPropagation(); toggleSelectType('${item.gameId}', '${item.type}'); openModal();">✕</span>
+                `;
+                drawerList.appendChild(cardEl);
             });
 
             totalPriceEl.innerText = `R$ ${total.toFixed(2).replace('.', ',')}`;
 
             const message = `🔥 *PEDIDO - MCO GAMES* 🔥\n\n` +
-                            `Olá! Quero comprar os seguintes jogos do catálogo:\n\n` +
+                            `Olá! Quero comprar os seguintes itens do catálogo:\n\n` +
                             `📦 *Itens Escolhidos:*\n` +
                             messageItems.join('\n') + `\n\n` +
                             `💰 *Valor Total (Pix):* R$ ${total.toFixed(2).replace('.', ',')}\n\n` +
@@ -1004,7 +1021,7 @@
             document.getElementById('modalDrawer').classList.remove('active');
         }
 
-        // Iniciar a procura do catálogo ao carregar a página
+        // Carregar catálogo ao iniciar
         fetchCatalogFromSheets();
     </script>
 </body>
