@@ -629,7 +629,7 @@
 
         <div id="errorContainer" class="status-box error" style="display: none;">
             <h3>Não foi possível carregar o catálogo.</h3>
-            <p>Verifique o link de publicação da sua planilha do Google Sheets.</p>
+            <p>Verifique se a planilha continua publicada na web como CSV.</p>
         </div>
 
         <div id="mainContent" style="display: none;">
@@ -700,30 +700,23 @@
             return parseFloat(clean) || 0;
         }
 
-        async function fetchCatalogFromSheets() {
-            try {
-                const response = await fetch(SHEET_CSV_URL + "&t=" + new Date().getTime());
-                if (!response.ok) throw new Error("Erro de rede.");
-
-                const csvText = await response.text();
-
-                Papa.parse(csvText, {
-                    header: false,
-                    skipEmptyLines: true,
-                    complete: function(results) {
-                        if (results.data && results.data.length > 0) {
-                            parseCsvData(results.data);
-                        } else {
-                            showError();
-                        }
-                    },
-                    error: function() {
+        function fetchCatalogFromSheets() {
+            Papa.parse(SHEET_CSV_URL, {
+                download: true,
+                header: false,
+                skipEmptyLines: true,
+                complete: function(results) {
+                    if (results && results.data && results.data.length > 0) {
+                        parseCsvData(results.data);
+                    } else {
                         showError();
                     }
-                });
-            } catch (err) {
-                showError();
-            }
+                },
+                error: function(err) {
+                    console.error("Erro ao carregar CSV:", err);
+                    showError();
+                }
+            });
         }
 
         function parseCsvData(rows) {
@@ -736,7 +729,7 @@
                 const name = row[1] ? row[1].trim() : '';
                 if (!name || name.toLowerCase() === 'nome' || name.toLowerCase() === 'jogo') continue;
 
-                // Mapeamento exato das 11 colunas da tabela:
+                // Mapeamento das 11 colunas da tabela:
                 // A(0): ID | B(1): Nome | C(2): Plataforma | D(3): Categoria
                 // E(4): Preço Antigo | F(5): Preço Primária | G(6): Qtd Primária
                 // H(7): Preço Secundária | I(8): Qtd Secundária | J(9): Data | K(10): Imagem
@@ -1021,7 +1014,7 @@
             document.getElementById('modalDrawer').classList.remove('active');
         }
 
-        // Carregar catálogo ao iniciar
+        // Inicializa a leitura do catálogo
         fetchCatalogFromSheets();
     </script>
 </body>
