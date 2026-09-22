@@ -1,165 +1,1230 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MCO Games - Card de Promoção</title>
-  <style>
-    :root {
-      --bg-color: #0f172a;
-      --card-bg: #1e293b;
-      --accent-color: #3b82f6;
-      --accent-green: #22c55e;
-      --text-main: #f8fafc;
-      --text-muted: #94a3b8;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MCO GAMES | Sua Loja Digital</title>
+    
+    <!-- Meta Tags para redes sociais e WhatsApp -->
+    <meta property="og:title" content="MCO GAMES | Catálogo Oficial">
+    <meta property="og:description" content="Jogos digitais de PS4 e PS5 com os melhores preços. Ativação Instantânea!">
+    <meta property="og:image" content="https://mco-games.netlify.app/PS-Store.jpg">
 
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background-color: var(--bg-color);
-      color: var(--text-main);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-      margin: 0;
-      padding: 20px;
-    }
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <!-- PapaParse para leitura do CSV -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    
+    <!-- html2canvas para gerar a imagem/print em PNG do Card -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
-    .card {
-      background-color: var(--card-bg);
-      border: 1px solid #334155;
-      border-radius: 16px;
-      width: 100%;
-      max-width: 400px;
-      padding: 24px;
-      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
-    }
+    <style>
+        :root {
+            --bg-color: #0b0d10;
+            --card-bg: #13171d;
+            --accent-green: #00e676;
+            --accent-green-dark: #00b359;
+            --border-color: #202630;
+            --text-main: #ffffff;
+            --text-muted: #8c96a3;
+            --badge-discount: #ff0055;
+            --whatsapp-bg: #25d366;
+            --error-red: #ff4d4d;
+            --timer-orange: #ffaa00;
+        }
 
-    .badge {
-      display: inline-block;
-      background-color: rgba(59, 130, 246, 0.15);
-      color: var(--accent-color);
-      font-weight: 700;
-      font-size: 0.8rem;
-      padding: 4px 12px;
-      border-radius: 20px;
-      margin-bottom: 12px;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-    }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+        }
 
-    .title {
-      font-size: 1.4rem;
-      font-weight: 800;
-      margin: 0 0 16px 0;
-      color: var(--text-main);
-    }
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            padding-bottom: 120px;
+        }
 
-    .details {
-      list-style: none;
-      padding: 0;
-      margin: 0 0 20px 0;
-    }
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 30px;
+            background-color: #101318;
+            border-bottom: 1px solid var(--border-color);
+            position: sticky;
+            top: 0;
+            z-index: 90;
+        }
 
-    .details li {
-      margin-bottom: 8px;
-      font-size: 0.95rem;
-      color: var(--text-muted);
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
 
-    .price-box {
-      background-color: rgba(34, 197, 94, 0.1);
-      border: 1px border;
-      border-color: rgba(34, 197, 94, 0.3);
-      padding: 12px;
-      border-radius: 10px;
-      margin-bottom: 20px;
-    }
+        .brand-icon {
+            background: linear-gradient(135deg, var(--accent-green), #00b359);
+            color: #000;
+            width: 38px;
+            height: 38px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 900;
+            font-size: 1.2rem;
+        }
 
-    .price-label {
-      font-size: 0.8rem;
-      color: var(--text-muted);
-      display: block;
-    }
+        .brand-title {
+            font-weight: 800;
+            font-size: 1.1rem;
+            letter-spacing: 0.5px;
+        }
 
-    .price-value {
-      font-size: 1.5rem;
-      font-weight: 800;
-      color: var(--accent-green);
-    }
+        .brand-subtitle {
+            font-size: 0.7rem;
+            color: var(--accent-green);
+            font-weight: 700;
+            text-transform: uppercase;
+        }
 
-    .btn-share {
-      width: 100%;
-      background-color: var(--accent-color);
-      color: white;
-      border: none;
-      padding: 14px;
-      border-radius: 10px;
-      font-weight: 700;
-      font-size: 1rem;
-      cursor: pointer;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 8px;
-      transition: background-color 0.2s ease;
-    }
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
 
-    .btn-share:hover {
-      background-color: #2563eb;
-    }
-  </style>
+        .community-btn {
+            background-color: var(--whatsapp-bg);
+            color: #000;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 800;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: transform 0.2s;
+        }
+
+        .community-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .header-tag {
+            background-color: rgba(0, 230, 118, 0.1);
+            color: var(--accent-green);
+            border: 1px solid var(--accent-green);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
+
+        .container {
+            max-width: 1300px;
+            margin: 0 auto;
+            padding: 24px 20px;
+        }
+
+        .hero-section {
+            margin-bottom: 24px;
+        }
+
+        .hero-title {
+            font-size: 2rem;
+            font-weight: 900;
+            margin-bottom: 6px;
+        }
+
+        .hero-subtitle {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
+        .status-box {
+            background-color: var(--card-bg);
+            border: 1px dashed var(--border-color);
+            border-radius: 12px;
+            padding: 40px 20px;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .status-box.error {
+            border-color: var(--error-red);
+            color: var(--error-red);
+        }
+
+        .carousel-section {
+            margin-bottom: 32px;
+        }
+
+        .carousel-title {
+            font-size: 1.1rem;
+            font-weight: 800;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #fff;
+        }
+
+        .carousel-grid {
+            display: flex;
+            gap: 16px;
+            overflow-x: auto;
+            scroll-behavior: smooth;
+            padding-bottom: 10px;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        .carousel-grid::-webkit-scrollbar {
+            display: none;
+        }
+
+        .carousel-grid .card {
+            min-width: 230px;
+            max-width: 240px;
+            flex-shrink: 0;
+        }
+
+        .controls {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+
+        .search-input {
+            flex: 1;
+            min-width: 200px;
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            padding: 12px 16px;
+            border-radius: 8px;
+            color: #fff;
+            font-size: 0.9rem;
+            outline: none;
+        }
+
+        .search-input:focus {
+            border-color: var(--accent-green);
+        }
+
+        .category-select {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            padding: 12px 16px;
+            border-radius: 8px;
+            color: #fff;
+            font-size: 0.9rem;
+            outline: none;
+            cursor: pointer;
+        }
+
+        .category-title-section {
+            font-size: 1.2rem;
+            font-weight: 800;
+            margin: 32px 0 16px 0;
+            color: var(--accent-green);
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 8px;
+        }
+
+        .grid-games {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+            gap: 18px;
+        }
+
+        /* ESTILO DO CARD PARA PRINT */
+        .card {
+            background-color: var(--card-bg);
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            overflow: hidden;
+            position: relative;
+            transition: all 0.2s ease;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .card-watermark {
+            background-color: #0d1015;
+            padding: 6px 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.65rem;
+            font-weight: 800;
+            color: var(--accent-green);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .card:hover {
+            border-color: #353f4e;
+            transform: translateY(-2px);
+        }
+
+        .card.selected {
+            border-color: var(--accent-green);
+            box-shadow: 0 0 18px rgba(0, 230, 118, 0.25);
+        }
+
+        .card-img-container {
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            position: relative;
+            background-color: #1a1e26;
+        }
+
+        .card-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .platform-tag {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background-color: rgba(0,0,0,0.85);
+            color: #fff;
+            font-size: 0.65rem;
+            font-weight: 800;
+            padding: 4px 8px;
+            border-radius: 4px;
+            border: 1px solid rgba(255,255,255,0.2);
+            z-index: 2;
+        }
+
+        .discount-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: var(--badge-discount);
+            color: #fff;
+            font-size: 0.7rem;
+            font-weight: 800;
+            padding: 3px 6px;
+            border-radius: 4px;
+            z-index: 2;
+        }
+
+        .timer-badge {
+            background-color: rgba(255, 170, 0, 0.12);
+            color: var(--timer-orange);
+            border: 1px solid rgba(255, 170, 0, 0.35);
+            font-size: 0.7rem;
+            font-weight: 800;
+            padding: 4px 8px;
+            border-radius: 6px;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            width: fit-content;
+            margin-top: 2px;
+        }
+
+        .card-info {
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            flex-grow: 1;
+            justify-content: space-between;
+        }
+
+        .card-title {
+            font-size: 0.88rem;
+            font-weight: 700;
+            color: #fff;
+            line-height: 1.2;
+            min-height: 2.2em;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .price-container {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .old-price {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-decoration: line-through;
+        }
+
+        .current-price {
+            font-size: 1.05rem;
+            font-weight: 800;
+            color: var(--accent-green);
+        }
+
+        .type-selector {
+            display: flex;
+            gap: 6px;
+            margin-top: 4px;
+        }
+
+        .type-btn {
+            flex: 1;
+            background-color: #1a202c;
+            border: 1px solid var(--border-color);
+            color: #fff;
+            padding: 6px 4px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.68rem;
+            text-align: center;
+            transition: all 0.2s;
+            line-height: 1.3;
+        }
+
+        .type-btn:hover {
+            background-color: #263040;
+        }
+
+        .type-btn.active {
+            background-color: var(--accent-green);
+            color: #000;
+            font-weight: 800;
+            border-color: var(--accent-green);
+        }
+
+        /* BOTÕES DO CARD */
+        .card-actions {
+            display: flex;
+            gap: 6px;
+            margin-top: 6px;
+            padding-top: 8px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .btn-card-action {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            padding: 8px 6px;
+            border-radius: 6px;
+            font-size: 0.72rem;
+            font-weight: 800;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s ease;
+            text-decoration: none;
+        }
+
+        .btn-card-wa {
+            background-color: rgba(37, 211, 102, 0.15);
+            color: #25d366;
+            border: 1px solid rgba(37, 211, 102, 0.35);
+        }
+
+        .btn-card-wa:hover {
+            background-color: #25d366;
+            color: #000;
+        }
+
+        .btn-card-print {
+            background-color: rgba(0, 230, 118, 0.15);
+            color: var(--accent-green);
+            border: 1px solid rgba(0, 230, 118, 0.35);
+        }
+
+        .btn-card-print:hover {
+            background-color: var(--accent-green);
+            color: #000;
+        }
+
+        .bottom-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background-color: #12161d;
+            border-top: 2px solid var(--border-color);
+            padding: 14px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            z-index: 100;
+            transform: translateY(100%);
+            transition: transform 0.3s ease;
+            box-shadow: 0 -10px 25px rgba(0,0,0,0.5);
+        }
+
+        .bottom-bar.active {
+            transform: translateY(0);
+        }
+
+        .selected-info {
+            text-align: center;
+        }
+
+        .selected-info h4 {
+            font-size: 0.9rem;
+            font-weight: 800;
+        }
+
+        .selected-info p {
+            font-size: 1.1rem;
+            color: var(--accent-green);
+            font-weight: 800;
+        }
+
+        .card-fee-note {
+            font-size: 0.65rem;
+            color: var(--text-muted);
+            font-weight: 400;
+        }
+
+        .btn-continue {
+            background-color: var(--accent-green);
+            color: #000;
+            border: none;
+            padding: 12px 32px;
+            border-radius: 8px;
+            font-weight: 800;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.2s, transform 0.2s;
+            width: 100%;
+            max-width: 320px;
+        }
+
+        .btn-continue:hover {
+            background-color: var(--accent-green-dark);
+            transform: scale(1.02);
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.75);
+            backdrop-filter: blur(4px);
+            z-index: 200;
+            display: none;
+        }
+
+        .modal-overlay.active {
+            display: block;
+        }
+
+        .modal-drawer {
+            position: fixed;
+            top: 0;
+            right: -450px;
+            width: 100%;
+            max-width: 420px;
+            height: 100%;
+            background-color: #12151b;
+            z-index: 201;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            transition: right 0.3s ease;
+        }
+
+        .modal-drawer.active {
+            right: 0;
+        }
+
+        .drawer-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 15px;
+        }
+
+        .drawer-header span {
+            color: var(--accent-green);
+            font-size: 0.75rem;
+            font-weight: 800;
+            text-transform: uppercase;
+        }
+
+        .drawer-header h2 {
+            font-size: 1.3rem;
+            margin-top: 2px;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 1.4rem;
+            cursor: pointer;
+        }
+
+        .item-list {
+            flex-grow: 1;
+            overflow-y: auto;
+            margin-bottom: 20px;
+        }
+
+        .selected-item-card {
+            background-color: #1a1e27;
+            padding: 12px 14px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            border: 1px solid var(--border-color);
+        }
+
+        .selected-item-card h5 {
+            font-size: 0.85rem;
+            margin-bottom: 2px;
+        }
+
+        .selected-item-card p {
+            font-size: 0.8rem;
+            color: var(--accent-green);
+            font-weight: 700;
+        }
+
+        .remove-item {
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 1rem;
+            padding: 4px;
+        }
+
+        .drawer-footer {
+            border-top: 1px solid var(--border-color);
+            padding-top: 16px;
+        }
+
+        .price-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-bottom: 16px;
+        }
+
+        .price-row span {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .price-row h3 {
+            color: var(--accent-green);
+            font-size: 1.4rem;
+            font-weight: 800;
+            text-align: right;
+        }
+
+        .btn-whatsapp {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            width: 100%;
+            background-color: var(--accent-green);
+            color: #000;
+            padding: 14px;
+            border-radius: 8px;
+            font-weight: 800;
+            text-decoration: none;
+            font-size: 1rem;
+            transition: background-color 0.2s;
+        }
+
+        .btn-whatsapp:hover {
+            background-color: var(--accent-green-dark);
+        }
+
+        @media (max-width: 600px) {
+            header { padding: 12px 20px; }
+            .grid-games { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+            .modal-drawer { max-width: 100%; }
+            .header-tag { display: none; }
+            .hero-title { font-size: 1.5rem; }
+        }
+    </style>
 </head>
 <body>
 
-  <div class="card" id="promo-card">
-    <span class="badge">🎮 MCO GAMES — Oferta Especial</span>
-    <h2 class="title" id="game-title">NOME DO JOGO / PRODUTO</h2>
-    
-    <ul class="details">
-      <li>⚡ Mídia Digital / Mídia Física</li>
-      <li>⚡ Envio imediato e suporte completo</li>
-      <li>⚡ Garantia total de funcionamento</li>
-    </ul>
+    <header>
+        <div class="brand">
+            <div class="brand-icon">🎮</div>
+            <div>
+                <div class="brand-title">MCO GAMES</div>
+                <div class="brand-subtitle">Catálogo Oficial</div>
+            </div>
+        </div>
+        <div class="header-actions">
+            <a href="https://chat.whatsapp.com/IREOzjw9jh55ekz95Nv3Pd" target="_blank" class="community-btn">
+                💬 Grupo VIP
+            </a>
+            <div class="header-tag">⚡ Ativação Instantânea</div>
+        </div>
+    </header>
 
-    <div class="price-box">
-      <span class="price-label">Condição Especial</span>
-      <span class="price-value" id="game-price">R$ 00,00</span>
-      <span class="price-label" style="margin-top: 4px;">Aceitamos Pix e Cartão em até 12x</span>
+    <div class="container">
+
+        <div class="hero-section">
+            <h1 class="hero-title">Encontre seu próximo jogo</h1>
+            <p class="hero-subtitle">Escolha o jogo, selecione o tipo de mídia e conclua pelo WhatsApp.</p>
+        </div>
+
+        <div id="loadingContainer" class="status-box">
+            <h3>⏳ A carregar catálogo completo...</h3>
+            <p>Sincronizando todos os jogos da sua planilha do Google Sheets.</p>
+        </div>
+
+        <div id="errorContainer" class="status-box error" style="display: none;">
+            <h3>Não foi possível carregar o catálogo.</h3>
+            <p>Verifique se a planilha continua publicada na web como CSV.</p>
+        </div>
+
+        <div id="mainContent" style="display: none;">
+            
+            <div class="carousel-section" id="carouselSection">
+                <div class="carousel-title">🔥 Destaques em Promoção (Deslize ➔)</div>
+                <div id="carouselGrid" class="carousel-grid"></div>
+            </div>
+
+            <div class="controls">
+                <input type="text" id="searchInput" class="search-input" placeholder="🔍 Pesquisar jogo..." oninput="renderGames()">
+                <select id="categorySelect" class="category-select" onchange="renderGames()">
+                    <option value="ALL">Todas as Categorias</option>
+                </select>
+            </div>
+
+            <div id="catalogContainer"></div>
+        </div>
     </div>
 
-    <button class="btn-share" onclick="compartilharOferta()">
-      📲 Compartilhar Oferta
-    </button>
-  </div>
+    <div class="bottom-bar" id="bottomBar">
+        <div class="selected-info">
+            <h4 id="barSelectedCount">0 item(ns) selecionado(s)</h4>
+            <p id="barSelectedTotal">Total: R$ 0,00</p>
+            <div class="card-fee-note">*Valores para PIX. Cartão de crédito possui taxa da máquina.</div>
+        </div>
+        <button class="btn-continue" onclick="openModal()">Finalizar Pedido ➔</button>
+    </div>
 
-  <script>
-    async function compartilharOferta() {
-      const titulo = document.getElementById('game-title').innerText;
-      const preco = document.getElementById('game-price').innerText;
-      
-      const textoCompartilhamento = `🎮 *MCO GAMES — OFERTA ESPECIAL* 🎮\n\n🔥 *${titulo}*\n\n⚡ Destaques:\n• Mídia Digital / Mídia Física\n• Envio imediato\n• Garantia total\n\n💰 *${preco}*\n💳 Pix ou Cartão até 12x\n\n📲 Garanta a sua cópia agora!`;
+    <div class="modal-overlay" id="modalOverlay" onclick="closeModal()"></div>
+    <div class="modal-drawer" id="modalDrawer">
+        <div>
+            <div class="drawer-header">
+                <div>
+                    <span>CARRINHO DE COMPRAS</span>
+                    <h2>Resumo do Pedido</h2>
+                </div>
+                <button class="close-btn" onclick="closeModal()">✕</button>
+            </div>
 
-      if (navigator.share) {
-        try {
-          await navigator.share({
-            title: 'MCO GAMES',
-            text: textoCompartilhamento
-          });
-        } catch (err) {
-          console.log('Compartilhamento cancelado ou não suportado.');
+            <div class="item-list" id="drawerItemList"></div>
+        </div>
+
+        <div class="drawer-footer">
+            <div class="price-row">
+                <span>Valor no PIX:</span>
+                <div>
+                    <h3 id="drawerTotalPrice">R$ 0,00</h3>
+                    <div class="card-fee-note" style="text-align: right;">Cartão de crédito com pequeno acréscimo.</div>
+                </div>
+            </div>
+            <a href="#" id="whatsappLink" target="_blank" class="btn-whatsapp">
+                🛒 Concluir Compra no WhatsApp
+            </a>
+        </div>
+    </div>
+
+    <script>
+        const PHONE_NUMBER = "5599981810222";
+        const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTbnddE66aBmhilS8BtFkch5qx41mzkZOiVtVeMxzHJRXljT3qevVZFGf4jU8o1LNZHuHL_3bnIGqRg/pub?output=csv";
+
+        let games = [];
+        let selectedCart = [];
+
+        function parsePrice(val) {
+            if (!val) return 0;
+            let clean = val.toString().replace(/[^\d,\.]/g, '').replace(',', '.');
+            return parseFloat(clean) || 0;
         }
-      } else {
-        // Fallback: Copia para a área de transferência se o navegador não tiver o Share API
-        navigator.clipboard.writeText(textoCompartilhamento);
-        alert('Texto da oferta copiado para a área de transferência!');
-      }
-    }
-  </script>
 
+        function parseTargetDate(dateStr) {
+            if (!dateStr) return null;
+            let str = dateStr.toString().trim();
+            if (!str) return null;
+
+            if (str.includes('/')) {
+                const parts = str.split(' ');
+                const dateParts = parts[0].split('/');
+                if (dateParts.length === 3) {
+                    const day = parseInt(dateParts[0], 10);
+                    const month = parseInt(dateParts[1], 10) - 1;
+                    const year = parseInt(dateParts[2], 10);
+                    let hours = 0, minutes = 0, seconds = 0;
+
+                    if (parts[1]) {
+                        const timeParts = parts[1].split(':');
+                        hours = parseInt(timeParts[0], 10) || 0;
+                        minutes = parseInt(timeParts[1], 10) || 0;
+                        seconds = parseInt(timeParts[2], 10) || 0;
+                    }
+
+                    return new Date(year, month, day, hours, minutes, seconds);
+                }
+            }
+
+            const parsed = new Date(str);
+            return isNaN(parsed.getTime()) ? null : parsed;
+        }
+
+        function getCountdownString(targetDateStr) {
+            const target = parseTargetDate(targetDateStr);
+            if (!target) return null;
+
+            const now = new Date();
+            const diff = target.getTime() - now.getTime();
+
+            if (diff <= 0) return "Encerrado / Lançado";
+
+            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+            const minutes = Math.floor((diff / (1000 * 60)) % 60);
+            const seconds = Math.floor((diff / 1000) % 60);
+
+            const pad = num => String(num).padStart(2, '0');
+
+            if (days > 0) {
+                return `${days}d ${pad(hours)}h ${pad(minutes)}m ${pad(seconds)}s`;
+            }
+            return `${pad(hours)}h ${pad(minutes)}m ${pad(seconds)}s`;
+        }
+
+        function updateTimers() {
+            const timerElements = document.querySelectorAll('.timer-badge');
+            timerElements.forEach(el => {
+                const targetStr = el.getAttribute('data-target');
+                if (targetStr) {
+                    const countdown = getCountdownString(targetStr);
+                    if (countdown) {
+                        el.innerHTML = `⏳ ${countdown}`;
+                        el.style.display = 'inline-flex';
+                    } else {
+                        el.style.display = 'none';
+                    }
+                }
+            });
+        }
+
+        function fetchCatalogFromSheets() {
+            Papa.parse(SHEET_CSV_URL, {
+                download: true,
+                header: false,
+                skipEmptyLines: true,
+                complete: function(results) {
+                    if (results && results.data && results.data.length > 0) {
+                        parseCsvData(results.data);
+                    } else {
+                        showError();
+                    }
+                },
+                error: function(err) {
+                    console.error("Erro ao carregar CSV:", err);
+                    showError();
+                }
+            });
+        }
+
+        function parseCsvData(rows) {
+            games = [];
+
+            for (let i = 1; i < rows.length; i++) {
+                const row = rows[i];
+                if (!row || row.length < 2) continue;
+
+                const name = row[1] ? row[1].trim() : '';
+                if (!name || name.toLowerCase() === 'nome' || name.toLowerCase() === 'jogo') continue;
+
+                const imgRaw = row[10] ? row[10].trim() : '';
+                const imgUrl = (imgRaw && imgRaw.startsWith('http')) 
+                    ? imgRaw 
+                    : "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTnOXAQFE6SWdIZy6b4OpXDWYJUjkIbnYx7gQLCRunJ3w&s=10";
+
+                const pricePrimary = parsePrice(row[5]);
+                const stockPrimary = row[6] ? (parseInt(row[6].toString().replace(/\D/g, '')) || 0) : 0;
+
+                const priceSecondary = parsePrice(row[7]);
+                const stockSecondary = row[8] ? (parseInt(row[8].toString().replace(/\D/g, '')) || 0) : 0;
+
+                const oldPrice = parsePrice(row[4]);
+
+                let validPrices = [];
+                if (pricePrimary > 0 && stockPrimary > 0) validPrices.push(pricePrimary);
+                if (priceSecondary > 0 && stockSecondary > 0) validPrices.push(priceSecondary);
+
+                if (validPrices.length === 0) {
+                    if (pricePrimary > 0) validPrices.push(pricePrimary);
+                    if (priceSecondary > 0) validPrices.push(priceSecondary);
+                }
+
+                const mainPrice = validPrices.length > 0 ? Math.min(...validPrices) : (pricePrimary || priceSecondary || 0);
+                const targetDate = row[9] ? row[9].trim() : '';
+
+                // Limpeza de ID seguro para seletores DOM
+                const rawId = row[0] && row[0].trim() ? row[0].trim() : `game-${i}`;
+                const safeId = rawId.replace(/[^a-zA-Z0-9_-]/g, '_');
+
+                games.push({
+                    id: safeId,
+                    name: name,
+                    platform: row[2] ? row[2].trim() : 'PS4 / PS5',
+                    category: row[3] ? row[3].trim() : 'Geral',
+                    oldPrice: oldPrice > 0 ? oldPrice : (mainPrice * 1.3),
+                    pricePrimary: pricePrimary,
+                    stockPrimary: stockPrimary,
+                    priceSecondary: priceSecondary,
+                    stockSecondary: stockSecondary,
+                    mainPrice: mainPrice,
+                    targetDate: targetDate,
+                    img: imgUrl
+                });
+            }
+
+            if (games.length === 0) {
+                showError();
+                return;
+            }
+
+            document.getElementById('loadingContainer').style.display = 'none';
+            document.getElementById('mainContent').style.display = 'block';
+
+            populateCategories();
+            renderCarousel();
+            renderGames();
+            startAutoScroll();
+
+            updateTimers();
+            setInterval(updateTimers, 1000);
+        }
+
+        function showError() {
+            document.getElementById('loadingContainer').style.display = 'none';
+            document.getElementById('errorContainer').style.display = 'block';
+        }
+
+        function populateCategories() {
+            const select = document.getElementById('categorySelect');
+            select.innerHTML = '<option value="ALL">Todas as Categorias</option>';
+            
+            const categories = [...new Set(games.map(g => g.category))];
+            categories.forEach(cat => {
+                const opt = document.createElement('option');
+                opt.value = cat;
+                opt.innerText = cat;
+                select.appendChild(opt);
+            });
+        }
+
+        function toggleSelectType(gameId, type) {
+            const game = games.find(g => g.id === gameId);
+            if (!game) return;
+
+            const price = type === 'Primária' ? game.pricePrimary : game.priceSecondary;
+
+            const idx = selectedCart.findIndex(i => i.gameId === gameId && i.type === type);
+            if (idx > -1) {
+                selectedCart.splice(idx, 1);
+            } else {
+                selectedCart = selectedCart.filter(i => i.gameId !== gameId);
+                selectedCart.push({ gameId: gameId, name: game.name, platform: game.platform, type: type, price: price });
+            }
+
+            renderCarousel();
+            renderGames();
+            updateBottomBar();
+        }
+
+        // --- FUNÇÃO PARA GERAR E DESCARREGAR PRINT DO CARD (PNG) ---
+        function downloadCardPrint(gameId) {
+            const cardElement = document.getElementById(`card-node-${gameId}`);
+            if (!cardElement) {
+                alert("Erro ao localizar o card para geração de print.");
+                return;
+            }
+
+            // Oculta temporariamente os botões de ação para a imagem sair limpa
+            const actionsElement = cardElement.querySelector('.card-actions');
+            if (actionsElement) actionsElement.style.display = 'none';
+
+            html2canvas(cardElement, {
+                useCORS: true,
+                scale: 2, // Maior definição da imagem (HD)
+                backgroundColor: '#13171d'
+            }).then(canvas => {
+                // Restaura os botões de ação no card
+                if (actionsElement) actionsElement.style.display = 'flex';
+
+                const link = document.createElement('a');
+                link.download = `MCO_GAMES_${gameId}.png`;
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+            }).catch(err => {
+                if (actionsElement) actionsElement.style.display = 'flex';
+                console.error("Erro ao gerar print:", err);
+                alert("Não foi possível gerar a imagem automaticamente.");
+            });
+        }
+
+        function createCardElement(game, instancePrefix = 'main') {
+            const card = document.createElement('div');
+            card.className = 'card';
+            const nodeUniqueId = `${instancePrefix}-${game.id}`;
+            card.id = `card-node-${nodeUniqueId}`;
+
+            const primarySelected = selectedCart.some(i => i.gameId === game.id && i.type === 'Primária');
+            const secondarySelected = selectedCart.some(i => i.gameId === game.id && i.type === 'Secundária');
+
+            if (primarySelected || secondarySelected) {
+                card.classList.add('selected');
+            }
+
+            const discount = (game.oldPrice > game.mainPrice) 
+                ? Math.round(((game.oldPrice - game.mainPrice) / game.oldPrice) * 100) 
+                : 0;
+
+            let buttonsHtml = '';
+            const primaryTxt = `Primária (${game.stockPrimary} Unid)<br>R$ ${game.pricePrimary.toFixed(2).replace('.', ',')}`;
+            const secondaryTxt = `Secundária (${game.stockSecondary} Unid)<br>R$ ${game.priceSecondary.toFixed(2).replace('.', ',')}`;
+
+            if (game.pricePrimary > 0 && game.priceSecondary > 0) {
+                buttonsHtml = `
+                    <div class="type-selector">
+                        <button class="type-btn ${primarySelected ? 'active' : ''}" onclick="toggleSelectType('${game.id}', 'Primária')">
+                            ${primaryTxt}
+                        </button>
+                        <button class="type-btn ${secondarySelected ? 'active' : ''}" onclick="toggleSelectType('${game.id}', 'Secundária')">
+                            ${secondaryTxt}
+                        </button>
+                    </div>
+                `;
+            } else if (game.pricePrimary > 0) {
+                buttonsHtml = `
+                    <div class="type-selector">
+                        <button class="type-btn ${primarySelected ? 'active' : ''}" style="width:100%" onclick="toggleSelectType('${game.id}', 'Primária')">
+                            ${primaryTxt}
+                        </button>
+                    </div>
+                `;
+            } else if (game.priceSecondary > 0) {
+                buttonsHtml = `
+                    <div class="type-selector">
+                        <button class="type-btn ${secondarySelected ? 'active' : ''}" style="width:100%" onclick="toggleSelectType('${game.id}', 'Secundária')">
+                            ${secondaryTxt}
+                        </button>
+                    </div>
+                `;
+            }
+
+            let timerHtml = '';
+            if (game.targetDate) {
+                timerHtml = `<div class="timer-badge" data-target="${game.targetDate}">⏳ Carregando...</div>`;
+            }
+
+            const waMsg = encodeURIComponent(
+                `🔥 *MCO GAMES* 🔥\n\n` +
+                `Olá! Quero comprar/consultar este jogo:\n` +
+                `🎮 *${game.name}* (${game.platform})\n` +
+                `💰 A partir de R$ ${game.mainPrice.toFixed(2).replace('.', ',')}`
+            );
+
+            card.innerHTML = `
+                <div class="card-watermark">
+                    <span>🎮 MCO GAMES</span>
+                    <span>OFICIAL</span>
+                </div>
+                <div class="card-img-container">
+                    <span class="platform-tag">${game.platform}</span>
+                    ${discount > 0 ? `<span class="discount-badge">-${discount}%</span>` : ''}
+                    <img src="${game.img}" alt="${game.name}" class="card-img" loading="lazy" crossorigin="anonymous" onerror="this.src='https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTnOXAQFE6SWdIZy6b4OpXDWYJUjkIbnYx7gQLCRunJ3w&s=10'">
+                </div>
+                <div class="card-info">
+                    <div class="card-title">${game.name}</div>
+                    ${timerHtml}
+                    <div class="price-container">
+                        ${game.oldPrice > 0 ? `<span class="old-price">R$ ${game.oldPrice.toFixed(2).replace('.', ',')}</span>` : ''}
+                        <span class="current-price">A partir de R$ ${game.mainPrice.toFixed(2).replace('.', ',')}</span>
+                    </div>
+                    ${buttonsHtml}
+                    
+                    <div class="card-actions">
+                        <a href="https://wa.me/${PHONE_NUMBER}?text=${waMsg}" target="_blank" class="btn-card-action btn-card-wa" title="Comprar no WhatsApp">
+                            💬 Comprar
+                        </a>
+                        <button class="btn-card-action btn-card-print" onclick="event.stopPropagation(); downloadCardPrint('${nodeUniqueId}')" title="Descarregar imagem do card">
+                            📸 Baixar Print
+                        </button>
+                    </div>
+                </div>
+            `;
+            return card;
+        }
+
+        function renderCarousel() {
+            const container = document.getElementById('carouselGrid');
+            if (!container) return;
+            container.innerHTML = '';
+
+            const featuredGames = games.slice(0, 10);
+            featuredGames.forEach(game => {
+                container.appendChild(createCardElement(game, 'carousel'));
+            });
+            updateTimers();
+        }
+
+        function startAutoScroll() {
+            const container = document.getElementById('carouselGrid');
+            if (!container) return;
+            const cardWidth = 246;
+
+            setInterval(() => {
+                if (container.scrollLeft + container.clientWidth >= container.scrollWidth - 10) {
+                    container.scrollTo({ left: 0, behavior: 'smooth' });
+                } else {
+                    container.scrollBy({ left: cardWidth, behavior: 'smooth' });
+                }
+            }, 3500);
+        }
+
+        function renderGames() {
+            const catalogContainer = document.getElementById('catalogContainer');
+            if (!catalogContainer) return;
+
+            const searchVal = document.getElementById('searchInput').value.toLowerCase();
+            const catVal = document.getElementById('categorySelect').value;
+
+            catalogContainer.innerHTML = '';
+
+            const categories = catVal === 'ALL' 
+                ? [...new Set(games.map(g => g.category))]
+                : [catVal];
+
+            categories.forEach(category => {
+                const filteredGames = games.filter(g => 
+                    g.category === category &&
+                    g.name.toLowerCase().includes(searchVal)
+                );
+
+                if (filteredGames.length > 0) {
+                    const catTitle = document.createElement('h3');
+                    catTitle.className = 'category-title-section';
+                    catTitle.innerText = category;
+                    catalogContainer.appendChild(catTitle);
+
+                    const grid = document.createElement('div');
+                    grid.className = 'grid-games';
+
+                    filteredGames.forEach(game => {
+                        grid.appendChild(createCardElement(game, 'catalog'));
+                    });
+
+                    catalogContainer.appendChild(grid);
+                }
+            });
+            updateTimers();
+        }
+
+        function calculateTotal() {
+            return selectedCart.reduce((acc, item) => acc + item.price, 0);
+        }
+
+        function updateBottomBar() {
+            const bottomBar = document.getElementById('bottomBar');
+            const countText = document.getElementById('barSelectedCount');
+            const totalText = document.getElementById('barSelectedTotal');
+            const total = calculateTotal();
+
+            if (selectedCart.length > 0) {
+                countText.innerText = `${selectedCart.length} item(ns) selecionado(s)`;
+                totalText.innerText = `Total: R$ ${total.toFixed(2).replace('.', ',')}`;
+                bottomBar.classList.add('active');
+            } else {
+                bottomBar.classList.remove('active');
+            }
+        }
+
+        function openModal() {
+            if (selectedCart.length === 0) {
+                closeModal();
+                return;
+            }
+
+            const modalOverlay = document.getElementById('modalOverlay');
+            const modalDrawer = document.getElementById('modalDrawer');
+            const drawerList = document.getElementById('drawerItemList');
+            const totalPriceEl = document.getElementById('drawerTotalPrice');
+            const whatsappBtn = document.getElementById('whatsappLink');
+
+            drawerList.innerHTML = '';
+            let total = 0;
+            let messageItems = [];
+
+            selectedCart.forEach((item, index) => {
+                total += item.price;
+                messageItems.push(`${index + 1}. ${item.name} (${item.platform}) - [${item.type}] — R$ ${item.price.toFixed(2).replace('.', ',')}`);
+
+                const cardEl = document.createElement('div');
+                cardEl.className = 'selected-item-card';
+                cardEl.innerHTML = `
+                    <div>
+                        <h5>${item.name}</h5>
+                        <p>${item.type} — R$ ${item.price.toFixed(2).replace('.', ',')}</p>
+                    </div>
+                    <span class="remove-item" onclick="event.stopPropagation(); toggleSelectType('${item.gameId}', '${item.type}'); openModal();">✕</span>
+                `;
+                drawerList.appendChild(cardEl);
+            });
+
+            totalPriceEl.innerText = `R$ ${total.toFixed(2).replace('.', ',')}`;
+
+            const message = `🔥 *PEDIDO - MCO GAMES* 🔥\n\n` +
+                            `Olá! Quero comprar os seguintes itens do catálogo:\n\n` +
+                            `📦 *Itens Escolhidos:*\n` +
+                            messageItems.join('\n') + `\n\n` +
+                            `💰 *Valor Total (Pix):* R$ ${total.toFixed(2).replace('.', ',')}\n\n` +
+                            `Aguardo as instruções para pagamento!`;
+
+            whatsappBtn.href = `https://wa.me/${PHONE_NUMBER}?text=${encodeURIComponent(message)}`;
+
+            modalOverlay.classList.add('active');
+            modalDrawer.classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('modalOverlay').classList.remove('active');
+            document.getElementById('modalDrawer').classList.remove('active');
+        }
+
+        fetchCatalogFromSheets();
+    </script>
 </body>
 </html>
