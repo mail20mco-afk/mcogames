@@ -14,7 +14,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
     
-    <!-- PapaParse para leitura robusta do CSV sem bloqueio de CORS -->
+    <!-- PapaParse para leitura do CSV -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 
     <style>
@@ -29,6 +29,7 @@
             --badge-discount: #ff0055;
             --whatsapp-bg: #25d366;
             --error-red: #ff4d4d;
+            --timer-orange: #ffaa00;
         }
 
         * {
@@ -310,6 +311,21 @@
             padding: 3px 6px;
             border-radius: 4px;
             z-index: 2;
+        }
+
+        .timer-badge {
+            background-color: rgba(255, 170, 0, 0.12);
+            border: 1px solid var(--timer-orange);
+            color: var(--timer-orange);
+            font-size: 0.68rem;
+            font-weight: 700;
+            padding: 4px 8px;
+            border-radius: 6px;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            margin-top: 2px;
+            width: fit-content;
         }
 
         .card-info {
@@ -665,7 +681,7 @@
             <div class="drawer-header">
                 <div>
                     <span>CARRINHO DE COMPRAS</span>
-                    2. Resumo do Pedido</h2>
+                    <h2>Resumo do Pedido</h2>
                 </div>
                 <button class="close-btn" onclick="closeModal()">✕</button>
             </div>
@@ -693,11 +709,74 @@
 
         let games = [];
         let selectedCart = [];
+        let countdownInterval = null;
 
         function parsePrice(val) {
             if (!val) return 0;
             let clean = val.toString().replace(/[^\d,\.]/g, '').replace(',', '.');
             return parseFloat(clean) || 0;
+        }
+
+        function parseSheetDate(dateStr) {
+            if (!dateStr) return null;
+            dateStr = dateStr.trim();
+            if (!dateStr) return null;
+
+            // Formatos aceitos: DD/MM/YYYY, DD/MM/YYYY HH:mm:ss, YYYY-MM-DD
+            if (dateStr.includes('/')) {
+                const parts = dateStr.split(' ');
+                const dateParts = parts[0].split('/');
+                if (dateParts.length === 3) {
+                    const day = dateParts[0].padStart(2, '0');
+                    const month = dateParts[1].padStart(2, '0');
+                    const year = dateParts[2];
+                    const timePart = parts[1] || '23:59:59';
+                    return new Date(`${year}-${month}-${day}T${timePart}`);
+                }
+            }
+            
+            const parsed = new Date(dateStr);
+            return isNaN(parsed.getTime()) ? null : parsed;
+        }
+
+        function startCountdowns() {
+            if (countdownInterval) clearInterval(countdownInterval);
+            updateCountdowns();
+            countdownInterval = setInterval(updateCountdowns, 1000);
+        }
+
+        function updateCountdowns() {
+            const elements = document.querySelectorAll('.countdown-timer');
+            const now = new Date().getTime();
+
+            elements.forEach(el => {
+                const targetStr = el.getAttribute('data-target');
+                const labelPrefix = el.getAttribute('data-prefix') || '';
+                const targetDate = parseSheetDate(targetStr);
+
+                if (!targetDate) {
+                    el.style.display = 'none';
+                    return;
+                }
+
+                const diff = targetDate.getTime() - now;
+
+                if (diff <= 0) {
+                    el.innerText = labelPrefix.includes('Lança') ? '🚀 Já disponível!' : '⏳ Oferta encerrada';
+                    return;
+                }
+
+                const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+                let timeStr = '';
+                if (days > 0) timeStr += `${days}d `;
+                timeStr += `${String(hours).padStart(2, '0')}h ${String(minutes).padStart(2, '0')}m ${String(seconds).padStart(2, '0')}s`;
+
+                el.innerText = `${labelPrefix} ${timeStr}`;
+            });
         }
 
         function fetchCatalogFromSheets() {
@@ -728,11 +807,6 @@
 
                 const name = row[1] ? row[1].trim() : '';
                 if (!name || name.toLowerCase() === 'nome' || name.toLowerCase() === 'jogo') continue;
-
-                // Colunas da tabela:
-                // A(0): ID | B(1): Nome | C(2): Plataforma | D(3): Categoria
-                // E(4): Preço Antigo | F(5): Preço Primária | G(6): Qtd Primária
-                // H(7): Preço Secundária | I(8): Qtd Secundária | J(9): Data | K(10): Imagem
 
                 const imgRaw = row[10] ? row[10].trim() : '';
                 const imgUrl = (imgRaw && imgRaw.startsWith('http')) 
@@ -831,8 +905,8 @@
                 : 0;
 
             let buttonsHtml = '';
-            const primaryTxt = `Primária (${game.stockPrimary} vagas)<br>R$ ${game.pricePrimary.toFixed(2).replace('.', ',')}`;
-            const secondaryTxt = `Secundária (${game.stockSecondary} vagas)<br>R$ ${game.priceSecondary.toFixed(2).replace('.', ',')}`;
+            const primaryTxt = `Primária (${game.stockPrimary} unid.)<br>R$ ${game.pricePrimary.toFixed(2).replace('.', ',')}`;
+            const secondaryTxt = `Secundária (${game.stockSecondary} unid.)<br>R$ ${game.priceSecondary.toFixed(2).replace('.', ',')}`;
 
             if (game.pricePrimary > 0 && game.priceSecondary > 0) {
                 buttonsHtml = `
@@ -863,6 +937,23 @@
                 `;
             }
 
+            let timerHtml = '';
+            if (game.targetDate && game.targetDate.trim() !== '') {
+                const catLower = game.category.toLowerCase();
+                const nameLower = game.name.toLowerCase();
+                let prefix = '⏱️';
+
+                if (catLower.includes('pré') || catLower.includes('pre') || nameLower.includes('pré') || nameLower.includes('pre')) {
+                    prefix = '🚀 Lança em:';
+                } else if (catLower.includes('promo') || catLower.includes('oferta') || game.oldPrice > game.mainPrice) {
+                    prefix = '⏳ Oferta encerra em:';
+                } else {
+                    prefix = '⏱️ Restam:';
+                }
+
+                timerHtml = `<div class="timer-badge countdown-timer" data-target="${game.targetDate}" data-prefix="${prefix}">⏱️ Calculando...</div>`;
+            }
+
             card.innerHTML = `
                 <div class="card-img-container">
                     <span class="platform-tag">${game.platform}</span>
@@ -871,6 +962,7 @@
                 </div>
                 <div class="card-info">
                     <div class="card-title">${game.name}</div>
+                    ${timerHtml}
                     <div class="price-container">
                         ${game.oldPrice > 0 ? `<span class="old-price">R$ ${game.oldPrice.toFixed(2).replace('.', ',')}</span>` : ''}
                         <span class="current-price">A partir de R$ ${game.mainPrice.toFixed(2).replace('.', ',')}</span>
@@ -890,6 +982,7 @@
             featuredGames.forEach(game => {
                 container.appendChild(createCardElement(game));
             });
+            startCountdowns();
         }
 
         function startAutoScroll() {
@@ -941,6 +1034,8 @@
                     catalogContainer.appendChild(grid);
                 }
             });
+
+            startCountdowns();
         }
 
         function calculateTotal() {
@@ -1014,7 +1109,6 @@
             document.getElementById('modalDrawer').classList.remove('active');
         }
 
-        // Executa a leitura inicial do catálogo
         fetchCatalogFromSheets();
     </script>
 </body>
