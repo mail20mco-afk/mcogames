@@ -1,1115 +1,227 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MCO GAMES | Catálogo Oficial</title>
-    
-    <!-- Meta Tags para redes sociais e WhatsApp -->
-    <meta property="og:title" content="MCO GAMES | Catálogo Oficial">
-    <meta property="og:description" content="Jogos digitais de PS4 e PS5 com os melhores preços. Ativação Instantânea!">
-    <meta property="og:image" content="https://mco-games.netlify.app/PS-Store.jpg">
-
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
-    
-    <!-- PapaParse para leitura do CSV -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
-
-    <style>
-        :root {
-            --bg-color: #0b0d10;
-            --card-bg: #13171d;
-            --accent-green: #00e676;
-            --accent-green-dark: #00b359;
-            --border-color: #202630;
-            --text-main: #ffffff;
-            --text-muted: #8c96a3;
-            --badge-discount: #ff0055;
-            --whatsapp-bg: #25d366;
-            --error-red: #ff4d4d;
-            --timer-orange: #ffaa00;
-        }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Inter', sans-serif;
-        }
-
-        body {
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            padding-bottom: 120px;
-        }
-
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 16px 30px;
-            background-color: #101318;
-            border-bottom: 1px solid var(--border-color);
-            position: sticky;
-            top: 0;
-            z-index: 90;
-        }
-
-        .brand {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .brand-icon {
-            background: linear-gradient(135deg, var(--accent-green), #00b359);
-            color: #000;
-            width: 38px;
-            height: 38px;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 900;
-            font-size: 1.2rem;
-        }
-
-        .brand-title {
-            font-weight: 800;
-            font-size: 1.1rem;
-            letter-spacing: 0.5px;
-        }
-
-        .brand-subtitle {
-            font-size: 0.7rem;
-            color: var(--accent-green);
-            font-weight: 700;
-            text-transform: uppercase;
-        }
-
-        .header-actions {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .community-btn {
-            background-color: var(--whatsapp-bg);
-            color: #000;
-            padding: 6px 14px;
-            border-radius: 20px;
-            font-size: 0.75rem;
-            font-weight: 800;
-            text-decoration: none;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            transition: transform 0.2s;
-        }
-
-        .community-btn:hover {
-            transform: scale(1.05);
-        }
-
-        .header-tag {
-            background-color: rgba(0, 230, 118, 0.1);
-            color: var(--accent-green);
-            border: 1px solid var(--accent-green);
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 0.75rem;
-            font-weight: 700;
-        }
-
-        .container {
-            max-width: 1300px;
-            margin: 0 auto;
-            padding: 24px 20px;
-        }
-
-        .hero-section {
-            margin-bottom: 24px;
-        }
-
-        .hero-title {
-            font-size: 2rem;
-            font-weight: 900;
-            margin-bottom: 6px;
-        }
-
-        .hero-subtitle {
-            color: var(--text-muted);
-            font-size: 0.95rem;
-        }
-
-        .status-box {
-            background-color: var(--card-bg);
-            border: 1px dashed var(--border-color);
-            border-radius: 12px;
-            padding: 40px 20px;
-            text-align: center;
-            margin: 20px 0;
-        }
-
-        .status-box.error {
-            border-color: var(--error-red);
-            color: var(--error-red);
-        }
-
-        .status-box h3 {
-            font-size: 1.1rem;
-            margin-bottom: 8px;
-        }
-
-        .status-box p {
-            font-size: 0.85rem;
-            color: var(--text-muted);
-        }
-
-        .carousel-section {
-            margin-bottom: 32px;
-        }
-
-        .carousel-title {
-            font-size: 1.1rem;
-            font-weight: 800;
-            margin-bottom: 12px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            color: #fff;
-        }
-
-        .carousel-grid {
-            display: flex;
-            gap: 16px;
-            overflow-x: auto;
-            scroll-behavior: smooth;
-            padding-bottom: 10px;
-            scrollbar-width: none;
-            -ms-overflow-style: none;
-        }
-
-        .carousel-grid::-webkit-scrollbar {
-            display: none;
-        }
-
-        .carousel-grid .card {
-            min-width: 220px;
-            max-width: 230px;
-            flex-shrink: 0;
-        }
-
-        .controls {
-            display: flex;
-            gap: 12px;
-            margin-bottom: 24px;
-            flex-wrap: wrap;
-        }
-
-        .search-input {
-            flex: 1;
-            min-width: 200px;
-            background-color: var(--card-bg);
-            border: 1px solid var(--border-color);
-            padding: 12px 16px;
-            border-radius: 8px;
-            color: #fff;
-            font-size: 0.9rem;
-            outline: none;
-        }
-
-        .search-input:focus {
-            border-color: var(--accent-green);
-        }
-
-        .category-select {
-            background-color: var(--card-bg);
-            border: 1px solid var(--border-color);
-            padding: 12px 16px;
-            border-radius: 8px;
-            color: #fff;
-            font-size: 0.9rem;
-            outline: none;
-            cursor: pointer;
-        }
-
-        .category-title-section {
-            font-size: 1.2rem;
-            font-weight: 800;
-            margin: 32px 0 16px 0;
-            color: var(--accent-green);
-            border-bottom: 1px solid var(--border-color);
-            padding-bottom: 8px;
-        }
-
-        .grid-games {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-            gap: 18px;
-        }
-
-        .card {
-            background-color: var(--card-bg);
-            border: 2px solid var(--border-color);
-            border-radius: 12px;
-            overflow: hidden;
-            position: relative;
-            transition: all 0.2s ease;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-        }
-
-        .card:hover {
-            border-color: #353f4e;
-            transform: translateY(-2px);
-        }
-
-        .card.selected {
-            border-color: var(--accent-green);
-            box-shadow: 0 0 18px rgba(0, 230, 118, 0.25);
-        }
-
-        .card-img-container {
-            width: 100%;
-            aspect-ratio: 1 / 1;
-            position: relative;
-            background-color: #1a1e26;
-        }
-
-        .card-img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .platform-tag {
-            position: absolute;
-            top: 10px;
-            left: 10px;
-            background-color: rgba(0,0,0,0.85);
-            color: #fff;
-            font-size: 0.65rem;
-            font-weight: 800;
-            padding: 4px 8px;
-            border-radius: 4px;
-            border: 1px solid rgba(255,255,255,0.2);
-            z-index: 2;
-        }
-
-        .discount-badge {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background-color: var(--badge-discount);
-            color: #fff;
-            font-size: 0.7rem;
-            font-weight: 800;
-            padding: 3px 6px;
-            border-radius: 4px;
-            z-index: 2;
-        }
-
-        .timer-badge {
-            background-color: rgba(255, 170, 0, 0.12);
-            border: 1px solid var(--timer-orange);
-            color: var(--timer-orange);
-            font-size: 0.68rem;
-            font-weight: 700;
-            padding: 4px 8px;
-            border-radius: 6px;
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-            margin-top: 2px;
-            width: fit-content;
-        }
-
-        .card-info {
-            padding: 12px;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            flex-grow: 1;
-            justify-content: space-between;
-        }
-
-        .card-title {
-            font-size: 0.88rem;
-            font-weight: 700;
-            color: #fff;
-            line-height: 1.2;
-            min-height: 2.2em;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-        }
-
-        .price-container {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .old-price {
-            font-size: 0.75rem;
-            color: var(--text-muted);
-            text-decoration: line-through;
-        }
-
-        .current-price {
-            font-size: 1.05rem;
-            font-weight: 800;
-            color: var(--accent-green);
-        }
-
-        .type-selector {
-            display: flex;
-            gap: 6px;
-            margin-top: 4px;
-        }
-
-        .type-btn {
-            flex: 1;
-            background-color: #1a202c;
-            border: 1px solid var(--border-color);
-            color: #fff;
-            padding: 6px 4px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 0.68rem;
-            text-align: center;
-            transition: all 0.2s;
-            line-height: 1.3;
-        }
-
-        .type-btn:hover {
-            background-color: #263040;
-        }
-
-        .type-btn.active {
-            background-color: var(--accent-green);
-            color: #000;
-            font-weight: 800;
-            border-color: var(--accent-green);
-        }
-
-        .bottom-bar {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            background-color: #12161d;
-            border-top: 2px solid var(--border-color);
-            padding: 14px 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            z-index: 100;
-            transform: translateY(100%);
-            transition: transform 0.3s ease;
-            box-shadow: 0 -10px 25px rgba(0,0,0,0.5);
-        }
-
-        .bottom-bar.active {
-            transform: translateY(0);
-        }
-
-        .selected-info {
-            text-align: center;
-        }
-
-        .selected-info h4 {
-            font-size: 0.9rem;
-            font-weight: 800;
-        }
-
-        .selected-info p {
-            font-size: 1.1rem;
-            color: var(--accent-green);
-            font-weight: 800;
-        }
-
-        .card-fee-note {
-            font-size: 0.65rem;
-            color: var(--text-muted);
-            font-weight: 400;
-        }
-
-        .btn-continue {
-            background-color: var(--accent-green);
-            color: #000;
-            border: none;
-            padding: 12px 32px;
-            border-radius: 8px;
-            font-weight: 800;
-            font-size: 1rem;
-            cursor: pointer;
-            transition: background-color 0.2s, transform 0.2s;
-            width: 100%;
-            max-width: 320px;
-        }
-
-        .btn-continue:hover {
-            background-color: var(--accent-green-dark);
-            transform: scale(1.02);
-        }
-
-        .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.75);
-            backdrop-filter: blur(4px);
-            z-index: 200;
-            display: none;
-        }
-
-        .modal-overlay.active {
-            display: block;
-        }
-
-        .modal-drawer {
-            position: fixed;
-            top: 0;
-            right: -450px;
-            width: 100%;
-            max-width: 420px;
-            height: 100%;
-            background-color: #12151b;
-            z-index: 201;
-            padding: 24px;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            transition: right 0.3s ease;
-        }
-
-        .modal-drawer.active {
-            right: 0;
-        }
-
-        .drawer-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 20px;
-            border-bottom: 1px solid var(--border-color);
-            padding-bottom: 15px;
-        }
-
-        .drawer-header span {
-            color: var(--accent-green);
-            font-size: 0.75rem;
-            font-weight: 800;
-            text-transform: uppercase;
-        }
-
-        .drawer-header h2 {
-            font-size: 1.3rem;
-            margin-top: 2px;
-        }
-
-        .close-btn {
-            background: none;
-            border: none;
-            color: var(--text-muted);
-            font-size: 1.4rem;
-            cursor: pointer;
-        }
-
-        .item-list {
-            flex-grow: 1;
-            overflow-y: auto;
-            margin-bottom: 20px;
-        }
-
-        .selected-item-card {
-            background-color: #1a1e27;
-            padding: 12px 14px;
-            border-radius: 8px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px;
-            border: 1px solid var(--border-color);
-        }
-
-        .selected-item-card h5 {
-            font-size: 0.85rem;
-            margin-bottom: 2px;
-        }
-
-        .selected-item-card p {
-            font-size: 0.8rem;
-            color: var(--accent-green);
-            font-weight: 700;
-        }
-
-        .remove-item {
-            color: var(--text-muted);
-            cursor: pointer;
-            font-size: 1rem;
-            padding: 4px;
-        }
-
-        .drawer-footer {
-            border-top: 1px solid var(--border-color);
-            padding-top: 16px;
-        }
-
-        .price-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-end;
-            margin-bottom: 16px;
-        }
-
-        .price-row span {
-            color: var(--text-muted);
-            font-size: 0.9rem;
-        }
-
-        .price-row h3 {
-            color: var(--accent-green);
-            font-size: 1.4rem;
-            font-weight: 800;
-            text-align: right;
-        }
-
-        .btn-whatsapp {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            width: 100%;
-            background-color: var(--accent-green);
-            color: #000;
-            padding: 14px;
-            border-radius: 8px;
-            font-weight: 800;
-            text-decoration: none;
-            font-size: 1rem;
-            transition: background-color 0.2s;
-        }
-
-        .btn-whatsapp:hover {
-            background-color: var(--accent-green-dark);
-        }
-
-        @media (max-width: 600px) {
-            header { padding: 12px 20px; }
-            .grid-games { grid-template-columns: repeat(2, 1fr); gap: 10px; }
-            .modal-drawer { max-width: 100%; }
-            .header-tag { display: none; }
-            .hero-title { font-size: 1.5rem; }
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Card de Produto - MCO Games</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      background-color: #0f141d;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    /* Estilização do Card */
+    .product-card {
+      width: 280px;
+      background-color: #161c28;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+      border: 1px solid #222b3d;
+      color: #ffffff;
+    }
+
+    .card-banner {
+      position: relative;
+      width: 100%;
+      height: 260px;
+      background-color: #0d1117;
+    }
+
+    .card-banner img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    /* Badges da imagem */
+    .badge-platform {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      background-color: rgba(0, 0, 0, 0.85);
+      color: #fff;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 4px 8px;
+      border-radius: 4px;
+    }
+
+    .badge-discount {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background-color: #ff0055;
+      color: #fff;
+      font-size: 13px;
+      font-weight: 800;
+      padding: 4px 8px;
+      border-radius: 4px;
+    }
+
+    /* Corpo do Card */
+    .card-info {
+      padding: 16px;
+    }
+
+    .product-title {
+      font-size: 18px;
+      font-weight: 800;
+      margin-bottom: 12px;
+      letter-spacing: 0.5px;
+    }
+
+    .price-original {
+      font-size: 13px;
+      color: #7a8b9e;
+      text-decoration: line-through;
+      margin-bottom: 2px;
+    }
+
+    .price-from {
+      font-size: 18px;
+      font-weight: 800;
+      color: #00e676; /* Verde em destaque */
+      margin-bottom: 16px;
+    }
+
+    /* Grade de Variações */
+    .variations-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .variation-item {
+      background-color: #1f2738;
+      border: 1px solid #2a354b;
+      border-radius: 8px;
+      padding: 8px 6px;
+      text-align: center;
+      transition: border-color 0.2s, background-color 0.2s;
+    }
+
+    .variation-item:hover {
+      border-color: #00e676;
+      background-color: #253046;
+    }
+
+    .variation-title {
+      font-size: 11px;
+      color: #a0aec0;
+      display: block;
+      margin-bottom: 2px;
+    }
+
+    .variation-price {
+      font-size: 13px;
+      font-weight: 700;
+      color: #ffffff;
+    }
+
+    .out-of-stock {
+      opacity: 0.4;
+      pointer-events: none;
+    }
+  </style>
 </head>
 <body>
 
-    <header>
-        <div class="brand">
-            <div class="brand-icon">🎮</div>
-            <div>
-                <div class="brand-title">MCO GAMES</div>
-                <div class="brand-subtitle">Catálogo Oficial</div>
-            </div>
-        </div>
-        <div class="header-actions">
-            <a href="https://chat.whatsapp.com/IREOzjw9jh55ekz95Nv3Pd" target="_blank" class="community-btn">
-                💬 Grupo VIP
-            </a>
-            <div class="header-tag">⚡ Ativação Instantânea</div>
-        </div>
-    </header>
-
-    <div class="container">
-
-        <div class="hero-section">
-            <h1 class="hero-title">Encontre seu próximo jogo</h1>
-            <p class="hero-subtitle">Escolha o jogo, selecione o tipo de mídia e conclua pelo WhatsApp.</p>
-        </div>
-
-        <div id="loadingContainer" class="status-box">
-            <h3>⏳ A carregar catálogo completo...</h3>
-            <p>Sincronizando todos os jogos da sua planilha do Google Sheets.</p>
-        </div>
-
-        <div id="errorContainer" class="status-box error" style="display: none;">
-            <h3>Não foi possível carregar o catálogo.</h3>
-            <p>Verifique se a planilha continua publicada na web como CSV.</p>
-        </div>
-
-        <div id="mainContent" style="display: none;">
-            
-            <div class="carousel-section" id="carouselSection">
-                <div class="carousel-title">🔥 Destaques em Promoção (Deslize ➔)</div>
-                <div id="carouselGrid" class="carousel-grid"></div>
-            </div>
-
-            <div class="controls">
-                <input type="text" id="searchInput" class="search-input" placeholder="🔍 Pesquisar jogo..." oninput="renderGames()">
-                <select id="categorySelect" class="category-select" onchange="renderGames()">
-                    <option value="ALL">Todas as Categorias</option>
-                </select>
-            </div>
-
-            <div id="catalogContainer"></div>
-        </div>
+  <!-- Estrutura do Card -->
+  <div class="product-card" id="card-nba2k27">
+    <div class="card-banner">
+      <span class="badge-platform" id="platform-badge">PS5</span>
+      <span class="badge-discount" id="discount-badge">-0%</span>
+      <img src="https://via.placeholder.com/280x260/111/fff?text=NBA+2K27" alt="Capa do Jogo" id="cover-img">
     </div>
+    
+    <div class="card-info">
+      <h3 class="product-title" id="product-title">NBA 2K27</h3>
+      
+      <div class="price-original" id="price-original">R$ 0,00</div>
+      <div class="price-from" id="price-from">A partir de R$ 0,00</div>
 
-    <div class="bottom-bar" id="bottomBar">
-        <div class="selected-info">
-            <h4 id="barSelectedCount">0 item(ns) selecionado(s)</h4>
-            <p id="barSelectedTotal">Total: R$ 0,00</p>
-            <div class="card-fee-note">*Valores para PIX. Cartão de crédito possui taxa da máquina.</div>
-        </div>
-        <button class="btn-continue" onclick="openModal()">Finalizar Pedido ➔</button>
+      <div class="variations-grid" id="variations-container">
+        <!-- Variações renderizadas dinamicamente pelo JS -->
+      </div>
     </div>
-
-    <div class="modal-overlay" id="modalOverlay" onclick="closeModal()"></div>
-    <div class="modal-drawer" id="modalDrawer">
-        <div>
-            <div class="drawer-header">
-                <div>
-                    <span>CARRINHO DE COMPRAS</span>
-                    <h2>Resumo do Pedido</h2>
-                </div>
-                <button class="close-btn" onclick="closeModal()">✕</button>
-            </div>
-
-            <div class="item-list" id="drawerItemList"></div>
-        </div>
-
-        <div class="drawer-footer">
-            <div class="price-row">
-                <span>Valor no PIX:</span>
-                <div>
-                    <h3 id="drawerTotalPrice">R$ 0,00</h3>
-                    <div class="card-fee-note" style="text-align: right;">Cartão de crédito com pequeno acréscimo.</div>
-                </div>
-            </div>
-            <a href="#" id="whatsappLink" target="_blank" class="btn-whatsapp">
-                🛒 Concluir Compra no WhatsApp
-            </a>
-        </div>
-    </div>
-
-    <script>
-        const PHONE_NUMBER = "5599981810222";
-        const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTbnddE66aBmhilS8BtFkch5qx41mzkZOiVtVeMxzHJRXljT3qevVZFGf4jU8o1LNZHuHL_3bnIGqRg/pub?output=csv";
-
-        let games = [];
-        let selectedCart = [];
-        let countdownInterval = null;
-
-        function parsePrice(val) {
-            if (!val) return 0;
-            let clean = val.toString().replace(/[^\d,\.]/g, '').replace(',', '.');
-            return parseFloat(clean) || 0;
-        }
-
-        function parseSheetDate(dateStr) {
-            if (!dateStr) return null;
-            dateStr = dateStr.trim();
-            if (!dateStr) return null;
-
-            // Formatos aceitos: DD/MM/YYYY, DD/MM/YYYY HH:mm:ss, YYYY-MM-DD
-            if (dateStr.includes('/')) {
-                const parts = dateStr.split(' ');
-                const dateParts = parts[0].split('/');
-                if (dateParts.length === 3) {
-                    const day = dateParts[0].padStart(2, '0');
-                    const month = dateParts[1].padStart(2, '0');
-                    const year = dateParts[2];
-                    const timePart = parts[1] || '23:59:59';
-                    return new Date(`${year}-${month}-${day}T${timePart}`);
-                }
-            }
-            
-            const parsed = new Date(dateStr);
-            return isNaN(parsed.getTime()) ? null : parsed;
-        }
-
-        function startCountdowns() {
-            if (countdownInterval) clearInterval(countdownInterval);
-            updateCountdowns();
-            countdownInterval = setInterval(updateCountdowns, 1000);
-        }
-
-        function updateCountdowns() {
-            const elements = document.querySelectorAll('.countdown-timer');
-            const now = new Date().getTime();
-
-            elements.forEach(el => {
-                const targetStr = el.getAttribute('data-target');
-                const labelPrefix = el.getAttribute('data-prefix') || '';
-                const targetDate = parseSheetDate(targetStr);
-
-                if (!targetDate) {
-                    el.style.display = 'none';
-                    return;
-                }
-
-                const diff = targetDate.getTime() - now;
-
-                if (diff <= 0) {
-                    el.innerText = labelPrefix.includes('Lança') ? '🚀 Já disponível!' : '⏳ Oferta encerrada';
-                    return;
-                }
-
-                const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-                const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-                const seconds = Math.floor((diff % (1000 * 60)) / 1000);
-
-                let timeStr = '';
-                if (days > 0) timeStr += `${days}d `;
-                timeStr += `${String(hours).padStart(2, '0')}h ${String(minutes).padStart(2, '0')}m ${String(seconds).padStart(2, '0')}s`;
-
-                el.innerText = `${labelPrefix} ${timeStr}`;
-            });
-        }
-
-        function fetchCatalogFromSheets() {
-            Papa.parse(SHEET_CSV_URL, {
-                download: true,
-                header: false,
-                skipEmptyLines: true,
-                complete: function(results) {
-                    if (results && results.data && results.data.length > 0) {
-                        parseCsvData(results.data);
-                    } else {
-                        showError();
-                    }
-                },
-                error: function(err) {
-                    console.error("Erro ao carregar CSV:", err);
-                    showError();
-                }
-            });
-        }
-
-        function parseCsvData(rows) {
-            games = [];
-
-            for (let i = 1; i < rows.length; i++) {
-                const row = rows[i];
-                if (!row || row.length < 2) continue;
-
-                const name = row[1] ? row[1].trim() : '';
-                if (!name || name.toLowerCase() === 'nome' || name.toLowerCase() === 'jogo') continue;
-
-                const imgRaw = row[10] ? row[10].trim() : '';
-                const imgUrl = (imgRaw && imgRaw.startsWith('http')) 
-                    ? imgRaw 
-                    : "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTnOXAQFE6SWdIZy6b4OpXDWYJUjkIbnYx7gQLCRunJ3w&s=10";
-
-                const pricePrimary = parsePrice(row[5]);
-                const stockPrimary = row[6] ? (parseInt(row[6].toString().replace(/\D/g, '')) || 0) : 0;
-
-                const priceSecondary = parsePrice(row[7]);
-                const stockSecondary = row[8] ? (parseInt(row[8].toString().replace(/\D/g, '')) || 0) : 0;
-
-                const oldPrice = parsePrice(row[4]);
-                const mainPrice = pricePrimary > 0 ? pricePrimary : priceSecondary;
-
-                games.push({
-                    id: row[0] && row[0].trim() ? row[0].trim() : `game-${i}`,
-                    name: name,
-                    platform: row[2] ? row[2].trim() : 'PS4 / PS5',
-                    category: row[3] ? row[3].trim() : 'Geral',
-                    oldPrice: oldPrice > 0 ? oldPrice : (mainPrice * 1.3),
-                    pricePrimary: pricePrimary,
-                    stockPrimary: stockPrimary,
-                    priceSecondary: priceSecondary,
-                    stockSecondary: stockSecondary,
-                    mainPrice: mainPrice,
-                    targetDate: row[9] ? row[9].trim() : '',
-                    img: imgUrl
-                });
-            }
-
-            if (games.length === 0) {
-                showError();
-                return;
-            }
-
-            document.getElementById('loadingContainer').style.display = 'none';
-            document.getElementById('mainContent').style.display = 'block';
-
-            populateCategories();
-            renderCarousel();
-            renderGames();
-            startAutoScroll();
-        }
-
-        function showError() {
-            document.getElementById('loadingContainer').style.display = 'none';
-            document.getElementById('errorContainer').style.display = 'block';
-        }
-
-        function populateCategories() {
-            const select = document.getElementById('categorySelect');
-            select.innerHTML = '<option value="ALL">Todas as Categorias</option>';
-            
-            const categories = [...new Set(games.map(g => g.category))];
-            categories.forEach(cat => {
-                const opt = document.createElement('option');
-                opt.value = cat;
-                opt.innerText = cat;
-                select.appendChild(opt);
-            });
-        }
-
-        function toggleSelectType(gameId, type) {
-            const game = games.find(g => g.id === gameId);
-            if (!game) return;
-
-            const price = type === 'Primária' ? game.pricePrimary : game.priceSecondary;
-
-            const idx = selectedCart.findIndex(i => i.gameId === gameId && i.type === type);
-            if (idx > -1) {
-                selectedCart.splice(idx, 1);
-            } else {
-                selectedCart = selectedCart.filter(i => i.gameId !== gameId);
-                selectedCart.push({ gameId: gameId, name: game.name, platform: game.platform, type: type, price: price });
-            }
-
-            renderCarousel();
-            renderGames();
-            updateBottomBar();
-        }
-
-        function createCardElement(game) {
-            const card = document.createElement('div');
-            card.className = 'card';
-
-            const primarySelected = selectedCart.some(i => i.gameId === game.id && i.type === 'Primária');
-            const secondarySelected = selectedCart.some(i => i.gameId === game.id && i.type === 'Secundária');
-
-            if (primarySelected || secondarySelected) {
-                card.classList.add('selected');
-            }
-
-            const discount = (game.oldPrice > game.mainPrice) 
-                ? Math.round(((game.oldPrice - game.mainPrice) / game.oldPrice) * 100) 
-                : 0;
-
-            let buttonsHtml = '';
-            const primaryTxt = `Primária (${game.stockPrimary} unid.)<br>R$ ${game.pricePrimary.toFixed(2).replace('.', ',')}`;
-            const secondaryTxt = `Secundária (${game.stockSecondary} unid.)<br>R$ ${game.priceSecondary.toFixed(2).replace('.', ',')}`;
-
-            if (game.pricePrimary > 0 && game.priceSecondary > 0) {
-                buttonsHtml = `
-                    <div class="type-selector">
-                        <button class="type-btn ${primarySelected ? 'active' : ''}" onclick="toggleSelectType('${game.id}', 'Primária')">
-                            ${primaryTxt}
-                        </button>
-                        <button class="type-btn ${secondarySelected ? 'active' : ''}" onclick="toggleSelectType('${game.id}', 'Secundária')">
-                            ${secondaryTxt}
-                        </button>
-                    </div>
-                `;
-            } else if (game.pricePrimary > 0) {
-                buttonsHtml = `
-                    <div class="type-selector">
-                        <button class="type-btn ${primarySelected ? 'active' : ''}" style="width:100%" onclick="toggleSelectType('${game.id}', 'Primária')">
-                            ${primaryTxt}
-                        </button>
-                    </div>
-                `;
-            } else if (game.priceSecondary > 0) {
-                buttonsHtml = `
-                    <div class="type-selector">
-                        <button class="type-btn ${secondarySelected ? 'active' : ''}" style="width:100%" onclick="toggleSelectType('${game.id}', 'Secundária')">
-                            ${secondaryTxt}
-                        </button>
-                    </div>
-                `;
-            }
-
-            let timerHtml = '';
-            if (game.targetDate && game.targetDate.trim() !== '') {
-                const catLower = game.category.toLowerCase();
-                const nameLower = game.name.toLowerCase();
-                let prefix = '⏱️';
-
-                if (catLower.includes('pré') || catLower.includes('pre') || nameLower.includes('pré') || nameLower.includes('pre')) {
-                    prefix = '🚀 Lança em:';
-                } else if (catLower.includes('promo') || catLower.includes('oferta') || game.oldPrice > game.mainPrice) {
-                    prefix = '⏳ Oferta encerra em:';
-                } else {
-                    prefix = '⏱️ Restam:';
-                }
-
-                timerHtml = `<div class="timer-badge countdown-timer" data-target="${game.targetDate}" data-prefix="${prefix}">⏱️ Calculando...</div>`;
-            }
-
-            card.innerHTML = `
-                <div class="card-img-container">
-                    <span class="platform-tag">${game.platform}</span>
-                    ${discount > 0 ? `<span class="discount-badge">-${discount}%</span>` : ''}
-                    <img src="${game.img}" alt="${game.name}" class="card-img" loading="lazy" onerror="this.src='https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTnOXAQFE6SWdIZy6b4OpXDWYJUjkIbnYx7gQLCRunJ3w&s=10'">
-                </div>
-                <div class="card-info">
-                    <div class="card-title">${game.name}</div>
-                    ${timerHtml}
-                    <div class="price-container">
-                        ${game.oldPrice > 0 ? `<span class="old-price">R$ ${game.oldPrice.toFixed(2).replace('.', ',')}</span>` : ''}
-                        <span class="current-price">A partir de R$ ${game.mainPrice.toFixed(2).replace('.', ',')}</span>
-                    </div>
-                    ${buttonsHtml}
-                </div>
-            `;
-            return card;
-        }
-
-        function renderCarousel() {
-            const container = document.getElementById('carouselGrid');
-            if (!container) return;
-            container.innerHTML = '';
-
-            const featuredGames = games.slice(0, 10);
-            featuredGames.forEach(game => {
-                container.appendChild(createCardElement(game));
-            });
-            startCountdowns();
-        }
-
-        function startAutoScroll() {
-            const container = document.getElementById('carouselGrid');
-            if (!container) return;
-            const cardWidth = 236;
-
-            setInterval(() => {
-                if (container.scrollLeft + container.clientWidth >= container.scrollWidth - 10) {
-                    container.scrollTo({ left: 0, behavior: 'smooth' });
-                } else {
-                    container.scrollBy({ left: cardWidth, behavior: 'smooth' });
-                }
-            }, 3500);
-        }
-
-        function renderGames() {
-            const catalogContainer = document.getElementById('catalogContainer');
-            if (!catalogContainer) return;
-
-            const searchVal = document.getElementById('searchInput').value.toLowerCase();
-            const catVal = document.getElementById('categorySelect').value;
-
-            catalogContainer.innerHTML = '';
-
-            const categories = catVal === 'ALL' 
-                ? [...new Set(games.map(g => g.category))]
-                : [catVal];
-
-            categories.forEach(category => {
-                const filteredGames = games.filter(g => 
-                    g.category === category &&
-                    g.name.toLowerCase().includes(searchVal)
-                );
-
-                if (filteredGames.length > 0) {
-                    const catTitle = document.createElement('h3');
-                    catTitle.className = 'category-title-section';
-                    catTitle.innerText = category;
-                    catalogContainer.appendChild(catTitle);
-
-                    const grid = document.createElement('div');
-                    grid.className = 'grid-games';
-
-                    filteredGames.forEach(game => {
-                        grid.appendChild(createCardElement(game));
-                    });
-
-                    catalogContainer.appendChild(grid);
-                }
-            });
-
-            startCountdowns();
-        }
-
-        function calculateTotal() {
-            return selectedCart.reduce((acc, item) => acc + item.price, 0);
-        }
-
-        function updateBottomBar() {
-            const bottomBar = document.getElementById('bottomBar');
-            const countText = document.getElementById('barSelectedCount');
-            const totalText = document.getElementById('barSelectedTotal');
-            const total = calculateTotal();
-
-            if (selectedCart.length > 0) {
-                countText.innerText = `${selectedCart.length} item(ns) selecionado(s)`;
-                totalText.innerText = `Total: R$ ${total.toFixed(2).replace('.', ',')}`;
-                bottomBar.classList.add('active');
-            } else {
-                bottomBar.classList.remove('active');
-            }
-        }
-
-        function openModal() {
-            if (selectedCart.length === 0) {
-                closeModal();
-                return;
-            }
-
-            const modalOverlay = document.getElementById('modalOverlay');
-            const modalDrawer = document.getElementById('modalDrawer');
-            const drawerList = document.getElementById('drawerItemList');
-            const totalPriceEl = document.getElementById('drawerTotalPrice');
-            const whatsappBtn = document.getElementById('whatsappLink');
-
-            drawerList.innerHTML = '';
-            let total = 0;
-            let messageItems = [];
-
-            selectedCart.forEach((item, index) => {
-                total += item.price;
-                messageItems.push(`${index + 1}. ${item.name} (${item.platform}) - [${item.type}] — R$ ${item.price.toFixed(2).replace('.', ',')}`);
-
-                const cardEl = document.createElement('div');
-                cardEl.className = 'selected-item-card';
-                cardEl.innerHTML = `
-                    <div>
-                        <h5>${item.name}</h5>
-                        <p>${item.type} — R$ ${item.price.toFixed(2).replace('.', ',')}</p>
-                    </div>
-                    <span class="remove-item" onclick="event.stopPropagation(); toggleSelectType('${item.gameId}', '${item.type}'); openModal();">✕</span>
-                `;
-                drawerList.appendChild(cardEl);
-            });
-
-            totalPriceEl.innerText = `R$ ${total.toFixed(2).replace('.', ',')}`;
-
-            const message = `🔥 *PEDIDO - MCO GAMES* 🔥\n\n` +
-                            `Olá! Quero comprar os seguintes itens do catálogo:\n\n` +
-                            `📦 *Itens Escolhidos:*\n` +
-                            messageItems.join('\n') + `\n\n` +
-                            `💰 *Valor Total (Pix):* R$ ${total.toFixed(2).replace('.', ',')}\n\n` +
-                            `Aguardo as instruções para pagamento!`;
-
-            whatsappBtn.href = `https://wa.me/${PHONE_NUMBER}?text=${encodeURIComponent(message)}`;
-
-            modalOverlay.classList.add('active');
-            modalDrawer.classList.add('active');
-        }
-
-        function closeModal() {
-            document.getElementById('modalOverlay').classList.remove('active');
-            document.getElementById('modalDrawer').classList.remove('active');
-        }
-
-        fetchCatalogFromSheets();
-    </script>
+  </div>
+
+  <script>
+    // 1. Dados do produto (simulando retorno de banco de dados ou API)
+    const produtoData = {
+      titulo: "NBA 2K27",
+      plataforma: "PS5",
+      precoDeTabela: 349.00,
+      imagemUrl: "https://via.placeholder.com/280x260/0d1117/00e676?text=NBA+2K27",
+      variacoes: [
+        { id: "primaria", nome: "Primária", estoque: 1, preco: 257.90 },
+        { id: "secundaria", nome: "Secundária", estoque: 1, preco: 187.90 }
+      ]
+    };
+
+    // Função de formatação para Moeda Brasileira (R$)
+    function formatarMoeda(valor) {
+      return valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    }
+
+    // 2. Função principal para renderizar o Card Corretamente
+    function renderizarCardProduto(produto) {
+      // Filtrar apenas variações em estoque
+      const disponiveis = produto.variacoes.filter(item => item.estoque > 0);
+
+      if (disponiveis.length === 0) {
+        document.getElementById('price-from').innerText = "Esgotado";
+        document.getElementById('discount-badge').style.display = 'none';
+        return;
+      }
+
+      // LÓGICA CHAVE: Pegar o menor valor entre as opções disponíveis
+      const menorPreco = Math.min(...disponiveis.map(item => item.preco));
+
+      // LÓGICA CHAVE: Recalcular a porcentagem de desconto baseada no menor preço
+      const percentualDesconto = Math.round(((produto.precoDeTabela - menorPreco) / produto.precoDeTabela) * 100);
+
+      // Atualizar Textos do Card
+      document.getElementById('product-title').innerText = produto.titulo;
+      document.getElementById('platform-badge').innerText = produto.plataforma;
+      document.getElementById('price-original').innerText = formatarMoeda(produto.precoDeTabela);
+      
+      // Atualizar o "A partir de" com o menor valor calculado
+      document.getElementById('price-from').innerText = `A partir de ${formatarMoeda(menorPreco)}`;
+      
+      // Atualizar o badge de desconto
+      document.getElementById('discount-badge').innerText = `-${percentualDesconto}%`;
+
+      // Renderizar as caixas de variações
+      const containerVariacoes = document.getElementById('variations-container');
+      containerVariacoes.innerHTML = ''; // Limpar antes de renderizar
+
+      produto.variacoes.forEach(v => {
+        const itemDiv = document.createElement('div');
+        itemDiv.className = `variation-item ${v.estoque <= 0 ? 'out-of-stock' : ''}`;
+        
+        itemDiv.innerHTML = `
+          <span class="variation-title">${v.nome} (${v.estoque} unid.)</span>
+          <span class="variation-price">${formatarMoeda(v.preco)}</span>
+        `;
+        
+        containerVariacoes.appendChild(itemDiv);
+      });
+    }
+
+    // Executa a função passando os dados do produto
+    renderizarCardProduto(produtoData);
+  </script>
 </body>
 </html>
