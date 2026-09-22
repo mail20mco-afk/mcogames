@@ -1,943 +1,916 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#07111f">
-  <title>MCO GAMES - Catálogo Oficial</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MCO GAMES | Promoção Tokyo Game Show</title>
+    
+    <!-- Meta Tags para Preview no WhatsApp (Substitua a URL após publicar no GitHub) -->
+    <meta property="og:title" content="MCO GAMES | Promoção Tokyo Game Show">
+    <meta property="og:description" content="Jogos digitais de PS4 e PS5 com até 75% OFF. Ativação Instantânea!">
+    <meta property="og:image" content="https://mco-games.netlify.app/PS-Store.jpg">
+    <meta property="og:url" content="https://seu-usuario.github.io/mco-games/">
 
-  <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0b0d10;
+            --card-bg: #13171d;
+            --accent-green: #00e676;
+            --accent-green-dark: #00b359;
+            --border-color: #202630;
+            --text-main: #ffffff;
+            --text-muted: #8c96a3;
+            --badge-discount: #ff0055;
+            --whatsapp-bg: #25d366;
+        }
 
-    :root {
-      --bg: #07111f;
-      --card: #0d1b2e;
-      --card-2: #10233b;
-      --line: rgba(255,255,255,.09);
-      --text: #f5f7fb;
-      --muted: #9aa9bd;
-      --primary: #20c997;
-      --primary-dark: #0fa878;
-      --danger: #ff5d73;
-      --gold: #ffc857;
-    }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+        }
 
-    body {
-      min-height: 100vh;
-      background:
-        radial-gradient(circle at top right, rgba(32,201,151,.10), transparent 30%),
-        radial-gradient(circle at top left, rgba(54,113,255,.10), transparent 28%),
-        var(--bg);
-      color: var(--text);
-      font-family: "Segoe UI", Roboto, Arial, sans-serif;
-    }
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            padding-bottom: 120px;
+        }
 
-    button, input, select {
-      font: inherit;
-    }
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 30px;
+            background-color: #101318;
+            border-bottom: 1px solid var(--border-color);
+            position: sticky;
+            top: 0;
+            z-index: 90;
+        }
 
-    .header {
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      backdrop-filter: blur(14px);
-      background: rgba(7,17,31,.88);
-      border-bottom: 1px solid var(--line);
-    }
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
 
-    .header-inner {
-      width: min(1400px, 94%);
-      margin: auto;
-      padding: 18px 0;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 20px;
-    }
+        .brand-icon {
+            background: linear-gradient(135deg, var(--accent-green), #00b359);
+            color: #000;
+            width: 38px;
+            height: 38px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 900;
+            font-size: 1.2rem;
+        }
 
-    .logo {
-      font-size: clamp(1.5rem, 3vw, 2.2rem);
-      font-weight: 900;
-      letter-spacing: 1px;
-    }
+        .brand-title {
+            font-weight: 800;
+            font-size: 1.1rem;
+            letter-spacing: 0.5px;
+        }
 
-    .logo span {
-      color: var(--primary);
-    }
+        .brand-subtitle {
+            font-size: 0.7rem;
+            color: var(--accent-green);
+            font-weight: 700;
+            text-transform: uppercase;
+        }
 
-    .subtitle {
-      color: var(--muted);
-      font-size: .82rem;
-      margin-top: 3px;
-    }
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
 
-    .status {
-      color: var(--muted);
-      font-size: .8rem;
-      text-align: right;
-    }
+        .community-btn {
+            background-color: var(--whatsapp-bg);
+            color: #000;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 800;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: transform 0.2s;
+        }
 
-    .container {
-      width: min(1400px, 94%);
-      margin: auto;
-      padding: 28px 0 60px;
-    }
+        .community-btn:hover {
+            transform: scale(1.05);
+        }
 
-    .hero {
-      margin-bottom: 24px;
-    }
+        .header-tag {
+            background-color: rgba(0, 230, 118, 0.1);
+            color: var(--accent-green);
+            border: 1px solid var(--accent-green);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
 
-    .hero h1 {
-      font-size: clamp(1.5rem, 4vw, 2.5rem);
-      margin-bottom: 7px;
-    }
+        .promo-banner {
+            background: linear-gradient(90deg, #ff0055 0%, #990033 100%);
+            padding: 12px 20px;
+            text-align: center;
+            font-size: 0.85rem;
+            color: #fff;
+            font-weight: 700;
+        }
 
-    .hero p {
-      color: var(--muted);
-    }
+        .container {
+            max-width: 1300px;
+            margin: 0 auto;
+            padding: 24px 20px;
+        }
 
-    .controls {
-      display: grid;
-      grid-template-columns: minmax(220px, 1fr) 210px;
-      gap: 12px;
-      margin: 22px 0;
-    }
+        .community-banner {
+            background: rgba(37, 211, 102, 0.1);
+            border: 1px solid var(--whatsapp-bg);
+            border-radius: 12px;
+            padding: 16px 20px;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
 
-    .control {
-      width: 100%;
-      border: 1px solid var(--line);
-      border-radius: 12px;
-      background: rgba(13,27,46,.9);
-      color: var(--text);
-      padding: 13px 15px;
-      outline: none;
-    }
+        .community-banner-text h4 {
+            color: var(--whatsapp-bg);
+            font-size: 1rem;
+            font-weight: 800;
+        }
 
-    .control:focus {
-      border-color: rgba(32,201,151,.7);
-    }
+        .community-banner-text p {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
 
-    .categories {
-      display: flex;
-      gap: 8px;
-      overflow-x: auto;
-      padding-bottom: 5px;
-      margin-bottom: 28px;
-      scrollbar-width: thin;
-    }
+        .community-banner-btn {
+            background-color: var(--whatsapp-bg);
+            color: #000;
+            padding: 10px 18px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 800;
+            text-decoration: none;
+        }
 
-    .category-btn {
-      flex: 0 0 auto;
-      border: 1px solid var(--line);
-      background: var(--card);
-      color: var(--muted);
-      padding: 10px 16px;
-      border-radius: 999px;
-      cursor: pointer;
-      transition: .2s ease;
-    }
+        .carousel-section {
+            margin-bottom: 32px;
+        }
 
-    .category-btn:hover,
-    .category-btn.active {
-      background: var(--primary);
-      border-color: var(--primary);
-      color: #06150f;
-      font-weight: 700;
-    }
+        .carousel-title {
+            font-size: 1.1rem;
+            font-weight: 800;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #fff;
+        }
 
-    .section {
-      margin-bottom: 38px;
-    }
+        .carousel-grid {
+            display: flex;
+            gap: 16px;
+            overflow-x: auto;
+            scroll-behavior: smooth;
+            padding-bottom: 10px;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
 
-    .section-title {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      margin-bottom: 15px;
-    }
+        .carousel-grid::-webkit-scrollbar {
+            display: none;
+        }
 
-    .section-title h2 {
-      font-size: 1.25rem;
-    }
+        .carousel-grid .card {
+            min-width: 200px;
+            max-width: 220px;
+            flex-shrink: 0;
+        }
 
-    .count {
-      color: var(--muted);
-      font-size: .8rem;
-    }
+        .controls {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
 
-    .games {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
-      gap: 16px;
-    }
+        .search-input {
+            flex: 1;
+            min-width: 200px;
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            padding: 12px 16px;
+            border-radius: 8px;
+            color: #fff;
+            font-size: 0.9rem;
+            outline: none;
+        }
 
-    .game-card {
-      overflow: hidden;
-      background: linear-gradient(180deg, var(--card-2), var(--card));
-      border: 1px solid var(--line);
-      border-radius: 16px;
-      box-shadow: 0 10px 35px rgba(0,0,0,.16);
-      transition: transform .22s ease, border-color .22s ease, box-shadow .22s ease;
-    }
+        .search-input:focus {
+            border-color: var(--accent-green);
+        }
 
-    .game-card:hover {
-      transform: translateY(-4px);
-      border-color: rgba(32,201,151,.4);
-      box-shadow: 0 15px 45px rgba(0,0,0,.28);
-    }
+        .category-select {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            padding: 12px 16px;
+            border-radius: 8px;
+            color: #fff;
+            font-size: 0.9rem;
+            outline: none;
+            cursor: pointer;
+        }
 
-    .cover-wrap {
-      position: relative;
-      aspect-ratio: 3 / 4;
-      background: #091522;
-      overflow: hidden;
-    }
+        .category-title-section {
+            font-size: 1.2rem;
+            font-weight: 800;
+            margin: 32px 0 16px 0;
+            color: var(--accent-green);
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 8px;
+        }
 
-    .cover {
-      width: 100%;
-      height: 100%;
-      display: block;
-      object-fit: cover;
-      transition: transform .3s ease;
-    }
+        .grid-games {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+            gap: 18px;
+        }
 
-    .game-card:hover .cover {
-      transform: scale(1.035);
-    }
+        .card {
+            background-color: var(--card-bg);
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            overflow: hidden;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.2s ease;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
 
-    .badge {
-      position: absolute;
-      top: 10px;
-      left: 10px;
-      background: var(--danger);
-      color: white;
-      font-weight: 800;
-      font-size: .7rem;
-      padding: 5px 8px;
-      border-radius: 7px;
-      text-transform: uppercase;
-    }
+        .card:hover {
+            border-color: #353f4e;
+            transform: translateY(-2px);
+        }
 
-    .content {
-      padding: 13px;
-    }
+        .card.selected {
+            border-color: var(--accent-green);
+            box-shadow: 0 0 18px rgba(0, 230, 118, 0.25);
+        }
 
-    .title {
-      font-size: 1rem;
-      line-height: 1.3;
-      font-weight: 800;
-      min-height: 42px;
-    }
+        .card-img-container {
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            position: relative;
+            background-color: #1a1e26;
+        }
 
-    .platform {
-      color: var(--muted);
-      font-size: .78rem;
-      margin-top: 4px;
-      min-height: 18px;
-    }
+        .card-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
 
-    .old-price {
-      color: #718096;
-      text-decoration: line-through;
-      font-size: .78rem;
-      margin-top: 10px;
-    }
+        .platform-tag {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background-color: rgba(0,0,0,0.85);
+            color: #fff;
+            font-size: 0.65rem;
+            font-weight: 800;
+            padding: 4px 8px;
+            border-radius: 4px;
+            border: 1px solid rgba(255,255,255,0.2);
+            z-index: 2;
+        }
 
-    .prices {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 8px;
-      margin-top: 8px;
-    }
+        .discount-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: var(--badge-discount);
+            color: #fff;
+            font-size: 0.7rem;
+            font-weight: 800;
+            padding: 3px 6px;
+            border-radius: 4px;
+            z-index: 2;
+        }
 
-    .price-box {
-      background: rgba(255,255,255,.045);
-      border: 1px solid var(--line);
-      border-radius: 9px;
-      padding: 8px;
-    }
+        .checkmark {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            width: 28px;
+            height: 28px;
+            background-color: var(--accent-green);
+            color: #000;
+            border-radius: 50%;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            font-weight: 900;
+            font-size: 0.9rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+            z-index: 2;
+        }
 
-    .price-label {
-      color: var(--muted);
-      font-size: .65rem;
-      text-transform: uppercase;
-      font-weight: 700;
-    }
+        .card.selected .checkmark {
+            display: flex;
+        }
 
-    .price {
-      margin-top: 2px;
-      font-size: 1rem;
-      font-weight: 900;
-      color: var(--primary);
-    }
+        .card-info {
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
 
-    .stock {
-      margin-top: 3px;
-      color: var(--muted);
-      font-size: .66rem;
-    }
+        .card-title {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: #fff;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
 
-    .buy-buttons {
-      display: grid;
-      gap: 7px;
-      margin-top: 12px;
-    }
+        .price-container {
+            display: flex;
+            align-items: baseline;
+            gap: 8px;
+        }
 
-    .whatsapp {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      text-decoration: none;
-      background: var(--primary);
-      color: #04140e;
-      font-weight: 800;
-      font-size: .8rem;
-      border-radius: 9px;
-      padding: 10px 8px;
-      transition: .2s ease;
-    }
+        .old-price {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-decoration: line-through;
+        }
 
-    .whatsapp:hover {
-      background: var(--primary-dark);
-      color: white;
-    }
+        .current-price {
+            font-size: 1.1rem;
+            font-weight: 800;
+            color: var(--accent-green);
+        }
 
-    .whatsapp.secondary {
-      background: transparent;
-      color: var(--primary);
-      border: 1px solid rgba(32,201,151,.4);
-    }
+        .payment-info {
+            font-size: 0.68rem;
+            color: var(--text-muted);
+        }
 
-    .whatsapp.secondary:hover {
-      background: rgba(32,201,151,.1);
-      color: var(--primary);
-    }
+        .bottom-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background-color: #12161d;
+            border-top: 2px solid var(--border-color);
+            padding: 14px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            z-index: 100;
+            transform: translateY(100%);
+            transition: transform 0.3s ease;
+            box-shadow: 0 -10px 25px rgba(0,0,0,0.5);
+        }
 
-    .empty,
-    .loading,
-    .error {
-      text-align: center;
-      padding: 45px 20px;
-      color: var(--muted);
-      border: 1px dashed var(--line);
-      border-radius: 15px;
-      background: rgba(13,27,46,.45);
-    }
+        .bottom-bar.active {
+            transform: translateY(0);
+        }
 
-    .error {
-      color: #ff9aaa;
-    }
+        .selected-info {
+            text-align: center;
+        }
 
-    .footer {
-      text-align: center;
-      color: #66768b;
-      font-size: .75rem;
-      padding-top: 15px;
-    }
+        .selected-info h4 {
+            font-size: 0.9rem;
+            font-weight: 800;
+        }
 
-    @media (max-width: 650px) {
-      .header-inner {
-        align-items: flex-start;
-      }
+        .selected-info p {
+            font-size: 1.1rem;
+            color: var(--accent-green);
+            font-weight: 800;
+        }
 
-      .status {
-        display: none;
-      }
+        .card-fee-note {
+            font-size: 0.65rem;
+            color: var(--text-muted);
+            font-weight: 400;
+        }
 
-      .controls {
-        grid-template-columns: 1fr;
-      }
+        .btn-continue {
+            background-color: var(--accent-green);
+            color: #000;
+            border: none;
+            padding: 12px 32px;
+            border-radius: 8px;
+            font-weight: 800;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.2s, transform 0.2s;
+            width: 100%;
+            max-width: 320px;
+        }
 
-      .games {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 10px;
-      }
+        .btn-continue:hover {
+            background-color: var(--accent-green-dark);
+            transform: scale(1.02);
+        }
 
-      .content {
-        padding: 10px;
-      }
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.75);
+            backdrop-filter: blur(4px);
+            z-index: 200;
+            display: none;
+        }
 
-      .title {
-        font-size: .88rem;
-        min-height: 38px;
-      }
+        .modal-overlay.active {
+            display: block;
+        }
 
-      .prices {
-        grid-template-columns: 1fr;
-      }
+        .modal-drawer {
+            position: fixed;
+            top: 0;
+            right: -450px;
+            width: 100%;
+            max-width: 420px;
+            height: 100%;
+            background-color: #12151b;
+            z-index: 201;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            transition: right 0.3s ease;
+        }
 
-      .price-box:nth-child(2) {
-        display: none;
-      }
-    }
+        .modal-drawer.active {
+            right: 0;
+        }
 
-    @media (max-width: 360px) {
-      .games {
-        grid-template-columns: 1fr;
-      }
-    }
-  </style>
+        .drawer-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 15px;
+        }
+
+        .drawer-header span {
+            color: var(--accent-green);
+            font-size: 0.75rem;
+            font-weight: 800;
+            text-transform: uppercase;
+        }
+
+        .drawer-header h2 {
+            font-size: 1.3rem;
+            margin-top: 2px;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 1.4rem;
+            cursor: pointer;
+        }
+
+        .item-list {
+            flex-grow: 1;
+            overflow-y: auto;
+            margin-bottom: 20px;
+        }
+
+        .selected-item-card {
+            background-color: #1a1e27;
+            padding: 12px 14px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            border: 1px solid var(--border-color);
+        }
+
+        .selected-item-card h5 {
+            font-size: 0.85rem;
+            margin-bottom: 2px;
+        }
+
+        .selected-item-card p {
+            font-size: 0.8rem;
+            color: var(--accent-green);
+            font-weight: 700;
+        }
+
+        .remove-item {
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 1rem;
+            padding: 4px;
+        }
+
+        .drawer-footer {
+            border-top: 1px solid var(--border-color);
+            padding-top: 16px;
+        }
+
+        .price-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-bottom: 16px;
+        }
+
+        .price-row span {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .price-row h3 {
+            color: var(--accent-green);
+            font-size: 1.4rem;
+            font-weight: 800;
+            text-align: right;
+        }
+
+        .btn-whatsapp {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            width: 100%;
+            background-color: var(--accent-green);
+            color: #000;
+            padding: 14px;
+            border-radius: 8px;
+            font-weight: 800;
+            text-decoration: none;
+            font-size: 1rem;
+            transition: background-color 0.2s;
+        }
+
+        .btn-whatsapp:hover {
+            background-color: var(--accent-green-dark);
+        }
+
+        @media (max-width: 600px) {
+            header { padding: 12px 20px; }
+            .grid-games { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+            .modal-drawer { max-width: 100%; }
+            .header-tag { display: none; }
+        }
+    </style>
 </head>
-
 <body>
-  <header class="header">
-    <div class="header-inner">
-      <div>
-        <div class="logo">MCO <span>GAMES</span></div>
-        <div class="subtitle">Catálogo Oficial</div>
-      </div>
-      <div class="status" id="status">Carregando catálogo...</div>
-    </div>
-  </header>
 
-  <main class="container">
-    <section class="hero">
-      <h1>Encontre seu próximo jogo</h1>
-      <p>Escolha o jogo, confira a disponibilidade e fale conosco pelo WhatsApp.</p>
-    </section>
+    <header>
+        <div class="brand">
+            <div class="brand-icon">🎮</div>
+            <div>
+                <div class="brand-title">MCO GAMES</div>
+                <div class="brand-subtitle">Venda de Jogos Digitais</div>
+            </div>
+        </div>
+        <div class="header-actions">
+            <a href="https://chat.whatsapp.com/IREOzjw9jh55ekz95Nv3Pd" target="_blank" class="community-btn">
+                💬 Grupo VIP
+            </a>
+            <div class="header-tag">⚡ Ativação Instantânea</div>
+        </div>
+    </header>
 
-    <div class="controls">
-      <input id="search" class="control" type="search" placeholder="🔎 Pesquisar jogo...">
-      <select id="platform" class="control">
-        <option value="">Todas as plataformas</option>
-      </select>
+    <div class="promo-banner">
+        🔥 SUPER PROMOÇÃO TOKYO GAME SHOW! | Oferta até 23/09 ou durarem os estoques.
     </div>
 
-    <nav class="categories" id="categories"></nav>
+    <div class="container">
 
-    <div id="catalog">
-      <div class="loading">Carregando jogos da planilha...</div>
+        <div class="community-banner">
+            <div class="community-banner-text">
+                <h4>Entra no nosso Grupo VIP do WhatsApp! 🚀</h4>
+                <p>Receba ofertas relâmpago, descontos exclusivos e lançamentos em primeira mão.</p>
+            </div>
+            <a href="https://chat.whatsapp.com/IREOzjw9jh55ekz95Nv3Pd" target="_blank" class="community-banner-btn">
+                Entrar no Grupo
+            </a>
+        </div>
+
+        <div class="carousel-section">
+            <div class="carousel-title">🔥 Ofertas em Destaque (Deslize ➔)</div>
+            <div id="carouselGrid" class="carousel-grid"></div>
+        </div>
+
+        <div class="controls">
+            <input type="text" id="searchInput" class="search-input" placeholder="🔍 Pesquisar jogo..." oninput="renderGames()">
+            <select id="categorySelect" class="category-select" onchange="renderGames()">
+                <option value="ALL">Todas as Categorias</option>
+                <option value="Destaques">🔥 Destaques da Promoção</option>
+                <option value="Lançamentos & PS5 Exclusivo">Lançamentos & PS5 Exclusivo</option>
+                <option value="Ação, Aventura & RPG">Ação, Aventura & RPG</option>
+                <option value="Franquia Call of Duty">Franquia Call of Duty</option>
+                <option value="Corrida, Esportes & Luta">Corrida, Esportes & Luta</option>
+            </select>
+        </div>
+
+        <div id="catalogContainer"></div>
     </div>
 
-    <div class="footer">
-      MCO GAMES • Catálogo atualizado automaticamente pela planilha
+    <div class="bottom-bar" id="bottomBar">
+        <div class="selected-info">
+            <h4 id="barSelectedCount">0 jogo(s) selecionado(s)</h4>
+            <p id="barSelectedTotal">Total: R$ 0,00</p>
+            <div class="card-fee-note">*Valores para PIX. Cartão com pequeno acréscimo.</div>
+        </div>
+        <button class="btn-continue" onclick="openModal()">Finalizar Pedido ➔</button>
     </div>
-  </main>
 
-  <script>
-    /*
-      ============================================================
-      CONFIGURAÇÃO
-      ============================================================
-    */
-
-    const PLANILHA_PUBLICADA =
-      "https://docs.google.com/spreadsheets/d/e/2PACX-1vTbnddE66aBmhilS8BtFkch5qx41mzkZOiVtVeMxzHJRXljT3qevVZFGf4jU8o1LNZHuHL_3bnIGqRg/pub";
-
-    // Se sua aba principal não for a primeira aba publicada,
-    // coloque aqui o nome dela. Ex.: "Página1"
-    const NOME_DA_ABA = "";
-
-    // Número informado para receber os pedidos no WhatsApp.
-    const WHATSAPP_NUMERO = "5599981810222";
-
-    let jogos = [];
-    let categoriaAtual = "TODOS";
-
-    /*
-      ============================================================
-      FUNÇÕES AUXILIARES
-      ============================================================
-    */
-
-    function normalizar(texto) {
-      return String(texto ?? "")
-        .normalize("NFD")
-        .replace(/[\u0300-\u036f]/g, "")
-        .trim()
-        .toLowerCase();
-    }
-
-    function numero(valor) {
-      if (valor === null || valor === undefined || valor === "") return null;
-
-      let texto = String(valor).trim()
-        .replace(/[R$\s]/g, "");
-
-      // Aceita formatos 37,90 e 37.90
-      if (texto.includes(",") && texto.includes(".")) {
-        texto = texto.replace(/\./g, "").replace(",", ".");
-      } else if (texto.includes(",")) {
-        texto = texto.replace(",", ".");
-      }
-
-      const n = parseFloat(texto.replace(/[^\d.-]/g, ""));
-      return Number.isFinite(n) ? n : null;
-    }
-
-    function moeda(valor) {
-      const n = numero(valor);
-      if (n === null) return "—";
-
-      return n.toLocaleString("pt-BR", {
-        style: "currency",
-        currency: "BRL"
-      });
-    }
-
-    function extrairUrl(valor) {
-      if (!valor) return "";
-
-      const texto = String(valor).trim();
-
-      // Caso venha como [URL](URL)
-      const markdown = texto.match(/\]\((https?:\/\/[^)]+)\)/i);
-      if (markdown) return markdown[1];
-
-      // Caso venha diretamente como URL
-      const url = texto.match(/https?:\/\/[^\s)]+/i);
-      return url ? url[0] : texto;
-    }
-
-    function escapar(texto) {
-      return String(texto ?? "")
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
-    }
-
-    function textoCelula(cell) {
-      if (!cell) return "";
-      if (cell.f !== undefined && cell.f !== null) return String(cell.f);
-      if (cell.v !== undefined && cell.v !== null) return String(cell.v);
-      return "";
-    }
-
-    /*
-      ============================================================
-      GOOGLE SHEETS
-      ============================================================
-    */
-
-    async function carregarPlanilha() {
-      const aba = NOME_DA_ABA
-        ? "&sheet=" + encodeURIComponent(NOME_DA_ABA)
-        : "";
-
-      const url =
-        PLANILHA_PUBLICADA +
-        "/gviz/tq?tqx=out:json" +
-        aba;
-
-      const resposta = await fetch(url, {
-        cache: "no-store"
-      });
-
-      if (!resposta.ok) {
-        throw new Error("Não foi possível acessar a planilha.");
-      }
-
-      const texto = await resposta.text();
-
-      const inicio = texto.indexOf("{");
-      const fim = texto.lastIndexOf("}");
-
-      if (inicio === -1 || fim === -1) {
-        throw new Error("Resposta da planilha inválida.");
-      }
-
-      return JSON.parse(texto.substring(inicio, fim + 1));
-    }
-
-    function converterTabela(json) {
-      const tabela = json.table;
-      const headers = tabela.cols.map((col, index) => {
-        return normalizar(col.label || `coluna_${index}`);
-      });
-
-      return tabela.rows.map(row => {
-        const objeto = {};
-
-        headers.forEach((header, index) => {
-          objeto[header] = textoCelula(row.c[index]);
-        });
-
-        return objeto;
-      });
-    }
-
-    /*
-      ============================================================
-      LEITURA DAS COLUNAS DA SUA PLANILHA
-      ============================================================
-    */
-
-    function transformarJogo(linha) {
-      return {
-        id: linha["id"],
-        nome: linha["nome"],
-        plataforma: linha["plataforma"],
-        categoria: linha["categoria"],
-        precoAntigo: linha["preco antigo"],
-        primaria: linha["preco primaria"],
-        qtdPrimaria: linha["qtd. primaria"],
-        secundaria: linha["preco secundaria"],
-        qtdSecundaria: linha["qtd. secundaria"],
-        data: linha["data"],
-        imagem: extrairUrl(linha["link da imagem"])
-      };
-    }
-
-    /*
-      ============================================================
-      WHATSAPP
-      ============================================================
-    */
-
-    function whatsapp(jogo, tipo) {
-      const preco =
-        tipo === "Primária"
-          ? moeda(jogo.primaria)
-          : moeda(jogo.secundaria);
-
-      const mensagem =
-        `Olá! Tenho interesse no jogo *${jogo.nome}* ` +
-        `(${jogo.plataforma}), na modalidade *${tipo}*` +
-        (preco !== "—" ? `, no valor de *${preco}*.` : ".");
-
-      return `https://wa.me/${WHATSAPP_NUMERO}?text=${encodeURIComponent(mensagem)}`;
-    }
-
-    /*
-      ============================================================
-      CARD
-      ============================================================
-    */
-
-    function criarCard(jogo) {
-      const primaria = numero(jogo.primaria);
-      const secundaria = numero(jogo.secundaria);
-
-      const temPrimaria = primaria !== null;
-      const temSecundaria = secundaria !== null;
-
-      const imagem =
-        jogo.imagem ||
-        "https://via.placeholder.com/600x800/0d1b2e/ffffff?text=MCO+GAMES";
-
-      const badge =
-        normalizar(jogo.categoria).includes("promoc") ||
-        normalizar(jogo.categoria).includes("oferta")
-          ? `<span class="badge">Oferta</span>`
-          : "";
-
-      return `
-        <article class="game-card">
-          <div class="cover-wrap">
-            <img
-              class="cover"
-              src="${escapar(imagem)}"
-              alt="${escapar(jogo.nome)}"
-              loading="lazy"
-              onerror="this.onerror=null;this.src='https://via.placeholder.com/600x800/0d1b2e/ffffff?text=MCO+GAMES';"
-            >
-            ${badge}
-          </div>
-
-          <div class="content">
-            <div class="title">${escapar(jogo.nome || "Jogo sem nome")}</div>
-
-            <div class="platform">
-              🎮 ${escapar(jogo.plataforma || "Plataforma não informada")}
+    <div class="modal-overlay" id="modalOverlay" onclick="closeModal()"></div>
+    <div class="modal-drawer" id="modalDrawer">
+        <div>
+            <div class="drawer-header">
+                <div>
+                    <span>CARRINHO DE COMPRAS</span>
+                    <h2>Resumo do Pedido</h2>
+                </div>
+                <button class="close-btn" onclick="closeModal()">✕</button>
             </div>
 
-            ${
-              numero(jogo.precoAntigo) !== null
-                ? `<div class="old-price">${moeda(jogo.precoAntigo)}</div>`
-                : ""
+            <div class="item-list" id="drawerItemList"></div>
+        </div>
+
+        <div class="drawer-footer">
+            <div class="price-row">
+                <span>Valor no PIX:</span>
+                <div>
+                    <h3 id="drawerTotalPrice">R$ 0,00</h3>
+                    <div class="card-fee-note" style="text-align: right;">Cartão de crédito possui taxa da máquina.</div>
+                </div>
+            </div>
+            <a href="#" id="whatsappLink" target="_blank" class="btn-whatsapp">
+                🛒 Concluir Compra no WhatsApp
+            </a>
+        </div>
+    </div>
+
+    <script>
+        const PHONE_NUMBER = "5599981810222";
+
+        const games = [
+            { id: 1, name: "Resident Evil 4 Remake", platform: "PS4/PS5", category: "Destaques", oldPrice: 80.00, price: 37.90, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTnOXAQFE6SWdIZy6b4OpXDWYJUjkIbnYx7gQLCRunJ3w&s=10" },
+            { id: 2, name: "Hogwarts Legacy", platform: "PS4/PS5", category: "Destaques", oldPrice: 90.00, price: 37.90, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTDj6BedHy6lFY2FFjwxiGV1zcmtK1kTQ_GPF4LUKZgOg&s" },
+            { id: 3, name: "Cyberpunk 2077", platform: "PS4/PS5", category: "Destaques", oldPrice: 110.00, price: 67.90, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTMayA2Ii9XTlpaclA72rdm8Vx4S5yFRPFjb83aM2WGkw&s" },
+            { id: 4, name: "GTA V", platform: "PS4/PS5", category: "Destaques", oldPrice: 90.00, price: 67.90, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTD_2TSyucbjkBbxV0-asAkbJvbV7DJ4zra-B8YRAXxAw&s=10" },
+            { id: 5, name: "Call of Duty: Black Ops 6", platform: "PS4/PS5", category: "Destaques", oldPrice: 150.00, price: 97.90, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSIYU09C_GbjXgQoT0CtxzW4IDsG-szlkFlC_HfG2lGfw&s=10" },
+            { id: 6, name: "SILENT HILL 2", platform: "PS5", category: "Destaques", oldPrice: 160.00, price: 107.90, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRsSNGVDDSA992HE4NhDCjXSDOSdTfQuq6pdhj2a_QnfQ&s" },
+            { id: 7, name: "Dying Light: The Beast", platform: "PS5", category: "Lançamentos & PS5 Exclusivo", oldPrice: 160.00, price: 107.90, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSk5D29Jtl67ZjayzS4DX2AK0ihUqy47fJr4r2cB4nX7Q&s=10" },
+            { id: 8, name: "Demon Slayer: Hinokami Chronicles 2", platform: "PS4/PS5", category: "Lançamentos & PS5 Exclusivo", oldPrice: 160.00, price: 107.90, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT1ZZm8p0xCKW-pWrr2-Xa2CgpkiciTQevGl60MgSJCDA&s=10" },
+            { id: 9, name: "SILENT HILL f", platform: "PS5", category: "Lançamentos & PS5 Exclusivo", oldPrice: 200.00, price: 147.90, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSb7lugy8ebNl_Mvk9HZQu360lJ-5AP-csWGVUo-jcCDw&s=10" },
+            { id: 10, name: "PRAGMATA", platform: "PS5", category: "Lançamentos & PS5 Exclusivo", oldPrice: 230.00, price: 177.90, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRL3YkBaYSL3linYwsyi3NOwo_W58o0UKtDruhfA41-iw&s=10" },
+            { id: 11, name: "Resident Evil Requiem", platform: "PS5", category: "Lançamentos & PS5 Exclusivo", oldPrice: 230.00, price: 177.90, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQxGhTZukhdnD6qRmMYA1LpZp_JuranbtTbSPZycTEdEg&s=10" },
+            { id: 12, name: "Death Stranding 2: On the Beach", platform: "PS5", category: "Lançamentos & PS5 Exclusivo", oldPrice: 230.00, price: 177.90, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT4dDgl6F7BLoR2UQuA2XG6tjGI4x6PACbzhOLZ_gBeIg&s=10" },
+            { id: 13, name: "007 First Light", platform: "PS5", category: "Lançamentos & PS5 Exclusivo", oldPrice: 280.00, price: 217.90, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR8HBjVb1KtMfX74UUOHgt5dv_A_S9gGUTGLwqnC9BRTA&s=10" },
+            { id: 14, name: "FF XV Royal Edition", platform: "PS4/PS5", category: "Ação, Aventura & RPG", oldPrice: 70.00, price: 37.90, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRuc4Z487g300UU_r8ziEwMR_W1FN6y8N_cn-XOuTX7JA&s=10" },
+            { id: 15, name: "Tom Clancy's Ghost Recon Wildlands", platform: "PS4/PS5", category: "Ação, Aventura & RPG", oldPrice: 70.00, price: 37.90, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRFvUggY8_32UEnssEip3NZRvIjv1lMShdlsw0WkmFVSA&s=10" },
+            { id: 16, name: "Assassin's Creed Valhalla", platform: "PS4/PS5", category: "Ação, Aventura & RPG", oldPrice: 110.00, price: 67.90, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQEQjVrZjnQIAwrGV6GWUwVoCp5hzF0-vPcxfId3lC9_g&s=10" },
+            { id: 17, name: "Dragon Ball Z: Kakarot", platform: "PS4/PS5", category: "Ação, Aventura & RPG", oldPrice: 110.00, price: 67.90, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTaDWnfquDHrnCM9JKGNTvYYcTQ4Z7NRKigmHakvsRRNg&s=10" },
+            { id: 18, name: "Death Stranding Director’s Cut", platform: "PS5", category: "Ação, Aventura & RPG", oldPrice: 120.00, price: 73.90, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQO9IMarIiGTHTXpyzCIIeCjyJLr539P-2uCTOgwR7OOw&s=10" },
+            { id: 19, name: "Dark Souls: Remastered", platform: "PS4/PS5", category: "Ação, Aventura & RPG", oldPrice: 130.00, price: 87.90, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQPNGG_l4qJt4FWLoUxoT0W0-WqN6xcs4h612hhQjZ-Yw&s=10" },
+            { id: 20, name: "Horizon Zero Dawn Remastered", platform: "PS5", category: "Ação, Aventura & RPG", oldPrice: 130.00, price: 87.90, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSXt1LLH4gi6DDSgwEGyLuWBK10jcNi3TJaFNNkujPAQw&s=10" },
+            { id: 21, name: "No Man's Sky", platform: "PS4/PS5", category: "Ação, Aventura & RPG", oldPrice: 130.00, price: 87.90, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR-QDRNurbgTY39la8c9-xTcQwcg4_Ner8MgGfNtCp0_Q&s=10" },
+            { id: 22, name: "BLEACH Rebirth of Souls", platform: "PS4/PS5", category: "Ação, Aventura & RPG", oldPrice: 160.00, price: 107.90, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQZr8GpZW7QhZ86ROFPYKj1g9zudMUnLiWmzo4Ufy8rig&s=10" },
+            { id: 23, name: "Dark Souls III", platform: "PS4/PS5", category: "Ação, Aventura & RPG", oldPrice: 170.00, price: 117.90, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSkDcgqeMtemPwCtApIioFifCo6jx8MBAf0KuDw9_0NQQ&s=10" },
+            { id: 24, name: "Dragon Ball: Sparking! ZERO", platform: "PS5", category: "Ação, Aventura & RPG", oldPrice: 180.00, price: 127.90, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTDJZSPJUK2Z-oJT-JMDBKOpxIBCkOEDYQWohlXcDFDPQ&s=10" },
+            { id: 25, name: "Ghost of Tsushima Director's Cut", platform: "PS4/PS5", category: "Ação, Aventura & RPG", oldPrice: 220.00, price: 167.90, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS3aK5Zr4F7fRSSiN9R1SUQyCPZlcI4WnZzxlrEqK8lGg&s=10" },
+            { id: 26, name: "Metal Gear Solid: Master Collection Vol.1", platform: "PS4/PS5", category: "Ação, Aventura & RPG", oldPrice: 220.00, price: 167.90, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT6PLNNby6zdSS3XFRE2LNBIxGWrNZ1X2ElhTAsmWXlzQ&s=10" },
+            { id: 27, name: "COD: Infinite Warfare", platform: "PS4/PS5", category: "Franquia Call of Duty", oldPrice: 90.00, price: 57.90, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTwdcqPPDyL_No5OCLNieW7iFXx5WIJVmR0fdun225xJw&s=10" },
+            { id: 28, name: "COD: Modern Warfare", platform: "PS4/PS5", category: "Franquia Call of Duty", oldPrice: 90.00, price: 57.90, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRmIy8joUQm8E_iQpTj99xbkRYKdUZpn2kmAvJj5Q8wnA&s=10" },
+            { id: 29, name: "COD: WWII", platform: "PS4/PS5", category: "Franquia Call of Duty", oldPrice: 90.00, price: 57.90, img: "https://i.redd.it/485pucnuimee1.jpeg" },
+            { id: 30, name: "COD: Black Ops 4", platform: "PS4/PS5", category: "Franquia Call of Duty", oldPrice: 90.00, price: 57.90, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSyaUFxXOqHEcVW-0FFSgza3lusfKGDCyQM8fuV49zMvA&s=10" },
+            { id: 31, name: "COD: Black Ops Cold War", platform: "PS4/PS5", category: "Franquia Call of Duty", oldPrice: 100.00, price: 67.90, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ6snFkVRNMBN7cqKllJr7r88hNwYJPNR9y8MPmabDUyA&s=10" },
+            { id: 32, name: "COD: Black Ops III", platform: "PS4/PS5", category: "Franquia Call of Duty", oldPrice: 100.00, price: 67.90, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR6FKNkNKS8b1lcfFQJbj6JypX7zOrJsCRCMT6DpdPiEA&s=10" },
+            { id: 33, name: "COD: Black Ops 6", platform: "PS4/PS5", category: "Franquia Call of Duty", oldPrice: 180.00, price: 127.90, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSAi8ahEdvPpAZOs9hjJI43LBgdEnCi-D27r2Tk1By2UQ&s=10" },
+            { id: 34, name: "Crash Team Racing Nitro-Fueled", platform: "PS4/PS5", category: "Corrida, Esportes & Luta", oldPrice: 80.00, price: 47.90, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ-rc2NGfXuLGwI5NIIChAmUtsFjtdsiXwStPjoJLyQ5Q&s=10" },
+            { id: 35, name: "Marvel vs. Capcom Fighting Collection", platform: "PS4/PS5", category: "Corrida, Esportes & Luta", oldPrice: 100.00, price: 67.90, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQGvQIMeGwxkqm-whwiKXD4y7d4whk3R7yOJWlHuGH2Jg&s=10" },
+            { id: 36, name: "Forza Horizon 5", platform: "PS5", category: "Corrida, Esportes & Luta", oldPrice: 110.00, price: 73.90, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTB4z-9HFX99WmJ4AaZnJgd9_tz0PgkumCbTp0nn5sAAQ&s=10" },
+            { id: 37, name: "Kingdom Hearts III", platform: "PS4/PS5", category: "Corrida, Esportes & Luta", oldPrice: 110.00, price: 73.90, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRtvmISZm9lHAm5gFsVQDDhP5mRQZuauWW7gRp02Pavbg&s=10" },
+            { id: 38, name: "Sonic Racing: CrossWorlds", platform: "PS4/PS5", category: "Corrida, Esportes & Luta", oldPrice: 140.00, price: 97.90, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTqS5F5ILMzxDOsV6WgCyXILmcIYirzEgJ5iqyOL7rqBw&s=10" },
+            { id: 39, name: "WWE 2K26", platform: "PS5", category: "Corrida, Esportes & Luta", oldPrice: 190.00, price: 137.90, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQy6xg3nDV99cdRXvEriWSFC7tAQNKYwFAeOMs9uvL0JA&s=10" },
+            { id: 40, name: "Undisputed", platform: "PS5", category: "Corrida, Esportes & Luta", oldPrice: 220.00, price: 167.90, img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRKyxJjO-DO6vbK43o0d7SwO9wvVZmY07cf_6Zd6R-yGQ&s=10" }
+        ];
+
+        let selectedGameIds = [];
+
+        function renderCarousel() {
+            const carouselContainer = document.getElementById('carouselGrid');
+            if (!carouselContainer) return;
+            carouselContainer.innerHTML = '';
+
+            const featuredGames = games.filter(g => g.category === "Destaques");
+
+            featuredGames.forEach(game => {
+                const isSelected = selectedGameIds.includes(game.id);
+                const discount = Math.round(((game.oldPrice - game.price) / game.oldPrice) * 100);
+                const card = createCardElement(game, isSelected, discount);
+                carouselContainer.appendChild(card);
+            });
+        }
+
+        function startAutoScroll() {
+            const container = document.getElementById('carouselGrid');
+            if (!container) return;
+            const cardWidth = 216;
+
+            setInterval(() => {
+                if (container.scrollLeft + container.clientWidth >= container.scrollWidth - 10) {
+                    container.scrollTo({ left: 0, behavior: 'smooth' });
+                } else {
+                    container.scrollBy({ left: cardWidth, behavior: 'smooth' });
+                }
+            }, 3500);
+        }
+
+        function createCardElement(game, isSelected, discount) {
+            const card = document.createElement('div');
+            card.className = `card ${isSelected ? 'selected' : ''}`;
+            card.onclick = () => toggleSelectGame(game.id);
+
+            card.innerHTML = `
+                <div class="card-img-container">
+                    <span class="platform-tag">${game.platform}</span>
+                    <span class="discount-badge">-${discount}%</span>
+                    <div class="checkmark">✓</div>
+                    <img src="${game.img}" alt="${game.name}" class="card-img" loading="lazy">
+                </div>
+                <div class="card-info">
+                    <div class="card-title">${game.name}</div>
+                    <div class="price-container">
+                        <span class="old-price">R$ ${game.oldPrice.toFixed(2).replace('.', ',')}</span>
+                        <span class="current-price">R$ ${game.price.toFixed(2).replace('.', ',')}</span>
+                    </div>
+                    <div class="payment-info">à vista no Pix (ou Cartão*)</div>
+                </div>
+            `;
+            return card;
+        }
+
+        function renderGames() {
+            const catalogContainer = document.getElementById('catalogContainer');
+            if (!catalogContainer) return;
+            const searchVal = document.getElementById('searchInput').value.toLowerCase();
+            const catVal = document.getElementById('categorySelect').value;
+
+            catalogContainer.innerHTML = '';
+
+            const categories = catVal === 'ALL' 
+                ? [...new Set(games.map(g => g.category))]
+                : [catVal];
+
+            categories.forEach(category => {
+                const filteredGames = games.filter(g => 
+                    g.category === category &&
+                    g.name.toLowerCase().includes(searchVal)
+                );
+
+                if (filteredGames.length > 0) {
+                    const catTitle = document.createElement('h3');
+                    catTitle.className = 'category-title-section';
+                    catTitle.innerText = category;
+                    catalogContainer.appendChild(catTitle);
+
+                    const grid = document.createElement('div');
+                    grid.className = 'grid-games';
+
+                    filteredGames.forEach(game => {
+                        const isSelected = selectedGameIds.includes(game.id);
+                        const discount = Math.round(((game.oldPrice - game.price) / game.oldPrice) * 100);
+                        const card = createCardElement(game, isSelected, discount);
+                        grid.appendChild(card);
+                    });
+
+                    catalogContainer.appendChild(grid);
+                }
+            });
+        }
+
+        function toggleSelectGame(id) {
+            if (selectedGameIds.includes(id)) {
+                selectedGameIds = selectedGameIds.filter(gameId => gameId !== id);
+            } else {
+                selectedGameIds.push(id);
+            }
+            renderCarousel();
+            renderGames();
+            updateBottomBar();
+        }
+
+        function calculateTotal() {
+            return selectedGameIds.reduce((acc, id) => {
+                const game = games.find(g => g.id === id);
+                return acc + (game ? game.price : 0);
+            }, 0);
+        }
+
+        function updateBottomBar() {
+            const bottomBar = document.getElementById('bottomBar');
+            const countText = document.getElementById('barSelectedCount');
+            const totalText = document.getElementById('barSelectedTotal');
+            const total = calculateTotal();
+
+            if (selectedGameIds.length > 0) {
+                countText.innerText = `${selectedGameIds.length} jogo(s) selecionado(s)`;
+                totalText.innerText = `Total: R$ ${total.toFixed(2).replace('.', ',')}`;
+                bottomBar.classList.add('active');
+            } else {
+                bottomBar.classList.remove('active');
+            }
+        }
+
+        function openModal() {
+            if (selectedGameIds.length === 0) {
+                closeModal();
+                return;
             }
 
-            <div class="prices">
-              <div class="price-box">
-                <div class="price-label">Primária</div>
-                <div class="price">${temPrimaria ? moeda(jogo.primaria) : "—"}</div>
-                ${
-                  jogo.qtdPrimaria
-                    ? `<div class="stock">${escapar(jogo.qtdPrimaria)} disponível(is)</div>`
-                    : ""
+            const modalOverlay = document.getElementById('modalOverlay');
+            const modalDrawer = document.getElementById('modalDrawer');
+            const drawerList = document.getElementById('drawerItemList');
+            const totalPriceEl = document.getElementById('drawerTotalPrice');
+            const whatsappBtn = document.getElementById('whatsappLink');
+
+            drawerList.innerHTML = '';
+            let total = 0;
+            let messageItems = [];
+
+            selectedGameIds.forEach((id, index) => {
+                const game = games.find(g => g.id === id);
+                if (game) {
+                    total += game.price;
+                    messageItems.push(`${index + 1}. ${game.name} (${game.platform}) — R$ ${game.price.toFixed(2).replace('.', ',')}`);
+
+                    const item = document.createElement('div');
+                    item.className = 'selected-item-card';
+                    item.innerHTML = `
+                        <div>
+                            <h5>${game.name}</h5>
+                            <p>R$ ${game.price.toFixed(2).replace('.', ',')}</p>
+                        </div>
+                        <span class="remove-item" onclick="event.stopPropagation(); toggleSelectGame(${game.id}); openModal();">✕</span>
+                    `;
+                    drawerList.appendChild(item);
                 }
-              </div>
+            });
 
-              <div class="price-box">
-                <div class="price-label">Secundária</div>
-                <div class="price">${temSecundaria ? moeda(jogo.secundaria) : "—"}</div>
-                ${
-                  jogo.qtdSecundaria
-                    ? `<div class="stock">${escapar(jogo.qtdSecundaria)} disponível(is)</div>`
-                    : ""
-                }
-              </div>
-            </div>
+            totalPriceEl.innerText = `R$ ${total.toFixed(2).replace('.', ',')}`;
 
-            <div class="buy-buttons">
-              ${
-                temPrimaria
-                  ? `<a class="whatsapp" target="_blank" rel="noopener" href="${whatsapp(jogo, "Primária")}">WhatsApp • Primária</a>`
-                  : ""
-              }
+            const message = `🔥 *PEDIDO - PROMOÇÃO TOKYO GAME SHOW* 🔥\n\n` +
+                            `Olá! Quero aproveitar a promoção e comprar os seguintes jogos:\n\n` +
+                            `📦 *Itens Escolhidos:*\n` +
+                            messageItems.join('\n') + `\n\n` +
+                            `💰 *Valor Total (Pix):* R$ ${total.toFixed(2).replace('.', ',')}\n\n` +
+                            `Aguardo os dados para pagamento!`;
 
-              ${
-                temSecundaria
-                  ? `<a class="whatsapp secondary" target="_blank" rel="noopener" href="${whatsapp(jogo, "Secundária")}">WhatsApp • Secundária</a>`
-                  : ""
-              }
-            </div>
-          </div>
-        </article>
-      `;
-    }
+            whatsappBtn.href = `https://wa.me/${PHONE_NUMBER}?text=${encodeURIComponent(message)}`;
 
-    /*
-      ============================================================
-      FILTROS
-      ============================================================
-    */
-
-    function preencherPlataformas() {
-      const select = document.getElementById("platform");
-
-      const plataformas = [...new Set(
-        jogos
-          .map(j => j.plataforma)
-          .filter(Boolean)
-      )].sort((a, b) =>
-        a.localeCompare(b, "pt-BR")
-      );
-
-      select.innerHTML =
-        `<option value="">Todas as plataformas</option>` +
-        plataformas
-          .map(p => `<option value="${escapar(p)}">${escapar(p)}</option>`)
-          .join("");
-    }
-
-    function preencherCategorias() {
-      const container = document.getElementById("categories");
-
-      const categorias = [...new Set(
-        jogos
-          .map(j => j.categoria)
-          .filter(Boolean)
-      )];
-
-      const ordemPreferida = [
-        "Promoção",
-        "Lançamentos em Oferta",
-        "Pré-Venda",
-        "Catálogo (Mais Jogos)"
-      ];
-
-      categorias.sort((a, b) => {
-        const ia = ordemPreferida.findIndex(x => normalizar(x) === normalizar(a));
-        const ib = ordemPreferida.findIndex(x => normalizar(x) === normalizar(b));
-
-        if (ia !== -1 && ib !== -1) return ia - ib;
-        if (ia !== -1) return -1;
-        if (ib !== -1) return 1;
-
-        return a.localeCompare(b, "pt-BR");
-      });
-
-      container.innerHTML = `
-        <button class="category-btn active" data-category="TODOS">
-          Todos <span>(${jogos.length})</span>
-        </button>
-      `;
-
-      categorias.forEach(categoria => {
-        const quantidade = jogos.filter(
-          j => normalizar(j.categoria) === normalizar(categoria)
-        ).length;
-
-        container.innerHTML += `
-          <button
-            class="category-btn"
-            data-category="${escapar(categoria)}"
-          >
-            ${escapar(categoria)} <span>(${quantidade})</span>
-          </button>
-        `;
-      });
-
-      container.querySelectorAll(".category-btn").forEach(btn => {
-        btn.addEventListener("click", () => {
-          container.querySelectorAll(".category-btn")
-            .forEach(b => b.classList.remove("active"));
-
-          btn.classList.add("active");
-          categoriaAtual = btn.dataset.category;
-          renderizar();
-        });
-      });
-    }
-
-    /*
-      ============================================================
-      RENDERIZAÇÃO
-      ============================================================
-    */
-
-    function renderizar() {
-      const catalogo = document.getElementById("catalog");
-      const busca = normalizar(document.getElementById("search").value);
-      const plataforma = document.getElementById("platform").value;
-
-      let filtrados = jogos.filter(jogo => {
-        const bateCategoria =
-          categoriaAtual === "TODOS" ||
-          normalizar(jogo.categoria) === normalizar(categoriaAtual);
-
-        const batePlataforma =
-          !plataforma ||
-          normalizar(jogo.plataforma) === normalizar(plataforma);
-
-        const texto =
-          normalizar(
-            `${jogo.nome} ${jogo.plataforma} ${jogo.categoria}`
-          );
-
-        const bateBusca = !busca || texto.includes(busca);
-
-        return bateCategoria && batePlataforma && bateBusca;
-      });
-
-      if (!filtrados.length) {
-        catalogo.innerHTML = `
-          <div class="empty">
-            Nenhum jogo encontrado com os filtros selecionados.
-          </div>
-        `;
-        return;
-      }
-
-      /*
-        Quando há pesquisa ou filtro de plataforma/categoria,
-        mostramos os resultados juntos.
-      */
-      const usandoFiltro =
-        busca ||
-        plataforma ||
-        categoriaAtual !== "TODOS";
-
-      if (usandoFiltro) {
-        catalogo.innerHTML = `
-          <section class="section">
-            <div class="section-title">
-              <h2>Resultados</h2>
-              <span class="count">${filtrados.length} jogo(s)</span>
-            </div>
-            <div class="games">
-              ${filtrados.map(criarCard).join("")}
-            </div>
-          </section>
-        `;
-        return;
-      }
-
-      /*
-        Sem filtros: organiza automaticamente por categoria.
-      */
-      const grupos = {};
-
-      filtrados.forEach(jogo => {
-        const categoria = jogo.categoria || "Outros";
-
-        if (!grupos[categoria]) {
-          grupos[categoria] = [];
+            modalOverlay.classList.add('active');
+            modalDrawer.classList.add('active');
         }
 
-        grupos[categoria].push(jogo);
-      });
-
-      const ordem = [
-        "Promoção",
-        "Lançamentos em Oferta",
-        "Pré-Venda",
-        "Catálogo (Mais Jogos)"
-      ];
-
-      const categorias = Object.keys(grupos).sort((a, b) => {
-        const ia = ordem.findIndex(x => normalizar(x) === normalizar(a));
-        const ib = ordem.findIndex(x => normalizar(x) === normalizar(b));
-
-        if (ia !== -1 && ib !== -1) return ia - ib;
-        if (ia !== -1) return -1;
-        if (ib !== -1) return 1;
-
-        return a.localeCompare(b, "pt-BR");
-      });
-
-      catalogo.innerHTML = categorias.map(categoria => `
-        <section class="section">
-          <div class="section-title">
-            <h2>${escapar(categoria)}</h2>
-            <span class="count">${grupos[categoria].length} jogo(s)</span>
-          </div>
-
-          <div class="games">
-            ${grupos[categoria].map(criarCard).join("")}
-          </div>
-        </section>
-      `).join("");
-    }
-
-    /*
-      ============================================================
-      INICIALIZAÇÃO
-      ============================================================
-    */
-
-    async function iniciar() {
-      const status = document.getElementById("status");
-
-      try {
-        const dados = await carregarPlanilha();
-
-        const linhas = converterTabela(dados);
-
-        jogos = linhas
-          .map(transformarJogo)
-          .filter(jogo => jogo.nome && jogo.nome.trim());
-
-        if (!jogos.length) {
-          throw new Error("Nenhum jogo encontrado na planilha.");
+        function closeModal() {
+            document.getElementById('modalOverlay').classList.remove('active');
+            document.getElementById('modalDrawer').classList.remove('active');
         }
 
-        preencherPlataformas();
-        preencherCategorias();
-        renderizar();
-
-        status.textContent =
-          `${jogos.length} jogos • atualizado pela planilha`;
-
-      } catch (erro) {
-        console.error(erro);
-
-        document.getElementById("catalog").innerHTML = `
-          <div class="error">
-            <strong>Não foi possível carregar o catálogo.</strong><br><br>
-            Verifique se a planilha continua publicada na web.
-          </div>
-        `;
-
-        status.textContent = "Erro ao carregar catálogo";
-      }
-    }
-
-    document.getElementById("search")
-      .addEventListener("input", renderizar);
-
-    document.getElementById("platform")
-      .addEventListener("change", renderizar);
-
-    iniciar();
-  </script>
+        renderCarousel();
+        renderGames();
+        startAutoScroll();
+    </script>
 </body>
 </html>
