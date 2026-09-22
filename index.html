@@ -398,6 +398,54 @@
             border-color: var(--accent-green);
         }
 
+        /* NOVOS BOTÕES DE AÇÃO NO CARD (WHATSAPP E COMPARTILHAR) */
+        .card-actions {
+            display: flex;
+            gap: 6px;
+            margin-top: 6px;
+            padding-top: 8px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .btn-card-action {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            padding: 8px 6px;
+            border-radius: 6px;
+            font-size: 0.72rem;
+            font-weight: 800;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s ease;
+            text-decoration: none;
+        }
+
+        .btn-card-wa {
+            background-color: rgba(37, 211, 102, 0.15);
+            color: #25d366;
+            border: 1px solid rgba(37, 211, 102, 0.35);
+        }
+
+        .btn-card-wa:hover {
+            background-color: #25d366;
+            color: #000;
+        }
+
+        .btn-card-share {
+            background-color: rgba(255, 255, 255, 0.05);
+            color: #e0e0e0;
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-card-share:hover {
+            background-color: rgba(255, 255, 255, 0.15);
+            color: #fff;
+            border-color: #4a5568;
+        }
+
         .bottom-bar {
             position: fixed;
             bottom: 0;
@@ -682,7 +730,7 @@
             <div class="drawer-header">
                 <div>
                     <span>CARRINHO DE COMPRAS</span>
-                    <h2>Resumo do Pedido</h2>
+                    2. Resumo do Pedido</h2>
                 </div>
                 <button class="close-btn" onclick="closeModal()">✕</button>
             </div>
@@ -723,7 +771,6 @@
             let str = dateStr.toString().trim();
             if (!str) return null;
 
-            // Suporta formato brasileiro DD/MM/AAAA ou DD/MM/AAAA HH:mm:ss
             if (str.includes('/')) {
                 const parts = str.split(' ');
                 const dateParts = parts[0].split('/');
@@ -744,7 +791,6 @@
                 }
             }
 
-            // Suporta formato ISO/padrão JS (AAAA-MM-DD)
             const parsed = new Date(str);
             return isNaN(parsed.getTime()) ? null : parsed;
         }
@@ -832,7 +878,6 @@
 
                 const oldPrice = parsePrice(row[4]);
 
-                // Lógica do menor preço disponível
                 let validPrices = [];
                 if (pricePrimary > 0 && stockPrimary > 0) validPrices.push(pricePrimary);
                 if (priceSecondary > 0 && stockSecondary > 0) validPrices.push(priceSecondary);
@@ -843,8 +888,6 @@
                 }
 
                 const mainPrice = validPrices.length > 0 ? Math.min(...validPrices) : (pricePrimary || priceSecondary || 0);
-
-                // Coluna J (índice 9) -> Data limite para Pré-Venda ou Promoção
                 const targetDate = row[9] ? row[9].trim() : '';
 
                 games.push({
@@ -876,7 +919,6 @@
             renderGames();
             startAutoScroll();
 
-            // Inicia a atualização contínua dos relógios
             updateTimers();
             setInterval(updateTimers, 1000);
         }
@@ -916,6 +958,34 @@
             renderCarousel();
             renderGames();
             updateBottomBar();
+        }
+
+        // --- FUNÇÃO PARA COMPARTILHAR APENAS O ANÚNCIO DESTE JOGO ---
+        function shareGame(gameId) {
+            const game = games.find(g => g.id === gameId);
+            if (!game) return;
+
+            let priceDetails = [];
+            if (game.pricePrimary > 0) priceDetails.push(`• *Primária:* R$ ${game.pricePrimary.toFixed(2).replace('.', ',')}`);
+            if (game.priceSecondary > 0) priceDetails.push(`• *Secundária:* R$ ${game.priceSecondary.toFixed(2).replace('.', ',')}`);
+
+            const shareText = `🔥 *MCO GAMES - OFERTA IMPERDÍVEL* 🔥\n\n` +
+                              `🎮 *${game.name}*\n` +
+                              `🕹 *Plataforma:* ${game.platform}\n` +
+                              `💰 *A partir de R$ ${game.mainPrice.toFixed(2).replace('.', ',')}*\n\n` +
+                              (priceDetails.length > 0 ? `${priceDetails.join('\n')}\n\n` : '') +
+                              `⚡ Ativação Instantânea e Suporte Total!\n` +
+                              `📲 Peça agora pelo WhatsApp:\n` +
+                              `https://wa.me/${PHONE_NUMBER}?text=${encodeURIComponent('Olá! Vi a promoção do ' + game.name + ' e quero comprar!')}`;
+
+            if (navigator.share) {
+                navigator.share({
+                    title: `${game.name} - MCO GAMES`,
+                    text: shareText
+                }).catch(() => {});
+            } else {
+                window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(shareText)}`, '_blank');
+            }
         }
 
         function createCardElement(game) {
@@ -966,11 +1036,18 @@
                 `;
             }
 
-            // Render do relógio de tempo restante se houver data na Coluna J
             let timerHtml = '';
             if (game.targetDate) {
                 timerHtml = `<div class="timer-badge" data-target="${game.targetDate}">⏳ Carregando...</div>`;
             }
+
+            // Mensagem pronta para a conversa direta no WhatsApp
+            const waMsg = encodeURIComponent(
+                `🔥 *MCO GAMES* 🔥\n\n` +
+                `Olá! Quero comprar/consultar este jogo:\n` +
+                `🎮 *${game.name}* (${game.platform})\n` +
+                `💰 A partir de R$ ${game.mainPrice.toFixed(2).replace('.', ',')}`
+            );
 
             card.innerHTML = `
                 <div class="card-img-container">
@@ -986,6 +1063,16 @@
                         <span class="current-price">A partir de R$ ${game.mainPrice.toFixed(2).replace('.', ',')}</span>
                     </div>
                     ${buttonsHtml}
+                    
+                    <!-- NOVOS BOTÕES ESPECÍFICOS DESTE JOGO -->
+                    <div class="card-actions">
+                        <a href="https://wa.me/${PHONE_NUMBER}?text=${waMsg}" target="_blank" class="btn-card-action btn-card-wa" title="Comprar este jogo no WhatsApp">
+                            💬 Comprar
+                        </a>
+                        <button class="btn-card-action btn-card-share" onclick="event.stopPropagation(); shareGame('${game.id}')" title="Compartilhar este anúncio">
+                            📲 Divulgar
+                        </button>
+                    </div>
                 </div>
             `;
             return card;
@@ -1126,7 +1213,6 @@
             document.getElementById('modalDrawer').classList.remove('active');
         }
 
-        // Executa a leitura inicial do catálogo
         fetchCatalogFromSheets();
     </script>
 </body>
