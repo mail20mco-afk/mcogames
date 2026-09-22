@@ -14,7 +14,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
     
-    <!-- PapaParse para leitura robusta do CSV -->
+    <!-- PapaParse para leitura robusta do CSV sem bloqueio de CORS -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 
     <style>
@@ -665,7 +665,7 @@
             <div class="drawer-header">
                 <div>
                     <span>CARRINHO DE COMPRAS</span>
-                    <h2>Resumo do Pedido</h2>
+                    2. Resumo do Pedido</h2>
                 </div>
                 <button class="close-btn" onclick="closeModal()">✕</button>
             </div>
@@ -689,10 +689,10 @@
 
     <script>
         const PHONE_NUMBER = "5599981810222";
-        const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTbnddE66aBmhilS8BtFkch5qx41mzkZOiVtVeMxzHJRXIjT3qevVZFGf4jU8o1LNZHuHL_3bnIgQRg/pub?output=csv";
+        const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTbnddE66aBmhilS8BtFkch5qx41mzkZOiVtVeMxzHJRXljT3qevVZFGf4jU8o1LNZHuHL_3bnIGqRg/pub?output=csv";
 
         let games = [];
-        let selectedCart = []; // [{ gameId, type, price }]
+        let selectedCart = [];
 
         function parsePrice(val) {
             if (!val) return 0;
@@ -729,7 +729,7 @@
                 const name = row[1] ? row[1].trim() : '';
                 if (!name || name.toLowerCase() === 'nome' || name.toLowerCase() === 'jogo') continue;
 
-                // Mapeamento das 11 colunas da tabela:
+                // Colunas da tabela:
                 // A(0): ID | B(1): Nome | C(2): Plataforma | D(3): Categoria
                 // E(4): Preço Antigo | F(5): Preço Primária | G(6): Qtd Primária
                 // H(7): Preço Secundária | I(8): Qtd Secundária | J(9): Data | K(10): Imagem
@@ -806,7 +806,7 @@
             if (idx > -1) {
                 selectedCart.splice(idx, 1);
             } else {
-                selectedCart = selectedCart.filter(i => i.gameId !== gameId); // Seleciona 1 vaga por jogo
+                selectedCart = selectedCart.filter(i => i.gameId !== gameId);
                 selectedCart.push({ gameId: gameId, name: game.name, platform: game.platform, type: type, price: price });
             }
 
@@ -1014,7 +1014,7 @@
             document.getElementById('modalDrawer').classList.remove('active');
         }
 
-        // Inicializa a leitura do catálogo
+        // Executa a leitura inicial do catálogo
         fetchCatalogFromSheets();
     </script>
 </body>
