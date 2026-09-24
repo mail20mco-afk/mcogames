@@ -1236,6 +1236,10 @@
         }
 
         // --- GERAR PRINT DO CARD E COMPARTILHAR PELO WHATSAPP ---
+        function isMobileDevice() {
+            return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobile/i.test(navigator.userAgent);
+        }
+
         async function shareGameOffer(event, gameId) {
             event.stopPropagation();
 
@@ -1260,44 +1264,74 @@
                 `${offerLine}\n\n` +
                 `Esse e mais jogos, acesse: ${SHARE_URL}`;
 
-            try {
-                const canvas = await buildPrintableCard(cardEl);
+            const actionsRow = cardEl.querySelector('.card-actions-row');
+            const previousDisplay = actionsRow ? actionsRow.style.display : '';
 
-                const blob = await new Promise(resolve =>
-                    canvas.toBlob(resolve, 'image/png', 1)
-                );
+            try {
+                if (actionsRow) actionsRow.style.display = 'none';
+
+                const canvas = await html2canvas(cardEl, {
+                    scale: 2,
+                    useCORS: true,
+                    allowTaint: false,
+                    backgroundColor: '#13171d',
+                    logging: false
+                });
+
+                const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
                 if (!blob) throw new Error('Não foi possível gerar a imagem da oferta.');
 
                 const safeName = game.name
                     .replace(/[^a-zA-Z0-9À-ÿ]/g, '_')
                     .replace(/_+/g, '_');
-
                 const fileName = `MCO_GAMES_${safeName}.png`;
                 const file = new File([blob], fileName, { type: 'image/png' });
 
-                // CELULAR: compartilhamento nativo com o PNG realmente anexado.
-                const canShareFile = !!(
-                    navigator.share &&
-                    navigator.canShare &&
-                    navigator.canShare({ files: [file] })
-                );
+                // CELULAR:
+                // Usa o compartilhamento nativo, pois é a forma mais adequada de entregar
+                // a imagem ao WhatsApp em aparelhos móveis.
+                if (isMobileDevice()) {
+                    const canShareFile = !!(
+                        navigator.share &&
+                        navigator.canShare &&
+                        navigator.canShare({ files: [file] })
+                    );
 
-                if (canShareFile) {
-                    try {
-                        await navigator.share({
-                            files: [file],
-                            text: message,
-                            title: `Oferta MCO GAMES - ${game.name}`
-                        });
-                        return;
-                    } catch (shareError) {
-                        if (shareError?.name === 'AbortError') return;
-                        console.warn('Compartilhamento nativo falhou:', shareError);
+                    if (canShareFile) {
+                        try {
+                            await navigator.share({
+                                files: [file],
+                                text: message,
+                                title: `Oferta MCO GAMES - ${game.name}`
+                            });
+                            return;
+                        } catch (shareError) {
+                            if (shareError && shareError.name === 'AbortError') return;
+                            console.warn('Compartilhamento nativo falhou no celular:', shareError);
+                        }
                     }
+
+                    // Fallback mobile: salva a imagem e abre o WhatsApp com o texto pronto.
+                    const mobileImageUrl = URL.createObjectURL(blob);
+                    const mobileLink = document.createElement('a');
+                    mobileLink.href = mobileImageUrl;
+                    mobileLink.download = fileName;
+                    mobileLink.style.display = 'none';
+                    document.body.appendChild(mobileLink);
+                    mobileLink.click();
+                    mobileLink.remove();
+
+                    setTimeout(() => {
+                        URL.revokeObjectURL(mobileImageUrl);
+                        window.location.href = `https://wa.me/?text=${encodeURIComponent(message)}`;
+                    }, 700);
+
+                    return;
                 }
 
-                // COMPUTADOR: baixa o PNG e abre o WhatsApp Web com o texto pronto.
-                // O anexo do arquivo continua sendo manual no WhatsApp Web.
+                // COMPUTADOR:
+                // NÃO usa navigator.share() para evitar a janela de compartilhamento do Windows.
+                // Gera e salva o PNG primeiro e, depois, abre diretamente o WhatsApp Web.
                 const imageUrl = URL.createObjectURL(blob);
                 const link = document.createElement('a');
                 link.href = imageUrl;
@@ -1309,13 +1343,15 @@
 
                 setTimeout(() => {
                     URL.revokeObjectURL(imageUrl);
-                    window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, '_blank');
-                }, 900);
+                    window.open(`https://web.whatsapp.com/send?text=${encodeURIComponent(message)}`, '_blank');
+                }, 1000);
+
             } catch (err) {
-                if (err?.name !== 'AbortError') {
+                if (err && err.name !== 'AbortError') {
                     console.error('Erro ao gerar/compartilhar o print:', err);
-                    alert('Não foi possível gerar a imagem para compartilhamento. Tente novamente.');
                 }
+            } finally {
+                if (actionsRow) actionsRow.style.display = previousDisplay || 'flex';
             }
         }
 
