@@ -291,20 +291,76 @@
         }
 
         .category-expand-btn {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 9px;
+            min-width: 190px;
             background: transparent;
             color: var(--accent-green);
             border: 1px solid var(--accent-green);
-            border-radius: 8px;
-            padding: 9px 16px;
+            border-radius: 999px;
+            padding: 10px 18px;
             font-size: 0.78rem;
             font-weight: 800;
             cursor: pointer;
             transition: all 0.2s ease;
+            animation: expandButtonPulse 2.8s ease-in-out infinite;
         }
 
         .category-expand-btn:hover {
             background: rgba(0, 230, 118, 0.1);
-            transform: translateY(-1px);
+            transform: translateY(-2px) scale(1.01);
+            box-shadow: 0 8px 22px rgba(0, 230, 118, 0.16);
+        }
+
+        .category-expand-btn.expanded {
+            animation: none;
+        }
+
+        .expand-button-text {
+            display: inline-block;
+        }
+
+        .expand-chevron {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: rgba(0, 230, 118, 0.12);
+            font-size: 0.95rem;
+            line-height: 1;
+        }
+
+        .category-expand-btn:not(.expanded) .expand-chevron {
+            animation: expandChevronBounce 1.3s ease-in-out infinite;
+        }
+
+        @keyframes expandButtonPulse {
+            0%, 72%, 100% {
+                box-shadow: 0 0 0 rgba(0, 230, 118, 0);
+            }
+            82% {
+                box-shadow: 0 0 0 7px rgba(0, 230, 118, 0.10), 0 8px 24px rgba(0, 230, 118, 0.10);
+            }
+        }
+
+        @keyframes expandChevronBounce {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(3px);
+            }
+        }
+
+        .carousel-hint {
+            color: var(--text-muted);
+            font-size: 0.72rem;
+            font-weight: 600;
         }
 
         .grid-games {
@@ -744,6 +800,13 @@
             background-color: var(--accent-green-dark);
         }
 
+        @media (prefers-reduced-motion: reduce) {
+            .category-expand-btn,
+            .category-expand-btn:not(.expanded) .expand-chevron {
+                animation: none !important;
+            }
+        }
+
         @media (max-width: 600px) {
             header { padding: 12px 20px; }
             .category-grid,
@@ -791,9 +854,19 @@
 
         <div id="mainContent" style="display: none;">
             
-            <div class="carousel-section preorder-section" id="preorderSection" style="display: none;">
-                <div class="carousel-title">🚀 Pré-vendas (Deslize ➔)</div>
+            <div class="carousel-section category-feature-section launch-section" id="launchSection" style="display: none;">
+                <div class="carousel-title">🔥 Lançamentos em Oferta <span class="carousel-hint">(Deslize ➜)</span></div>
+                <div id="launchGrid" class="carousel-grid"></div>
+            </div>
+
+            <div class="carousel-section category-feature-section preorder-section" id="preorderSection" style="display: none;">
+                <div class="carousel-title">🚀 Pré-vendas <span class="carousel-hint">(Deslize ➜)</span></div>
                 <div id="preorderGrid" class="carousel-grid"></div>
+            </div>
+
+            <div class="carousel-section category-feature-section promotion-section" id="promotionSection" style="display: none;">
+                <div class="carousel-title">💥 Promoções <span class="carousel-hint">(Deslize ➜)</span></div>
+                <div id="promotionGrid" class="carousel-grid"></div>
             </div>
 
             <div class="controls">
@@ -850,8 +923,8 @@
         const SHARE_URL = "https://mcogames.github.io/store/";
         const CATEGORY_VISIBLE_LIMIT = 4;
         const CATEGORY_ORDER = [
-            "Pré Venda",
             "Lançamento em Oferta",
+            "Pré Venda",
             "Promoção",
             "Catálogo"
         ];
@@ -955,13 +1028,19 @@
         }
 
         function getExpandLabel(category, expanded) {
-            if (expanded) return 'Mostrar menos ↑';
+            if (expanded) return 'Mostrar menos';
 
-            if (isCategory({ category }, 'Promoção')) return 'Todas as Promoções ↓';
-            if (isCategory({ category }, 'Pré Venda')) return 'Todas as Pré-vendas ↓';
-            if (isCategory({ category }, 'Lançamento em Oferta')) return 'Todos os Lançamentos em Oferta ↓';
-            if (isCategory({ category }, 'Catálogo')) return 'Ver todo o Catálogo ↓';
-            return `Ver todos de ${category} ↓`;
+            if (isCategory({ category }, 'Promoção')) return 'Todas as Promoções';
+            if (isCategory({ category }, 'Pré Venda')) return 'Todas as Pré-vendas';
+            if (isCategory({ category }, 'Lançamento em Oferta')) return 'Todos os Lançamentos em Oferta';
+            if (isCategory({ category }, 'Catálogo')) return 'Ver todo o Catálogo';
+            return `Ver todos de ${category}`;
+        }
+
+        function getExpandButtonHtml(category, expanded) {
+            const label = getExpandLabel(category, expanded);
+            const icon = expanded ? '↑' : '↓';
+            return `<span class="expand-button-text">${escapeHtml(label)}</span><span class="expand-chevron" aria-hidden="true">${icon}</span>`;
         }
 
         function getDiscountPercent(game) {
@@ -1076,9 +1155,13 @@
             document.getElementById('mainContent').style.display = 'block';
 
             populateCategories();
+            renderLaunchCarousel();
             renderPreorderCarousel();
+            renderPromotionCarousel();
             renderGames();
+            startAutoScroll('launchGrid');
             startAutoScroll('preorderGrid');
+            startAutoScroll('promotionGrid');
 
             updateTimers();
             setInterval(updateTimers, 1000);
@@ -1116,7 +1199,9 @@
                 selectedCart.push({ gameId: gameId, name: game.name, platform: game.platform, type: type, price: price });
             }
 
+            renderLaunchCarousel();
             renderPreorderCarousel();
+            renderPromotionCarousel();
             renderGames();
             updateBottomBar();
         }
@@ -1330,21 +1415,59 @@
                 }
 
                 // COMPUTADOR:
-                // NÃO usa navigator.share() para evitar a janela de compartilhamento do Windows.
-                // Gera e salva o PNG primeiro e, depois, abre diretamente o WhatsApp Web.
-                const imageUrl = URL.createObjectURL(blob);
-                const link = document.createElement('a');
-                link.href = imageUrl;
-                link.download = fileName;
-                link.style.display = 'none';
-                document.body.appendChild(link);
-                link.click();
-                link.remove();
+                // Evita o compartilhamento do Windows e também evita o download automático
+                // sempre que o navegador permitir escrever uma imagem no clipboard.
+                //
+                // Fluxo:
+                // 1) abre o WhatsApp Web imediatamente (evita bloqueio de pop-up);
+                // 2) copia o PNG para a área de transferência;
+                // 3) deixa a mensagem pronta no WhatsApp;
+                // 4) você usa Ctrl+V no WhatsApp para colar a imagem.
+                const whatsappWindow = window.open(
+                    `https://web.whatsapp.com/send?text=${encodeURIComponent(message)}`,
+                    '_blank'
+                );
 
-                setTimeout(() => {
-                    URL.revokeObjectURL(imageUrl);
-                    window.open(`https://web.whatsapp.com/send?text=${encodeURIComponent(message)}`, '_blank');
-                }, 1000);
+                let copiedToClipboard = false;
+
+                if (navigator.clipboard && window.ClipboardItem) {
+                    try {
+                        const clipboardItem = new ClipboardItem({
+                            'image/png': blob
+                        });
+
+                        await navigator.clipboard.write([clipboardItem]);
+                        copiedToClipboard = true;
+                    } catch (clipboardError) {
+                        console.warn('Não foi possível copiar a imagem para o clipboard:', clipboardError);
+                    }
+                }
+
+                if (!copiedToClipboard) {
+                    // Fallback: caso o navegador não permita clipboard de imagem,
+                    // mantém o PNG disponível para salvamento manual.
+                    const imageUrl = URL.createObjectURL(blob);
+                    const link = document.createElement('a');
+                    link.href = imageUrl;
+                    link.download = fileName;
+                    link.style.display = 'none';
+                    document.body.appendChild(link);
+                    link.click();
+                    link.remove();
+
+                    setTimeout(() => {
+                        URL.revokeObjectURL(imageUrl);
+                    }, 5000);
+                }
+
+                // Mantém a aba do WhatsApp aberta. Se ela tiver sido bloqueada pelo navegador,
+                // tenta novamente depois da operação de clipboard/download.
+                if (!whatsappWindow || whatsappWindow.closed) {
+                    window.open(
+                        `https://web.whatsapp.com/send?text=${encodeURIComponent(message)}`,
+                        '_blank'
+                    );
+                }
 
             } catch (err) {
                 if (err && err.name !== 'AbortError') {
@@ -1442,22 +1565,49 @@
             return card;
         }
 
-        function renderPreorderCarousel() {
-            const section = document.getElementById('preorderSection');
-            const container = document.getElementById('preorderGrid');
+        function renderCategoryCarousel({ sectionId, gridId, category, maxItems = 12 }) {
+            const section = document.getElementById(sectionId);
+            const container = document.getElementById(gridId);
             if (!section || !container) return;
 
-            const preorderGames = games.filter(game => isCategory(game, 'Pré Venda')).slice(0, 12);
+            const categoryGames = games
+                .filter(game => isCategory(game, category))
+                .slice(0, maxItems);
+
             container.innerHTML = '';
 
-            if (preorderGames.length === 0) {
+            if (categoryGames.length === 0) {
                 section.style.display = 'none';
                 return;
             }
 
             section.style.display = 'block';
-            preorderGames.forEach(game => container.appendChild(createCardElement(game)));
+            categoryGames.forEach(game => container.appendChild(createCardElement(game)));
             updateTimers();
+        }
+
+        function renderLaunchCarousel() {
+            renderCategoryCarousel({
+                sectionId: 'launchSection',
+                gridId: 'launchGrid',
+                category: 'Lançamento em Oferta'
+            });
+        }
+
+        function renderPreorderCarousel() {
+            renderCategoryCarousel({
+                sectionId: 'preorderSection',
+                gridId: 'preorderGrid',
+                category: 'Pré Venda'
+            });
+        }
+
+        function renderPromotionCarousel() {
+            renderCategoryCarousel({
+                sectionId: 'promotionSection',
+                gridId: 'promotionGrid',
+                category: 'Promoção'
+            });
         }
 
         function startAutoScroll(containerId) {
@@ -1536,6 +1686,7 @@
 
             const categories = catVal === 'ALL'
                 ? getOrderedCategories(games.map(g => g.category))
+                    .filter(category => !['Lançamento em Oferta', 'Pré Venda', 'Promoção'].some(priority => normalizeCategory(priority) === normalizeCategory(category)))
                 : [catVal];
 
             categories.forEach(category => {
@@ -1573,10 +1724,9 @@
                     expandRow.className = 'category-expand-row';
 
                     const expandBtn = document.createElement('button');
-                    expandBtn.className = 'category-expand-btn';
-
                     const isExpanded = expandedCategories.has(category);
-                    expandBtn.innerText = getExpandLabel(category, isExpanded);
+                    expandBtn.className = `category-expand-btn${isExpanded ? ' expanded' : ''}`;
+                    expandBtn.innerHTML = getExpandButtonHtml(category, isExpanded);
 
                     expandBtn.addEventListener('click', () => toggleCategoryExpansion(category));
 
