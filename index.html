@@ -205,16 +205,16 @@
             flex-shrink: 0;
         }
 
-        /* --- FILTROS E PESQUISA --- */
         .controls {
             display: flex;
-            flex-direction: column;
-            gap: 14px;
+            gap: 12px;
             margin-bottom: 24px;
+            flex-wrap: wrap;
         }
 
         .search-input {
-            width: 100%;
+            flex: 1;
+            min-width: 200px;
             background-color: var(--card-bg);
             border: 1px solid var(--border-color);
             padding: 12px 16px;
@@ -228,35 +228,15 @@
             border-color: var(--accent-green);
         }
 
-        .category-chips {
-            display: flex;
-            gap: 8px;
-            overflow-x: auto;
-            padding-bottom: 6px;
-            scrollbar-width: none;
-        }
-
-        .category-chips::-webkit-scrollbar {
-            display: none;
-        }
-
-        .chip-btn {
+        .category-select {
             background-color: var(--card-bg);
             border: 1px solid var(--border-color);
-            color: var(--text-muted);
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-size: 0.82rem;
-            font-weight: 700;
+            padding: 12px 16px;
+            border-radius: 8px;
+            color: #fff;
+            font-size: 0.9rem;
+            outline: none;
             cursor: pointer;
-            white-space: nowrap;
-            transition: all 0.2s ease;
-        }
-
-        .chip-btn:hover, .chip-btn.active {
-            background-color: var(--accent-green);
-            color: #000;
-            border-color: var(--accent-green);
         }
 
         .category-title-section {
@@ -420,7 +400,7 @@
             border-color: var(--accent-green);
         }
 
-        /* --- BOTOES DO CARD --- */
+        /* --- LINHA DE AÇÕES DO CARD (COMPRAR + CIRCULO DO ZAP) --- */
         .card-actions-row {
             display: flex;
             align-items: center;
@@ -713,7 +693,7 @@
 
         <div id="loadingContainer" class="status-box">
             <h3>⏳ A carregar catálogo completo...</h3>
-            <p>Sincronizando jogos diretamente da sua planilha do Google Sheets.</p>
+            <p>Sincronizando todos os jogos da sua planilha do Google Sheets.</p>
         </div>
 
         <div id="errorContainer" class="status-box error" style="display: none;">
@@ -729,8 +709,10 @@
             </div>
 
             <div class="controls">
-                <input type="text" id="searchInput" class="search-input" placeholder="🔍 Pesquisar jogo pelo nome..." oninput="renderGames()">
-                <div class="category-chips" id="categoryChips"></div>
+                <input type="text" id="searchInput" class="search-input" placeholder="🔍 Pesquisar jogo..." oninput="renderGames()">
+                <select id="categorySelect" class="category-select" onchange="renderGames()">
+                    <option value="ALL">Todas as Categorias</option>
+                </select>
             </div>
 
             <div id="catalogContainer"></div>
@@ -780,7 +762,6 @@
 
         let games = [];
         let selectedCart = [];
-        let activeCategory = 'ALL';
 
         function parsePrice(val) {
             if (!val) return 0;
@@ -800,7 +781,7 @@
                     const day = parseInt(dateParts[0], 10);
                     const month = parseInt(dateParts[1], 10) - 1;
                     const year = parseInt(dateParts[2], 10);
-                    let hours = 23, minutes = 59, seconds = 59;
+                    let hours = 0, minutes = 0, seconds = 0;
 
                     if (parts[1]) {
                         const timeParts = parts[1].split(':');
@@ -825,7 +806,7 @@
             const diff = target.getTime() - now.getTime();
 
             if (diff <= 0) {
-                return "⏳ Lançado";
+                return "Encerrado / Lançado";
             }
 
             const days = Math.floor(diff / (1000 * 60 * 60 * 24));
@@ -886,15 +867,10 @@
                 const name = row[1] ? row[1].trim() : '';
                 if (!name || name.toLowerCase() === 'nome' || name.toLowerCase() === 'jogo') continue;
 
-                // Detecta imagem na coluna 10 ou na coluna 2 flexivelmente
-                let imgUrl = "";
-                if (row[10] && row[10].trim().startsWith('http')) {
-                    imgUrl = row[10].trim();
-                } else if (row[2] && row[2].trim().startsWith('http')) {
-                    imgUrl = row[2].trim();
-                } else {
-                    imgUrl = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTnOXAQFE6SWdIZy6b4OpXDWYJUjkIbnYx7gQLCRunJ3w&s=10";
-                }
+                const imgRaw = row[10] ? row[10].trim() : '';
+                const imgUrl = (imgRaw && imgRaw.startsWith('http')) 
+                    ? imgRaw 
+                    : "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTnOXAQFE6SWdIZy6b4OpXDWYJUjkIbnYx7gQLCRunJ3w&s=10";
 
                 const pricePrimary = parsePrice(row[5]);
                 const stockPrimary = row[6] ? (parseInt(row[6].toString().replace(/\D/g, '')) || 0) : 0;
@@ -920,7 +896,7 @@
                 games.push({
                     id: row[0] && row[0].trim() ? row[0].trim() : `game-${i}`,
                     name: name,
-                    platform: row[2] && !row[2].trim().startsWith('http') ? row[2].trim() : 'PS4 / PS5',
+                    platform: row[2] ? row[2].trim() : 'PS4 / PS5',
                     category: row[3] ? row[3].trim() : 'Geral',
                     oldPrice: oldPrice > 0 ? oldPrice : (mainPrice * 1.3),
                     pricePrimary: pricePrimary,
@@ -941,7 +917,7 @@
             document.getElementById('loadingContainer').style.display = 'none';
             document.getElementById('mainContent').style.display = 'block';
 
-            populateCategoryChips();
+            populateCategories();
             renderCarousel();
             renderGames();
             startAutoScroll();
@@ -955,23 +931,16 @@
             document.getElementById('errorContainer').style.display = 'block';
         }
 
-        function populateCategoryChips() {
-            const container = document.getElementById('categoryChips');
-            container.innerHTML = '';
-
-            const categories = ['ALL', ...new Set(games.map(g => g.category))];
+        function populateCategories() {
+            const select = document.getElementById('categorySelect');
+            select.innerHTML = '<option value="ALL">Todas as Categorias</option>';
             
+            const categories = [...new Set(games.map(g => g.category))];
             categories.forEach(cat => {
-                const btn = document.createElement('button');
-                btn.className = `chip-btn ${cat === activeCategory ? 'active' : ''}`;
-                btn.innerText = cat === 'ALL' ? 'Todos' : cat;
-                btn.onclick = () => {
-                    activeCategory = cat;
-                    document.querySelectorAll('.chip-btn').forEach(b => b.classList.remove('active'));
-                    btn.classList.add('active');
-                    renderGames();
-                };
-                container.appendChild(btn);
+                const opt = document.createElement('option');
+                opt.value = cat;
+                opt.innerText = cat;
+                select.appendChild(opt);
             });
         }
 
@@ -994,6 +963,7 @@
             updateBottomBar();
         }
 
+        // --- COMPRA DIRETA NO WHATSAPP PELO CARD ---
         function buyGameDirect(event, gameId) {
             event.stopPropagation();
             const game = games.find(g => g.id === gameId);
@@ -1013,19 +983,19 @@
             window.open(`https://wa.me/${PHONE_NUMBER}?text=${encodeURIComponent(message)}`, '_blank');
         }
 
+        // --- GERAR PRINT DO CARD E COMPARTILHAR ---
         async function shareCardPrint(event, gameId) {
             event.stopPropagation();
             const cardEl = event.currentTarget.closest('.card');
             if (!cardEl) return;
 
             const actionsRow = cardEl.querySelector('.card-actions-row');
-            if (actionsRow) actionsRow.style.display = 'none';
+            if (actionsRow) actionsRow.style.display = 'none'; // Oculta a linha de botões durante o print
 
             try {
                 const canvas = await html2canvas(cardEl, {
                     scale: 2,
                     useCORS: true,
-                    allowTaint: true,
                     backgroundColor: '#13171d'
                 });
 
@@ -1129,7 +1099,7 @@
                 <div class="card-img-container">
                     <span class="platform-tag">${game.platform}</span>
                     ${discount > 0 ? `<span class="discount-badge">-${discount}%</span>` : ''}
-                    <img src="${game.img}" alt="${game.name}" class="card-img" loading="lazy" crossorigin="anonymous" onerror="this.src='https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTnOXAQFE6SWdIZy6b4OpXDWYJUjkIbnYx7gQLCRunJ3w&s=10'">
+                    <img src="${game.img}" alt="${game.name}" class="card-img" loading="lazy" onerror="this.src='https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTnOXAQFE6SWdIZy6b4OpXDWYJUjkIbnYx7gQLCRunJ3w&s=10'">
                 </div>
                 <div class="card-info">
                     <div class="card-title">${game.name}</div>
@@ -1185,11 +1155,13 @@
             if (!catalogContainer) return;
 
             const searchVal = document.getElementById('searchInput').value.toLowerCase();
+            const catVal = document.getElementById('categorySelect').value;
+
             catalogContainer.innerHTML = '';
 
-            const categories = activeCategory === 'ALL' 
+            const categories = catVal === 'ALL' 
                 ? [...new Set(games.map(g => g.category))]
-                : [activeCategory];
+                : [catVal];
 
             categories.forEach(category => {
                 const filteredGames = games.filter(g => 
