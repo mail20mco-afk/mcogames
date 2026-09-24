@@ -335,17 +335,25 @@
             box-shadow: 0 0 18px rgba(0, 230, 118, 0.25);
         }
 
+        /* Padrão das capas: sempre 1:1 (quadrado).
+           A imagem preenche o quadrado sem distorção. */
         .card-img-container {
             width: 100%;
             aspect-ratio: 1 / 1;
+            height: auto;
+            min-height: 0;
             position: relative;
             background-color: #1a1e26;
+            overflow: hidden;
         }
 
         .card-img {
+            display: block;
             width: 100%;
             height: 100%;
+            aspect-ratio: 1 / 1;
             object-fit: cover;
+            object-position: center;
         }
 
         .platform-tag {
@@ -1016,6 +1024,16 @@
                     img: imgUrl
                 });
             }
+
+            // Pré-vendas sempre ficam no começo do catálogo, mantendo a ordem original entre os demais jogos.
+            games = games
+                .map((game, index) => ({ game, index }))
+                .sort((a, b) => {
+                    const aPreorder = isPreorderGame(a.game) ? 0 : 1;
+                    const bPreorder = isPreorderGame(b.game) ? 0 : 1;
+                    return aPreorder - bPreorder || a.index - b.index;
+                })
+                .map(item => item.game);
 
             if (games.length === 0) {
                 showError();
