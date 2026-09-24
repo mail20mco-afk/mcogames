@@ -190,9 +190,11 @@
             gap: 16px;
             overflow-x: auto;
             scroll-behavior: smooth;
+            scroll-snap-type: x proximity;
             padding-bottom: 10px;
             scrollbar-width: none;
             -ms-overflow-style: none;
+            overscroll-behavior-inline: contain;
         }
 
         .carousel-grid::-webkit-scrollbar {
@@ -203,6 +205,30 @@
             min-width: 220px;
             max-width: 230px;
             flex-shrink: 0;
+            scroll-snap-align: start;
+        }
+
+        .preorder-section .carousel-title,
+        .promotions-section .carousel-title {
+            margin-bottom: 14px;
+        }
+
+        .preorder-section {
+            margin-bottom: 28px;
+        }
+
+        .preorder-label {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: #7c4dff;
+            color: #fff;
+            font-size: 0.62rem;
+            font-weight: 900;
+            padding: 4px 8px;
+            border-radius: 4px;
+            z-index: 3;
+            letter-spacing: 0.2px;
         }
 
         .controls {
@@ -246,6 +272,39 @@
             color: var(--accent-green);
             border-bottom: 1px solid var(--border-color);
             padding-bottom: 8px;
+        }
+
+        .category-block {
+            margin-bottom: 28px;
+        }
+
+        .category-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 18px;
+        }
+
+        .category-expand-row {
+            display: flex;
+            justify-content: center;
+            margin-top: 14px;
+        }
+
+        .category-expand-btn {
+            background: transparent;
+            color: var(--accent-green);
+            border: 1px solid var(--accent-green);
+            border-radius: 8px;
+            padding: 9px 16px;
+            font-size: 0.78rem;
+            font-weight: 800;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .category-expand-btn:hover {
+            background: rgba(0, 230, 118, 0.1);
+            transform: translateY(-1px);
         }
 
         .grid-games {
@@ -363,10 +422,30 @@
             text-decoration: line-through;
         }
 
+        .current-price-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
         .current-price {
             font-size: 1.05rem;
             font-weight: 800;
             color: var(--accent-green);
+        }
+
+        .discount-inline {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--badge-discount);
+            color: #fff;
+            font-size: 0.68rem;
+            font-weight: 900;
+            padding: 3px 7px;
+            border-radius: 5px;
+            line-height: 1;
         }
 
         .type-selector {
@@ -431,8 +510,8 @@
         }
 
         .btn-share-circle {
-            width: 38px;
-            height: 38px;
+            width: 40px;
+            height: 40px;
             border-radius: 50%;
             background-color: var(--whatsapp-bg);
             color: #000;
@@ -659,6 +738,7 @@
 
         @media (max-width: 600px) {
             header { padding: 12px 20px; }
+            .category-grid,
             .grid-games { grid-template-columns: repeat(2, 1fr); gap: 10px; }
             .modal-drawer { max-width: 100%; }
             .header-tag { display: none; }
@@ -703,7 +783,12 @@
 
         <div id="mainContent" style="display: none;">
             
-            <div class="carousel-section" id="carouselSection">
+            <div class="carousel-section preorder-section" id="preorderSection" style="display: none;">
+                <div class="carousel-title">🚀 Pré-vendas (Deslize ➔)</div>
+                <div id="preorderGrid" class="carousel-grid"></div>
+            </div>
+
+            <div class="carousel-section promotions-section" id="carouselSection" style="display: none;">
                 <div class="carousel-title">🔥 Destaques em Promoção (Deslize ➔)</div>
                 <div id="carouselGrid" class="carousel-grid"></div>
             </div>
@@ -759,9 +844,13 @@
     <script>
         const PHONE_NUMBER = "5599981810222";
         const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTbnddE66aBmhilS8BtFkch5qx41mzkZOiVtVeMxzHJRXljT3qevVZFGf4jU8o1LNZHuHL_3bnIGqRg/pub?output=csv";
+        const SHARE_URL = "https://mcogames.github.io/store/";
+        const CATEGORY_VISIBLE_LIMIT = 4;
 
         let games = [];
         let selectedCart = [];
+        let expandedCategories = new Set();
+        const carouselIntervals = new Map();
 
         function parsePrice(val) {
             if (!val) return 0;
@@ -820,6 +909,25 @@
                 return `${days}d ${pad(hours)}h ${pad(minutes)}m ${pad(seconds)}s`;
             }
             return `${pad(hours)}h ${pad(minutes)}m ${pad(seconds)}s`;
+        }
+
+        function isPreorderGame(game) {
+            const target = parseTargetDate(game.targetDate);
+            return !!target && target.getTime() > Date.now();
+        }
+
+        function getDiscountPercent(game) {
+            if (!game || !(game.oldPrice > game.mainPrice) || game.mainPrice <= 0) return 0;
+            return Math.round(((game.oldPrice - game.mainPrice) / game.oldPrice) * 100);
+        }
+
+        function escapeHtml(value) {
+            return String(value ?? '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
         }
 
         function updateTimers() {
@@ -898,7 +1006,7 @@
                     name: name,
                     platform: row[2] ? row[2].trim() : 'PS4 / PS5',
                     category: row[3] ? row[3].trim() : 'Geral',
-                    oldPrice: oldPrice > 0 ? oldPrice : (mainPrice * 1.3),
+                    oldPrice: oldPrice > 0 ? oldPrice : 0,
                     pricePrimary: pricePrimary,
                     stockPrimary: stockPrimary,
                     priceSecondary: priceSecondary,
@@ -918,9 +1026,11 @@
             document.getElementById('mainContent').style.display = 'block';
 
             populateCategories();
+            renderPreorderCarousel();
             renderCarousel();
             renderGames();
-            startAutoScroll();
+            startAutoScroll('preorderGrid');
+            startAutoScroll('carouselGrid');
 
             updateTimers();
             setInterval(updateTimers, 1000);
@@ -983,63 +1093,40 @@
             window.open(`https://wa.me/${PHONE_NUMBER}?text=${encodeURIComponent(message)}`, '_blank');
         }
 
-        // --- GERAR PRINT DO CARD E COMPARTILHAR ---
-        async function shareCardPrint(event, gameId) {
+        // --- COMPARTILHAR OFERTA NO WHATSAPP ---
+        function shareGameOffer(event, gameId) {
             event.stopPropagation();
-            const cardEl = event.currentTarget.closest('.card');
-            if (!cardEl) return;
 
-            const actionsRow = cardEl.querySelector('.card-actions-row');
-            if (actionsRow) actionsRow.style.display = 'none'; // Oculta a linha de botões durante o print
+            const game = games.find(g => g.id === gameId);
+            if (!game) return;
 
-            try {
-                const canvas = await html2canvas(cardEl, {
-                    scale: 2,
-                    useCORS: true,
-                    backgroundColor: '#13171d'
-                });
+            const typeStr = (game.pricePrimary > 0 && game.priceSecondary > 0)
+                ? 'Escolha a mídia no site'
+                : (game.pricePrimary > 0 ? 'Primária' : 'Secundária');
 
-                const game = games.find(g => g.id === gameId);
-                const safeName = game ? game.name.replace(/[^a-zA-Z0-9]/g, '_') : 'jogo';
-                const fileName = `MCO_GAMES_${safeName}.png`;
+            const discount = getDiscountPercent(game);
+            const offerLine = discount > 0
+                ? `💰 A partir de R$ ${game.mainPrice.toFixed(2).replace('.', ',')} (-${discount}%)`
+                : `💰 A partir de R$ ${game.mainPrice.toFixed(2).replace('.', ',')}`;
 
-                canvas.toBlob(async (blob) => {
-                    if (!blob) {
-                        if (actionsRow) actionsRow.style.display = 'flex';
-                        return;
-                    }
+            const message =
+                `🎮 *MCO GAMES*
 
-                    const file = new File([blob], fileName, { type: 'image/png' });
+` +
+                `Confira esta oferta:
+` +
+                `🕹️ *${game.name}* (${game.platform})
+` +
+                `📌 ${typeStr}
+` +
+                `${offerLine}
 
-                    if (navigator.canShare && navigator.canShare({ files: [file] })) {
-                        try {
-                            await navigator.share({
-                                files: [file],
-                                title: game ? game.name : 'MCO GAMES',
-                                text: `Confira essa oferta na MCO GAMES: ${game ? game.name : ''}`
-                            });
-                        } catch (shareErr) {
-                            downloadBlob(blob, fileName);
-                        }
-                    } else {
-                        downloadBlob(blob, fileName);
-                    }
+` +
+                `Esse e mais jogos, acesse:
+${SHARE_URL}`;
 
-                    if (actionsRow) actionsRow.style.display = 'flex';
-                }, 'image/png');
-
-            } catch (err) {
-                console.error("Erro ao gerar print do card:", err);
-                if (actionsRow) actionsRow.style.display = 'flex';
-            }
-        }
-
-        function downloadBlob(blob, fileName) {
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(blob);
-            link.download = fileName;
-            link.click();
-            URL.revokeObjectURL(link.href);
+            const whatsappShareUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
+            window.open(whatsappShareUrl, '_blank');
         }
 
         function createCardElement(game) {
@@ -1053,9 +1140,7 @@
                 card.classList.add('selected');
             }
 
-            const discount = (game.oldPrice > game.mainPrice) 
-                ? Math.round(((game.oldPrice - game.mainPrice) / game.oldPrice) * 100) 
-                : 0;
+            const discount = getDiscountPercent(game);
 
             let buttonsHtml = '';
             const primaryTxt = `Primária (${game.stockPrimary} Un)<br>R$ ${game.pricePrimary.toFixed(2).replace('.', ',')}`;
@@ -1092,29 +1177,36 @@
 
             let timerHtml = '';
             if (game.targetDate) {
-                timerHtml = `<div class="timer-badge" data-target="${game.targetDate}">⏳ Carregando...</div>`;
+                timerHtml = `<div class="timer-badge" data-target="${escapeHtml(game.targetDate)}">⏳ Carregando...</div>`;
             }
+
+            const preorderHtml = isPreorderGame(game)
+                ? `<span class="preorder-label">🚀 PRÉ-VENDA</span>`
+                : '';
 
             card.innerHTML = `
                 <div class="card-img-container">
-                    <span class="platform-tag">${game.platform}</span>
-                    ${discount > 0 ? `<span class="discount-badge">-${discount}%</span>` : ''}
-                    <img src="${game.img}" alt="${game.name}" class="card-img" loading="lazy" onerror="this.src='https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTnOXAQFE6SWdIZy6b4OpXDWYJUjkIbnYx7gQLCRunJ3w&s=10'">
+                    ${preorderHtml}
+                    <span class="platform-tag">${escapeHtml(game.platform)}</span>
+                    <img src="${escapeHtml(game.img)}" alt="${escapeHtml(game.name)}" class="card-img" loading="lazy" onerror="this.src='https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTnOXAQFE6SWdIZy6b4OpXDWYJUjkIbnYx7gQLCRunJ3w&s=10'">
                 </div>
                 <div class="card-info">
-                    <div class="card-title">${game.name}</div>
+                    <div class="card-title">${escapeHtml(game.name)}</div>
                     ${timerHtml}
                     <div class="price-container">
-                        ${game.oldPrice > 0 ? `<span class="old-price">R$ ${game.oldPrice.toFixed(2).replace('.', ',')}</span>` : ''}
-                        <span class="current-price">A partir de R$ ${game.mainPrice.toFixed(2).replace('.', ',')}</span>
+                        ${game.oldPrice > game.mainPrice ? `<span class="old-price">R$ ${game.oldPrice.toFixed(2).replace('.', ',')}</span>` : ''}
+                        <div class="current-price-row">
+                            <span class="current-price">A partir de R$ ${game.mainPrice.toFixed(2).replace('.', ',')}</span>
+                            ${discount > 0 ? `<span class="discount-inline">-${discount}%</span>` : ''}
+                        </div>
                     </div>
                     ${buttonsHtml}
                     <div class="card-actions-row">
                         <button class="btn-buy-direct" onclick="buyGameDirect(event, '${game.id}')">
                             🛒 Comprar
                         </button>
-                        <button class="btn-share-circle" onclick="shareCardPrint(event, '${game.id}')" title="Gerar Print / Compartilhar Oferta">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                        <button class="btn-share-circle" onclick="shareGameOffer(event, '${game.id}')" title="Compartilhar oferta no WhatsApp">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                                 <path d="M12.012 2c-5.506 0-9.989 4.478-9.99 9.984 0 1.762.459 3.48 1.332 5.001l-1.416 5.17 5.291-1.387c1.467.8 3.123 1.22 4.78 1.22h.005c5.507 0 9.991-4.479 9.992-9.985 0-2.667-1.038-5.175-2.925-7.063C17.195 3.039 14.68 2 12.012 2zm5.833 14.283c-.244.686-1.42 1.309-1.96 1.365-.506.052-1.168.082-3.376-.826-2.825-1.162-4.636-4.04-4.776-4.228-.14-.188-1.141-1.517-1.141-2.893 0-1.376.721-2.054.978-2.336.257-.282.56-.352.747-.352.187 0 .374.002.538.01.176.008.412-.067.644.49.245.589.842 2.052.915 2.202.073.15.122.327.024.524-.098.198-.147.32-.293.491-.147.171-.309.383-.442.514-.148.148-.302.308-.13.603.172.295.766 1.265 1.644 2.047 1.13 1.005 2.083 1.317 2.378 1.464.295.148.467.123.639-.074.172-.197.737-.859.933-1.154.196-.295.393-.246.664-.148.27.098 1.716.81 2.011.957.295.148.491.221.564.344.073.123.073.712-.171 1.398z"/>
                             </svg>
                         </button>
@@ -1124,67 +1216,174 @@
             return card;
         }
 
-        function renderCarousel() {
-            const container = document.getElementById('carouselGrid');
-            if (!container) return;
+        function renderPreorderCarousel() {
+            const section = document.getElementById('preorderSection');
+            const container = document.getElementById('preorderGrid');
+            if (!section || !container) return;
+
+            const preorderGames = games.filter(isPreorderGame).slice(0, 12);
             container.innerHTML = '';
 
-            const featuredGames = games.slice(0, 10);
-            featuredGames.forEach(game => {
-                container.appendChild(createCardElement(game));
-            });
+            if (preorderGames.length === 0) {
+                section.style.display = 'none';
+                return;
+            }
+
+            section.style.display = 'block';
+            preorderGames.forEach(game => container.appendChild(createCardElement(game)));
             updateTimers();
         }
 
-        function startAutoScroll() {
+        function renderCarousel() {
+            const section = document.getElementById('carouselSection');
             const container = document.getElementById('carouselGrid');
-            if (!container) return;
-            const cardWidth = 236;
+            if (!section || !container) return;
 
-            setInterval(() => {
-                if (container.scrollLeft + container.clientWidth >= container.scrollWidth - 10) {
+            const featuredGames = games
+                .filter(game => !isPreorderGame(game) && getDiscountPercent(game) > 0)
+                .slice(0, 12);
+
+            container.innerHTML = '';
+
+            if (featuredGames.length === 0) {
+                section.style.display = 'none';
+                return;
+            }
+
+            section.style.display = 'block';
+            featuredGames.forEach(game => container.appendChild(createCardElement(game)));
+            updateTimers();
+        }
+
+        function startAutoScroll(containerId) {
+            const container = document.getElementById(containerId);
+            if (!container) return;
+
+            if (carouselIntervals.has(containerId)) {
+                clearInterval(carouselIntervals.get(containerId));
+                carouselIntervals.delete(containerId);
+            }
+
+            let paused = false;
+            let resumeTimer = null;
+
+            const pause = () => {
+                paused = true;
+                if (resumeTimer) clearTimeout(resumeTimer);
+            };
+
+            const resume = () => {
+                paused = false;
+            };
+
+            const resumeSoon = () => {
+                if (resumeTimer) clearTimeout(resumeTimer);
+                resumeTimer = setTimeout(resume, 2500);
+            };
+
+            container.addEventListener('mouseenter', pause);
+            container.addEventListener('mouseleave', resume);
+            container.addEventListener('touchstart', pause, { passive: true });
+            container.addEventListener('touchend', resumeSoon, { passive: true });
+            container.addEventListener('touchcancel', resumeSoon, { passive: true });
+            container.addEventListener('wheel', resumeSoon, { passive: true });
+
+            const interval = setInterval(() => {
+                if (paused || container.scrollWidth <= container.clientWidth + 8) return;
+
+                const firstCard = container.querySelector('.card');
+                if (!firstCard) return;
+
+                const styles = getComputedStyle(container);
+                const gap = parseFloat(styles.columnGap || styles.gap || '16') || 16;
+                const step = firstCard.getBoundingClientRect().width + gap;
+
+                const reachedEnd =
+                    container.scrollLeft + container.clientWidth >= container.scrollWidth - step;
+
+                if (reachedEnd) {
                     container.scrollTo({ left: 0, behavior: 'smooth' });
                 } else {
-                    container.scrollBy({ left: cardWidth, behavior: 'smooth' });
+                    container.scrollBy({ left: step, behavior: 'smooth' });
                 }
-            }, 3500);
+            }, 3200);
+
+            carouselIntervals.set(containerId, interval);
+        }
+
+        function toggleCategoryExpansion(category) {
+            if (expandedCategories.has(category)) {
+                expandedCategories.delete(category);
+            } else {
+                expandedCategories.add(category);
+            }
+            renderGames();
         }
 
         function renderGames() {
             const catalogContainer = document.getElementById('catalogContainer');
             if (!catalogContainer) return;
 
-            const searchVal = document.getElementById('searchInput').value.toLowerCase();
+            const searchVal = document.getElementById('searchInput').value.toLowerCase().trim();
             const catVal = document.getElementById('categorySelect').value;
 
             catalogContainer.innerHTML = '';
 
-            const categories = catVal === 'ALL' 
+            const categories = catVal === 'ALL'
                 ? [...new Set(games.map(g => g.category))]
                 : [catVal];
 
             categories.forEach(category => {
-                const filteredGames = games.filter(g => 
+                const filteredGames = games.filter(g =>
                     g.category === category &&
                     g.name.toLowerCase().includes(searchVal)
                 );
 
-                if (filteredGames.length > 0) {
-                    const catTitle = document.createElement('h3');
-                    catTitle.className = 'category-title-section';
-                    catTitle.innerText = category;
-                    catalogContainer.appendChild(catTitle);
+                if (filteredGames.length === 0) return;
 
-                    const grid = document.createElement('div');
-                    grid.className = 'grid-games';
+                const categoryBlock = document.createElement('section');
+                categoryBlock.className = 'category-block';
 
-                    filteredGames.forEach(game => {
-                        grid.appendChild(createCardElement(game));
-                    });
+                const catTitle = document.createElement('h3');
+                catTitle.className = 'category-title-section';
+                catTitle.innerText = category;
+                categoryBlock.appendChild(catTitle);
 
-                    catalogContainer.appendChild(grid);
+                const grid = document.createElement('div');
+                grid.className = 'category-grid';
+
+                const showAll = expandedCategories.has(category) || searchVal.length > 0;
+                const visibleGames = showAll
+                    ? filteredGames
+                    : filteredGames.slice(0, CATEGORY_VISIBLE_LIMIT);
+
+                visibleGames.forEach(game => {
+                    grid.appendChild(createCardElement(game));
+                });
+
+                categoryBlock.appendChild(grid);
+
+                if (filteredGames.length > CATEGORY_VISIBLE_LIMIT && !searchVal) {
+                    const expandRow = document.createElement('div');
+                    expandRow.className = 'category-expand-row';
+
+                    const expandBtn = document.createElement('button');
+                    expandBtn.className = 'category-expand-btn';
+
+                    const isExpanded = expandedCategories.has(category);
+                    expandBtn.innerText = isExpanded
+                        ? 'Mostrar menos ↑'
+                        : `Ver todos de ${category} ↓`;
+
+                    expandBtn.addEventListener('click', () => toggleCategoryExpansion(category));
+
+                    expandRow.appendChild(expandBtn);
+                    categoryBlock.appendChild(expandRow);
                 }
+
+                catalogContainer.appendChild(categoryBlock);
             });
+
             updateTimers();
         }
 
