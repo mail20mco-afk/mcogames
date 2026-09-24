@@ -1141,6 +1141,100 @@
             window.open(`https://wa.me/${PHONE_NUMBER}?text=${encodeURIComponent(message)}`, '_blank');
         }
 
+        // --- PREPARAR IMAGENS EXTERNAS PARA O HTML2CANVAS ---
+        // Algumas capas vêm de domínios sem CORS. O navegador exibe a imagem normalmente,
+        // mas o html2canvas não pode desenhá-la no canvas e ela acaba ficando em branco.
+        // Usamos o proxy CORS do wsrv.nl somente para a captura do print.
+        async function getImageDataUrlForCanvas(sourceUrl) {
+            if (!sourceUrl) return null;
+            if (sourceUrl.startsWith('data:')) return sourceUrl;
+
+            try {
+                const proxyUrl = `https://images.weserv.nl/?url=${encodeURIComponent(sourceUrl)}`;
+                const response = await fetch(proxyUrl, {
+                    mode: 'cors',
+                    cache: 'force-cache'
+                });
+
+                if (!response.ok) throw new Error(`Proxy retornou ${response.status}`);
+
+                const blob = await response.blob();
+                if (!blob.type.startsWith('image/')) throw new Error('Resposta não é uma imagem.');
+
+                return await new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onloadend = () => resolve(reader.result);
+                    reader.onerror = reject;
+                    reader.readAsDataURL(blob);
+                });
+            } catch (err) {
+                console.warn('Não foi possível preparar a capa para o print:', err);
+                return null;
+            }
+        }
+
+        async function buildPrintableCard(cardEl) {
+            const clone = cardEl.cloneNode(true);
+
+            // Mantém a largura exata do card que o usuário está vendo.
+            const rect = cardEl.getBoundingClientRect();
+            clone.style.width = `${Math.round(rect.width)}px`;
+            clone.style.position = 'fixed';
+            clone.style.left = '-100000px';
+            clone.style.top = '0';
+            clone.style.margin = '0';
+            clone.style.transform = 'none';
+            clone.style.zIndex = '-1';
+
+            // Retira apenas a área de ações do print.
+            const actionsRow = clone.querySelector('.card-actions-row');
+            if (actionsRow) actionsRow.remove();
+
+            document.body.appendChild(clone);
+
+            try {
+                const image = clone.querySelector('.card-img');
+                if (image) {
+                    const originalSrc = image.getAttribute('src') || image.src;
+                    const dataUrl = await getImageDataUrlForCanvas(originalSrc);
+
+                    if (dataUrl) {
+                        image.removeAttribute('srcset');
+                        image.src = dataUrl;
+                    }
+
+                    // Garante que a imagem já esteja efetivamente carregada antes do canvas.
+                    if (!image.complete) {
+                        await new Promise(resolve => {
+                            image.addEventListener('load', resolve, { once: true });
+                            image.addEventListener('error', resolve, { once: true });
+                        });
+                    }
+
+                    if (image.decode) {
+                        try {
+                            await image.decode();
+                        } catch (_) {}
+                    }
+                }
+
+                // Pequena espera para o navegador finalizar layout/imagem.
+                await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+
+                return await html2canvas(clone, {
+                    scale: Math.min(3, Math.max(2, window.devicePixelRatio || 1)),
+                    useCORS: true,
+                    allowTaint: false,
+                    backgroundColor: '#13171d',
+                    logging: false,
+                    imageTimeout: 15000,
+                    removeContainer: true
+                });
+            } finally {
+                clone.remove();
+            }
+        }
+
         // --- GERAR PRINT DO CARD E COMPARTILHAR PELO WHATSAPP ---
         async function shareGameOffer(event, gameId) {
             event.stopPropagation();
@@ -1166,30 +1260,27 @@
                 `${offerLine}\n\n` +
                 `Esse e mais jogos, acesse: ${SHARE_URL}`;
 
-            const actionsRow = cardEl.querySelector('.card-actions-row');
-            const previousDisplay = actionsRow ? actionsRow.style.display : '';
-
             try {
-                if (actionsRow) actionsRow.style.display = 'none';
+                const canvas = await buildPrintableCard(cardEl);
 
-                const canvas = await html2canvas(cardEl, {
-                    scale: 2,
-                    useCORS: true,
-                    allowTaint: false,
-                    backgroundColor: '#13171d',
-                    logging: false
-                });
-
-                const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+                const blob = await new Promise(resolve =>
+                    canvas.toBlob(resolve, 'image/png', 1)
+                );
                 if (!blob) throw new Error('Não foi possível gerar a imagem da oferta.');
 
-                const safeName = game.name.replace(/[^a-zA-Z0-9À-ÿ]/g, '_').replace(/_+/g, '_');
+                const safeName = game.name
+                    .replace(/[^a-zA-Z0-9À-ÿ]/g, '_')
+                    .replace(/_+/g, '_');
+
                 const fileName = `MCO_GAMES_${safeName}.png`;
                 const file = new File([blob], fileName, { type: 'image/png' });
 
-                // NO CELULAR: usa o compartilhamento nativo do sistema.
-                // Isso permite escolher o WhatsApp e enviar o PNG junto com o texto.
-                const canShareFile = !!(navigator.share && navigator.canShare && navigator.canShare({ files: [file] }));
+                // CELULAR: compartilhamento nativo com o PNG realmente anexado.
+                const canShareFile = !!(
+                    navigator.share &&
+                    navigator.canShare &&
+                    navigator.canShare({ files: [file] })
+                );
 
                 if (canShareFile) {
                     try {
@@ -1200,14 +1291,13 @@
                         });
                         return;
                     } catch (shareError) {
-                        // O usuário pode ter fechado a janela de compartilhamento.
-                        if (shareError && shareError.name === 'AbortError') return;
-                        console.warn('Compartilhamento nativo falhou, usando fallback:', shareError);
+                        if (shareError?.name === 'AbortError') return;
+                        console.warn('Compartilhamento nativo falhou:', shareError);
                     }
                 }
 
-                // NO COMPUTADOR (ou navegador sem suporte ao compartilhamento de arquivos):
-                // salva o PNG e abre o WhatsApp com o texto pronto para o anexo manual.
+                // COMPUTADOR: baixa o PNG e abre o WhatsApp Web com o texto pronto.
+                // O anexo do arquivo continua sendo manual no WhatsApp Web.
                 const imageUrl = URL.createObjectURL(blob);
                 const link = document.createElement('a');
                 link.href = imageUrl;
@@ -1222,11 +1312,10 @@
                     window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, '_blank');
                 }, 900);
             } catch (err) {
-                if (err && err.name !== 'AbortError') {
+                if (err?.name !== 'AbortError') {
                     console.error('Erro ao gerar/compartilhar o print:', err);
+                    alert('Não foi possível gerar a imagem para compartilhamento. Tente novamente.');
                 }
-            } finally {
-                if (actionsRow) actionsRow.style.display = previousDisplay || 'flex';
             }
         }
 
