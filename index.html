@@ -16,9 +16,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
   <style>
-    /* ==========================================
-       RESET E ESTILOS GERAIS
-       ========================================== */
+    /* RESET E ESTILOS GERAIS */
     * {
       box-sizing: border-box;
       margin: 0;
@@ -29,14 +27,12 @@
     body {
       background-color: #0b0d10;
       color: #f0f2f5;
-      padding-bottom: 90px; /* Espaço para a barra do carrinho */
+      padding-bottom: 90px;
     }
 
     a { text-decoration: none; color: inherit; }
 
-    /* ==========================================
-       CABEÇALHO E NAVEGAÇÃO
-       ========================================== */
+    /* CABEÇALHO E NAVEGAÇÃO */
     header {
       background-color: #12161f;
       padding: 1rem 1.5rem;
@@ -58,9 +54,7 @@
 
     .logo span { color: #fff; }
 
-    /* ==========================================
-       BARRA DE BUSCA E FILTROS
-       ========================================== */
+    /* BARRA DE BUSCA E FILTROS */
     .filter-container {
       max-width: 1200px;
       margin: 1.5rem auto;
@@ -87,16 +81,13 @@
       border-color: #00e676;
     }
 
-    /* ==========================================
-       CONTAINER PRINCIPAL E SEÇÕES
-       ========================================== */
+    /* CONTAINER PRINCIPAL E SEÇÕES */
     .main-container {
       max-width: 1200px;
       margin: 0 auto;
       padding: 0 1rem;
     }
 
-    /* Estilos de Categoria */
     .category-section {
       margin-bottom: 3rem;
     }
@@ -119,19 +110,16 @@
       font-weight: 400;
     }
 
-    /* Grelha de Produtos */
     .product-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
       gap: 1.5rem;
     }
 
-    /* Ocultar cards excedentes */
     .product-grid .card.hidden-card {
       display: none !important;
     }
 
-    /* Botão Expandir Categoria */
     .btn-expand-category {
       display: block;
       width: 100%;
@@ -153,9 +141,7 @@
       color: #0b0d10;
     }
 
-    /* ==========================================
-       CARROSSEL DE PRÉ-VENDAS
-       ========================================== */
+    /* CARROSSEL DE PRÉ-VENDAS */
     .pre-venda-section {
       background: linear-gradient(180deg, #121824 0%, #0b0d10 100%);
       padding: 1.5rem;
@@ -188,9 +174,7 @@
       max-width: 260px;
     }
 
-    /* ==========================================
-       CARD DO JOGO
-       ========================================== */
+    /* CARD DO JOGO */
     .card {
       background-color: #141923;
       border: 1px solid #1e2536;
@@ -210,7 +194,7 @@
     .card-img-wrapper {
       position: relative;
       width: 100%;
-      padding-top: 125%; /* Aspect ratio de capa de jogo */
+      padding-top: 125%;
       background-color: #0d1017;
     }
 
@@ -266,7 +250,6 @@
       -webkit-box-orient: vertical;
     }
 
-    /* Seleção de Mídia */
     .media-selector {
       display: flex;
       gap: 0.5rem;
@@ -342,9 +325,7 @@
 
     .btn-share:hover { background-color: #2d3748; }
 
-    /* ==========================================
-       BARRA INFERIOR DE CARRINHO
-       ========================================== */
+    /* BARRA INFERIOR DE CARRINHO */
     .cart-bar {
       position: fixed;
       bottom: 0; left: 0; right: 0;
@@ -406,12 +387,9 @@
   </div>
 
   <script>
-    // ==========================================
     // CONFIGURAÇÕES E ESTADO GLOBAL
-    // ==========================================
     const CONFIG = {
-      // Cole aqui o link CSV publicado do seu Google Sheets
-      sheetCsvUrl: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vT_YOUR_SHEET_ID_HERE/pub?output=csv',
+      sheetCsvUrl: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTbnddE66aBmhilS8BtFkch5qx41mzkZOiVtVeMxzHJRXIjT3qevVZFGf4jU8o1LNZHuHL_3bnIGqRg/pub?output=csv',
       whatsappNumber: '5599981810222',
       storeUrl: 'https://mcogames.github.io/store/',
       initialLimitPerCategory: 4
@@ -420,9 +398,7 @@
     let allGames = [];
     let selectedCart = [];
 
-    // ==========================================
     // CARREGAMENTO DOS DADOS (GOOGLE SHEETS)
-    // ==========================================
     document.addEventListener('DOMContentLoaded', () => {
       fetchData();
       setInterval(updateTimers, 1000);
@@ -435,7 +411,6 @@
         skipEmptyLines: true,
         complete: function(results) {
           if (results.data && results.data.length > 1) {
-            // Ignora o cabeçalho e mapeia
             allGames = results.data.slice(1).map(row => parseCsvRow(row)).filter(g => g.name);
             populateCategoryDropdown(allGames);
             renderCatalog(allGames);
@@ -471,9 +446,7 @@
       };
     }
 
-    // ==========================================
     // PREENCHER DROPDOWN DE CATEGORIAS
-    // ==========================================
     function populateCategoryDropdown(gamesList) {
       const select = document.getElementById('categorySelect');
       select.innerHTML = '<option value="">Todas as Categorias</option>';
@@ -489,9 +462,7 @@
       });
     }
 
-    // ==========================================
     // RENDERIZAÇÃO DO CATÁLOGO POR CATEGORIA E CARROSSEL
-    // ==========================================
     function renderCatalog(gamesList) {
       const container = document.getElementById('catalog-container');
       container.innerHTML = '';
@@ -544,7 +515,6 @@
 
         section.appendChild(grid);
 
-        // Botão de expandir se houver mais que o limite inicial
         if (categoryGames.length > CONFIG.initialLimitPerCategory) {
           const expandBtn = document.createElement('button');
           expandBtn.className = 'btn-expand-category';
@@ -594,9 +564,7 @@
       }
     }
 
-    // ==========================================
     // CONSTRUÇÃO DO CARD DE JOGO
-    // ==========================================
     function createGameCard(game) {
       const card = document.createElement('div');
       card.className = 'card';
@@ -647,23 +615,18 @@
       game.selectedType = type;
       const card = btnElement.closest('.card');
       
-      // Atualizar classe ativa dos botões
       card.querySelectorAll('.btn-media').forEach(b => b.classList.remove('active'));
       btnElement.classList.add('active');
 
-      // Atualizar preço exibido
       const priceDisplay = card.querySelector(`#price-display-${gameId}`);
       const newPrice = type === 'primary' ? game.pricePrimary : game.priceSecondary;
       priceDisplay.textContent = `R$ ${newPrice.toFixed(2)}`;
     }
 
-    // ==========================================
-    // ITEM 2: COMPARTILHAMENTO COM LINK DA LOJA
-    // ==========================================
+    // COMPARTILHAMENTO COM LINK DA LOJA
     async function shareCardPrint(cardElement, gameName) {
       const shareText = `🎮 *MCO GAMES* - ${gameName}\n\nEsse e mais jogos acesse: ${CONFIG.storeUrl}`;
 
-      // Ocultar linha de ações antes do print
       const actionRow = cardElement.querySelector('.card-actions');
       if (actionRow) actionRow.style.visibility = 'hidden';
 
@@ -682,7 +645,6 @@
           const fileName = `${gameName.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.png`;
           const file = new File([blob], fileName, { type: 'image/png' });
 
-          // Testar se suporta compartilhamento nativo com arquivo
           if (navigator.canShare && navigator.canShare({ files: [file] })) {
             await navigator.share({
               title: gameName,
@@ -690,14 +652,12 @@
               files: [file]
             });
           } else if (navigator.share) {
-            // Suporta share sem arquivo
             await navigator.share({
               title: gameName,
               text: shareText,
               url: CONFIG.storeUrl
             });
           } else {
-            // Fallback: Baixar imagem e copiar link
             const link = document.createElement('a');
             link.download = fileName;
             link.href = canvas.toDataURL();
@@ -719,9 +679,7 @@
       }
     }
 
-    // ==========================================
     // CONTAGEM REGRESSIVA (TIMERS)
-    // ==========================================
     function updateTimers() {
       const now = new Date().getTime();
 
@@ -731,7 +689,6 @@
         const timerEl = document.getElementById(`timer-${game.id}`);
         if (!timerEl) return;
 
-        // Suporta formatos DD/MM/AAAA HH:MM:SS ou ISO
         let target;
         if (game.targetDate.includes('/')) {
           const parts = game.targetDate.split(' ');
@@ -759,9 +716,7 @@
       });
     }
 
-    // ==========================================
     // SISTEMA DE CARRINHO E CHECKOUT
-    // ==========================================
     function addToCart(gameId) {
       const game = allGames.find(g => g.id === gameId);
       if (!game) return;
@@ -816,9 +771,7 @@
       window.open(`https://wa.me/${CONFIG.whatsappNumber}?text=${encoded}`, '_blank');
     }
 
-    // ==========================================
     // FILTRAGEM (PESQUISA + CATEGORIA)
-    // ==========================================
     function handleFilter() {
       const query = document.getElementById('searchInput').value.toLowerCase();
       const selectedCat = document.getElementById('categorySelect').value;
