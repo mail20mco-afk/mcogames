@@ -855,7 +855,7 @@
         <div id="mainContent" style="display: none;">
             
             <div class="carousel-section category-feature-section launch-section" id="launchSection" style="display: none;">
-                <div class="carousel-title">🔥 Lançamentos em Oferta <span class="carousel-hint">(Deslize ➜)</span></div>
+                <div class="carousel-title">🔥 Lançamento em Oferta <span class="carousel-hint">(Deslize ➜)</span></div>
                 <div id="launchGrid" class="carousel-grid"></div>
             </div>
 
@@ -995,13 +995,31 @@
 
         function normalizeCategory(value) {
             return String(value ?? '')
+                .normalize('NFD')
+                .replace(/[\u0300-\u036f]/g, '')
                 .trim()
+                .replace(/[-_]+/g, ' ')
                 .replace(/\s+/g, ' ')
                 .toLowerCase();
         }
 
+        function categoryKey(value) {
+            const normalized = normalizeCategory(value);
+            const aliases = {
+                'pre venda': 'pre-venda',
+                'pre vendas': 'pre-venda',
+                'pre-venda': 'pre-venda',
+                'lancamento em oferta': 'lancamento-em-oferta',
+                'lancamentos em oferta': 'lancamento-em-oferta',
+                'promocao': 'promocao',
+                'promocoes': 'promocao',
+                'catalogo': 'catalogo'
+            };
+            return aliases[normalized] || normalized;
+        }
+
         function isCategory(game, categoryName) {
-            return normalizeCategory(game.category) === normalizeCategory(categoryName);
+            return categoryKey(game.category) === categoryKey(categoryName);
         }
 
         // A pré-venda é definida exclusivamente pela coluna D da planilha.
@@ -1014,12 +1032,12 @@
             const ordered = [];
 
             CATEGORY_ORDER.forEach(priorityCategory => {
-                const match = unique.find(cat => normalizeCategory(cat) === normalizeCategory(priorityCategory));
+                const match = unique.find(cat => categoryKey(cat) === categoryKey(priorityCategory));
                 if (match) ordered.push(match);
             });
 
             unique.forEach(cat => {
-                if (!ordered.some(existing => normalizeCategory(existing) === normalizeCategory(cat))) {
+                if (!ordered.some(existing => categoryKey(existing) === categoryKey(cat))) {
                     ordered.push(cat);
                 }
             });
