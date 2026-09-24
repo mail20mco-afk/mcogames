@@ -1187,8 +1187,27 @@
                 const fileName = `MCO_GAMES_${safeName}.png`;
                 const file = new File([blob], fileName, { type: 'image/png' });
 
-                // Primeiro salva o print no computador/celular.
-                // O download acontece antes de abrir o WhatsApp para facilitar o anexo manual.
+                // NO CELULAR: usa o compartilhamento nativo do sistema.
+                // Isso permite escolher o WhatsApp e enviar o PNG junto com o texto.
+                const canShareFile = !!(navigator.share && navigator.canShare && navigator.canShare({ files: [file] }));
+
+                if (canShareFile) {
+                    try {
+                        await navigator.share({
+                            files: [file],
+                            text: message,
+                            title: `Oferta MCO GAMES - ${game.name}`
+                        });
+                        return;
+                    } catch (shareError) {
+                        // O usuário pode ter fechado a janela de compartilhamento.
+                        if (shareError && shareError.name === 'AbortError') return;
+                        console.warn('Compartilhamento nativo falhou, usando fallback:', shareError);
+                    }
+                }
+
+                // NO COMPUTADOR (ou navegador sem suporte ao compartilhamento de arquivos):
+                // salva o PNG e abre o WhatsApp com o texto pronto para o anexo manual.
                 const imageUrl = URL.createObjectURL(blob);
                 const link = document.createElement('a');
                 link.href = imageUrl;
@@ -1198,11 +1217,10 @@
                 link.click();
                 link.remove();
 
-                // Dá um pequeno tempo para o navegador iniciar o download antes de abrir o WhatsApp.
                 setTimeout(() => {
                     URL.revokeObjectURL(imageUrl);
                     window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, '_blank');
-                }, 700);
+                }, 900);
             } catch (err) {
                 if (err && err.name !== 'AbortError') {
                     console.error('Erro ao gerar/compartilhar o print:', err);
