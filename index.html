@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>MCO GAMES - Catálogo</title>
-  <!-- html2canvas para conversão do card em Imagem -->
+  <!-- Biblioteca para converter o card em imagem na partilha -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
   <style>
@@ -32,13 +32,14 @@
       padding: 20px;
     }
 
-    /* Abas de Navegação */
+    /* Navegação de Abas */
     .tabs-nav {
       display: flex;
       gap: 10px;
       margin-bottom: 20px;
       border-bottom: 1px solid var(--border-color);
       padding-bottom: 12px;
+      overflow-x: auto;
     }
 
     .tab-btn {
@@ -50,6 +51,7 @@
       cursor: pointer;
       font-weight: 600;
       font-size: 0.95rem;
+      white-space: nowrap;
       transition: all 0.2s ease;
     }
 
@@ -59,7 +61,7 @@
       border-color: var(--accent-green);
     }
 
-    /* Grid de Cards */
+    /* Grid do Catálogo */
     .cards-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
@@ -77,7 +79,7 @@
       position: relative;
     }
 
-    /* PROPORÇÃO 1:1 QUADRADA DA CAPA DOS JOGOS */
+    /* GARANTE A PROPORÇÃO 1:1 (QUADRADA) NAS CAPAS */
     .image-wrapper {
       position: relative;
       width: 100%;
@@ -95,7 +97,7 @@
       display: block;
     }
 
-    /* Temporizador / Relógio na Capa */
+    /* Relógio / Temporizador de Pré-Venda na Capa */
     .timer-badge {
       position: absolute;
       bottom: 10px;
@@ -113,7 +115,7 @@
       z-index: 2;
     }
 
-    /* Conteúdo do Card */
+    /* Conteúdo dos Textos e Preços */
     .card-content {
       padding: 15px;
       display: flex;
@@ -145,7 +147,7 @@
       color: var(--accent-green);
     }
 
-    /* Botões */
+    /* Botões de Ação */
     .action-buttons {
       display: flex;
       gap: 8px;
@@ -188,27 +190,58 @@
 </head>
 <body>
 
-  <!-- Navegação por Abas -->
+  <!-- Abas de Categoria -->
   <div class="tabs-nav">
     <button class="tab-btn active" onclick="filterCategory('TODOS')">Todos</button>
     <button class="tab-btn" onclick="filterCategory('PROMO')">Promoções</button>
     <button class="tab-btn" onclick="filterCategory('PRE VENDA')">Pré-Venda</button>
   </div>
 
-  <!-- Container dos Cards -->
-  <div id="cards-grid" class="cards-grid"></div>
+  <!-- Contentor dos Jogos -->
+  <div id="cards-grid" class="cards-grid">
+    <p style="grid-column: 1/-1; text-align: center; color: #8b949e; padding: 40px 0;">A carregar jogos da planilha...</p>
+  </div>
 
   <script>
     // =========================================================================
-    // INSIRA AQUI A URL DE EXPORTAÇÃO CSV DA SUA PLANILHA DO GOOGLE SHEETS
-    // Exemplo: https://docs.google.com/spreadsheets/d/SEU_ID/gviz/tq?tqx=out:csv
+    // COLE AQUI A URL DE EXPORTAÇÃO CSV DA SUA PLANILHA DO GOOGLE SHEETS
     // =========================================================================
     const GOOGLE_SHEETS_CSV_URL = 'SUA_URL_DO_GOOGLE_SHEETS_AQUI';
 
     let allGamesData = [];
     let currentCategory = 'TODOS';
 
-    // 1. CONVERTER E VALIDAR DATA FLEXÍVEL (DD/MM/AAAA, YYYY-MM-DD, ISO)
+    // 1. LEITOR INTELIGENTE DE CSV (SUPORTA SEPARADORES ';' OU ',')
+    function parseCSV(csvText) {
+      const lines = csvText.split(/\r?\n/).filter(line => line.trim() !== '');
+      if (lines.length === 0) return [];
+
+      // Identifica se a planilha exportou com ';' (padrão Brasil/Portugal) ou ','
+      const firstLine = lines[0];
+      const delimiter = firstLine.includes(';') ? ';' : ',';
+
+      return lines.map(line => {
+        const row = [];
+        let currentCell = '';
+        let insideQuotes = false;
+
+        for (let i = 0; i < line.length; i++) {
+          const char = line[i];
+          if (char === '"') {
+            insideQuotes = !insideQuotes;
+          } else if (char === delimiter && !insideQuotes) {
+            row.push(currentCell.trim().replace(/^"|"$/g, ''));
+            currentCell = '';
+          } else {
+            currentCell += char;
+          }
+        }
+        row.push(currentCell.trim().replace(/^"|"$/g, ''));
+        return row;
+      });
+    }
+
+    // 2. PARSER FLEXÍVEL DE DATAS (DD/MM/AAAA, YYYY-MM-DD ou ISO)
     function parseTargetDate(dateStr) {
       if (!dateStr || String(dateStr).trim() === '') return null;
       dateStr = String(dateStr).trim();
@@ -231,12 +264,12 @@
         return new Date(year, month, day, hours, minutes, seconds);
       }
 
-      // Formato ISO ou YYYY-MM-DD
+      // Formato ISO / YYYY-MM-DD
       const parsedDate = new Date(dateStr);
       return isNaN(parsedDate.getTime()) ? null : parsedDate;
     }
 
-    // 2. ATUALIZADOR DOS RELÓGIOS DE CONTAGEM REGRESSIVA
+    // 3. ATUALIZAÇÃO DOS RELÓGIOS DE CONTAGEM REGRESSIVA
     function updateTimers() {
       const now = new Date().getTime();
       const timerElements = document.querySelectorAll('.timer-badge');
@@ -253,7 +286,7 @@
         const distance = targetDate.getTime() - now;
 
         if (distance < 0) {
-          el.innerHTML = "⏳ Expirado";
+          el.innerHTML = "⏳ Lançado";
           return;
         }
 
@@ -270,7 +303,7 @@
       });
     }
 
-    // 3. RENDERIZAÇÃO DOS CARDS DENTRO DA PÁGINA
+    // 4. RENDERIZAÇÃO DOS CARDS DO CATÁLOGO
     function renderCards() {
       const container = document.getElementById('cards-grid');
       container.innerHTML = '';
@@ -282,7 +315,7 @@
       });
 
       if (filteredData.length === 0) {
-        container.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: #8b949e;">Nenhum jogo encontrado nesta categoria.</p>';
+        container.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: #8b949e; padding: 40px 0;">Nenhum jogo encontrado nesta categoria.</p>';
         return;
       }
 
@@ -302,7 +335,7 @@
         card.innerHTML = `
           <div class="image-wrapper">
             <img src="${imageUrl}" class="game-cover" alt="${title}" loading="lazy" crossorigin="anonymous" />
-            ${targetDateStr ? `<div class="timer-badge" data-target="${targetDateStr}">Carregando...</div>` : ''}
+            ${targetDateStr ? `<div class="timer-badge" data-target="${targetDateStr}">Calculando...</div>` : ''}
           </div>
           <div class="card-content">
             <div class="game-title">${title}</div>
@@ -322,11 +355,10 @@
         container.appendChild(card);
       });
 
-      // Atualiza os relógios imediatamente após a renderização
       updateTimers();
     }
 
-    // 4. TROCA DE ABAS / FILTRO
+    // 5. TROCA DE ABAS DE CATEGORIA
     function filterCategory(category) {
       currentCategory = category;
       document.querySelectorAll('.tab-btn').forEach(btn => {
@@ -335,26 +367,25 @@
       renderCards();
     }
 
-    // 5. CARREGAMENTO DINÂMICO DOS DADOS DA PLANILHA (CSV)
+    // 6. BUSCA DADOS NA PLANILHA DO GOOGLE SHEETS
     async function loadSheetData() {
       try {
         const response = await fetch(GOOGLE_SHEETS_CSV_URL);
         const csvText = await response.text();
 
-        // Parser simples de CSV tratando aspas e vírgulas
-        const rows = csvText.split('\n').map(row => {
-          return row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(cell => cell.replace(/^"\vert{}"$/g, '').trim());
-        });
+        // Processa o CSV detetando colunas corretamente
+        const rows = parseCSV(csvText);
 
-        // Remove o cabeçalho
+        // Remove a primeira linha (cabeçalho da planilha)
         allGamesData = rows.slice(1);
         renderCards();
       } catch (err) {
         console.error("Erro ao carregar dados da planilha:", err);
+        document.getElementById('cards-grid').innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: #ff5252;">Erro ao carregar a planilha. Verifique se o link CSV está correto e público.</p>';
       }
     }
 
-    // 6. COMPARTILHAMENTO UNIFICADO (IMAGEM + LEGENDA NA MESMA MENSAGEM)
+    // 7. COMPARTILHAR IMAGEM + LEGENDA NA MESMA MENSAGEM
     async function shareSingleMessage(buttonEl, title, storeUrl) {
       const cardElement = buttonEl.closest('.game-card');
       const actionButtons = cardElement.querySelector('.action-buttons');
@@ -373,8 +404,6 @@
 
         canvas.toBlob(async (blob) => {
           const file = new File([blob], `MCO_GAMES_${title.replace(/\s+/g, '_')}.png`, { type: 'image/png' });
-          
-          // Legenda integrada diretamente ao arquivo para enviar numa mensagem única
           const shareCaption = `🎮 *MCO GAMES* - ${title}\n\nEsse e mais jogos acesse:\n${storeUrl}`;
 
           if (navigator.canShare && navigator.canShare({ files: [file] })) {
@@ -396,10 +425,10 @@
       }
     }
 
-    // Atualização contínua do relógio
+    // Atualiza os relógios a cada segundo
     setInterval(updateTimers, 1000);
 
-    // Inicialização ao carregar a página
+    // Carrega a planilha assim que a página é aberta
     document.addEventListener('DOMContentLoaded', loadSheetData);
   </script>
 </body>
