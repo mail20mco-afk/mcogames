@@ -445,6 +445,7 @@
             allGames = results.data.slice(1).map(row => parseCsvRow(row)).filter(g => g.name);
             populateCategoryDropdown(allGames);
             renderCatalog(allGames);
+            updateTimers(); // Executa imediatamente após renderizar
           } else {
             document.getElementById('catalog-container').innerHTML = '<p class="no-results">Nenhum jogo encontrado na planilha.</p>';
           }
@@ -471,7 +472,7 @@
         stockPrimary: parseInt(row[6]) || 0,
         priceSecondary: priceSec,
         stockSecondary: parseInt(row[8]) || 0,
-        targetDate: row[9] || '',
+        targetDate: row[9] ? row[9].trim() : '',
         img: row[10] || 'https://via.placeholder.com/300x375?text=MCO+GAMES',
         selectedType: pricePrim > 0 ? 'primary' : 'secondary'
       };
@@ -623,7 +624,7 @@
       }
     }
 
-    // CONSTRUÇÃO DO CARD DE JOGO
+    // CONSTRUÇÃO DO CARD DE JOGO (Sem IDs repetidos)
     function createGameCard(game) {
       const card = document.createElement('div');
       card.className = 'card';
@@ -637,7 +638,7 @@
         <div class="card-img-wrapper">
           <img src="${game.img}" alt="${game.name}" class="card-img" onerror="this.src='https://via.placeholder.com/300x375?text=MCO+GAMES'">
           <span class="card-badge">${game.platform}</span>
-          ${game.targetDate ? `<span class="timer-badge" id="timer-${game.id}">--:--:--</span>` : ''}
+          ${game.targetDate ? `<span class="timer-badge">--:--:--</span>` : ''}
         </div>
         <div class="card-content">
           <div class="card-title">${game.name}</div>
@@ -656,8 +657,8 @@
           <div class="price-box">
             <div class="old-price">De: R$ ${game.oldPrice.toFixed(2)}</div>
             <div class="price-row">
-              <div class="current-price" id="price-display-${game.id}">R$ ${currentPrice.toFixed(2)}</div>
-              <span class="discount-badge" id="discount-display-${game.id}" style="${discount > 0 ? '' : 'display:none;'}">-${discount}%</span>
+              <div class="current-price">R$ ${currentPrice.toFixed(2)}</div>
+              <span class="discount-badge" style="${discount > 0 ? '' : 'display:none;'}">-${discount}%</span>
             </div>
           </div>
 
@@ -685,11 +686,11 @@
       card.querySelectorAll('.btn-media').forEach(b => b.classList.remove('active'));
       btnElement.classList.add('active');
 
-      const priceDisplay = card.querySelector(`#price-display-${gameId}`);
+      const priceDisplay = card.querySelector('.current-price');
       const newPrice = type === 'primary' ? game.pricePrimary : game.priceSecondary;
-      priceDisplay.textContent = `R$ ${newPrice.toFixed(2)}`;
+      if (priceDisplay) priceDisplay.textContent = `R$ ${newPrice.toFixed(2)}`;
 
-      const discountBadge = card.querySelector(`#discount-display-${gameId}`);
+      const discountBadge = card.querySelector('.discount-badge');
       const newDiscount = getDiscountPercent(game.oldPrice, newPrice);
       if (discountBadge) {
         if (newDiscount > 0) {
@@ -757,30 +758,41 @@
       }
     }
 
-    // CONTAGEM REGRESSIVA (TIMERS)
+    // CONTAGEM REGRESSIVA (Atualiza TODOS os relógios presentes no DOM)
     function updateTimers() {
       const now = new Date().getTime();
+      const cards = document.querySelectorAll('.card');
 
-      allGames.forEach(game => {
-        if (!game.targetDate) return;
+      cards.forEach(card => {
+        const targetDateStr = card.dataset.targetDate;
+        if (!targetDateStr) return;
 
-        const timerEl = document.getElementById(`timer-${game.id}`);
+        const timerEl = card.querySelector('.timer-badge');
         if (!timerEl) return;
 
         let target;
-        if (game.targetDate.includes('/')) {
-          const parts = game.targetDate.split(' ');
+        if (targetDateStr.includes('/')) {
+          const parts = targetDateStr.trim().split(' ');
           const dateParts = parts[0].split('/');
           const timeParts = parts[1] ? parts[1].split(':') : [0,0,0];
-          target = new Date(dateParts[2], dateParts[1] - 1, dateParts[0], timeParts[0], timeParts[1] || 0, timeParts[2] || 0).getTime();
+          target = new Date(
+            parseInt(dateParts[2]),
+            parseInt(dateParts[1]) - 1,
+            parseInt(dateParts[0]),
+            parseInt(timeParts[0] || 0),
+            parseInt(timeParts[1] || 0),
+            parseInt(timeParts[2] || 0)
+          ).getTime();
         } else {
-          target = new Date(game.targetDate).getTime();
+          target = new Date(targetDateStr).getTime();
         }
+
+        if (isNaN(target)) return;
 
         const diff = target - now;
 
         if (diff <= 0) {
-          timerEl.textContent = 'Lançado / Oferta Encerrou';
+          timerEl.textContent = 'Lançado / Encerrou';
           timerEl.style.backgroundColor = '#e53e3e';
           timerEl.style.color = '#fff';
         } else {
@@ -790,6 +802,8 @@
           const seconds = Math.floor((diff % (1000 * 60)) / 1000);
 
           timerEl.textContent = `${days > 0 ? days + 'd ' : ''}${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+          timerEl.style.backgroundColor = '#ff9800';
+          timerEl.style.color = '#000';
         }
       });
     }
@@ -861,6 +875,7 @@
       });
 
       renderCatalog(filtered);
+      updateTimers();
     }
   </script>
 </body>
