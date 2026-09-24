@@ -1,435 +1,1293 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MCO GAMES - Catálogo</title>
-  <!-- Biblioteca para converter o card em imagem na partilha -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MCO GAMES | Sua Loja Digital</title>
+    
+    <!-- Meta Tags para redes sociais e WhatsApp -->
+    <meta property="og:title" content="MCO GAMES | Sua Loja Digital">
+    <meta property="og:description" content="Jogos digitais de PS4 e PS5 com os melhores preços. Ativação Instantânea!">
+    <meta property="og:image" content="https://mco-games.netlify.app/PS-Store.jpg">
 
-  <style>
-    :root {
-      --bg-color: #0d1117;
-      --card-bg: #161b22;
-      --text-color: #f0f6fc;
-      --accent-green: #00e676;
-      --accent-hover: #00c853;
-      --timer-bg: #ff9800;
-      --timer-text: #000;
-      --border-color: #30363d;
-    }
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <!-- PapaParse para leitura robusta do CSV -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    }
+    <!-- html2canvas para gerar print PNG dos cards -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
-    body {
-      background-color: var(--bg-color);
-      color: var(--text-color);
-      padding: 20px;
-    }
+    <style>
+        :root {
+            --bg-color: #0b0d10;
+            --card-bg: #13171d;
+            --accent-green: #00e676;
+            --accent-green-dark: #00b359;
+            --border-color: #202630;
+            --text-main: #ffffff;
+            --text-muted: #8c96a3;
+            --badge-discount: #ff0055;
+            --whatsapp-bg: #25d366;
+            --error-red: #ff4d4d;
+            --timer-orange: #ffaa00;
+        }
 
-    /* Navegação de Abas */
-    .tabs-nav {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 20px;
-      border-bottom: 1px solid var(--border-color);
-      padding-bottom: 12px;
-      overflow-x: auto;
-    }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+        }
 
-    .tab-btn {
-      background: var(--card-bg);
-      color: var(--text-color);
-      border: 1px solid var(--border-color);
-      padding: 8px 18px;
-      border-radius: 20px;
-      cursor: pointer;
-      font-weight: 600;
-      font-size: 0.95rem;
-      white-space: nowrap;
-      transition: all 0.2s ease;
-    }
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            padding-bottom: 120px;
+        }
 
-    .tab-btn.active, .tab-btn:hover {
-      background: var(--accent-green);
-      color: #000;
-      border-color: var(--accent-green);
-    }
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 30px;
+            background-color: #101318;
+            border-bottom: 1px solid var(--border-color);
+            position: sticky;
+            top: 0;
+            z-index: 90;
+        }
 
-    /* Grid do Catálogo */
-    .cards-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-      gap: 20px;
-    }
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
 
-    /* Card do Jogo */
-    .game-card {
-      background-color: var(--card-bg);
-      border-radius: 12px;
-      border: 1px solid var(--border-color);
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-      position: relative;
-    }
+        .brand-icon {
+            background: linear-gradient(135deg, var(--accent-green), #00b359);
+            color: #000;
+            width: 38px;
+            height: 38px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 900;
+            font-size: 1.2rem;
+        }
 
-    /* GARANTE A PROPORÇÃO 1:1 (QUADRADA) NAS CAPAS */
-    .image-wrapper {
-      position: relative;
-      width: 100%;
-      aspect-ratio: 1 / 1;
-      overflow: hidden;
-      background-color: #000;
-    }
+        .brand-title {
+            font-weight: 800;
+            font-size: 1.1rem;
+            letter-spacing: 0.5px;
+        }
 
-    .image-wrapper img,
-    .game-cover {
-      width: 100%;
-      height: 100%;
-      aspect-ratio: 1 / 1;
-      object-fit: cover;
-      display: block;
-    }
+        .brand-subtitle {
+            font-size: 0.7rem;
+            color: var(--accent-green);
+            font-weight: 700;
+            text-transform: uppercase;
+        }
 
-    /* Relógio / Temporizador de Pré-Venda na Capa */
-    .timer-badge {
-      position: absolute;
-      bottom: 10px;
-      right: 10px;
-      background-color: rgba(255, 152, 0, 0.95);
-      color: var(--timer-text);
-      font-size: 0.85rem;
-      font-weight: 700;
-      padding: 4px 10px;
-      border-radius: 16px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.5);
-      display: flex;
-      align-items: center;
-      gap: 5px;
-      z-index: 2;
-    }
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
 
-    /* Conteúdo dos Textos e Preços */
-    .card-content {
-      padding: 15px;
-      display: flex;
-      flex-direction: column;
-      flex: 1;
-      gap: 10px;
-    }
+        .community-btn {
+            background-color: var(--whatsapp-bg);
+            color: #000;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 800;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: transform 0.2s;
+        }
 
-    .game-title {
-      font-size: 1.1rem;
-      font-weight: 700;
-      line-height: 1.3;
-      color: #fff;
-    }
+        .community-btn:hover {
+            transform: scale(1.05);
+        }
 
-    .price-container {
-      margin-top: auto;
-    }
+        .header-tag {
+            background-color: rgba(0, 230, 118, 0.1);
+            color: var(--accent-green);
+            border: 1px solid var(--accent-green);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
 
-    .old-price {
-      text-decoration: line-through;
-      color: #8b949e;
-      font-size: 0.85rem;
-    }
+        .container {
+            max-width: 1300px;
+            margin: 0 auto;
+            padding: 24px 20px;
+        }
 
-    .current-price {
-      font-size: 1.25rem;
-      font-weight: 800;
-      color: var(--accent-green);
-    }
+        .hero-section {
+            margin-bottom: 24px;
+        }
 
-    /* Botões de Ação */
-    .action-buttons {
-      display: flex;
-      gap: 8px;
-    }
+        .hero-title {
+            font-size: 2rem;
+            font-weight: 900;
+            margin-bottom: 6px;
+        }
 
-    .btn-buy {
-      flex: 1;
-      background-color: var(--accent-green);
-      color: #000;
-      border: none;
-      padding: 10px;
-      border-radius: 6px;
-      font-weight: 700;
-      cursor: pointer;
-      text-align: center;
-      text-decoration: none;
-      transition: background 0.2s ease;
-    }
+        .hero-subtitle {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
 
-    .btn-buy:hover {
-      background-color: var(--accent-hover);
-    }
+        .status-box {
+            background-color: var(--card-bg);
+            border: 1px dashed var(--border-color);
+            border-radius: 12px;
+            padding: 40px 20px;
+            text-align: center;
+            margin: 20px 0;
+        }
 
-    .btn-share {
-      background-color: #21262d;
-      border: 1px solid var(--border-color);
-      color: #fff;
-      padding: 10px;
-      border-radius: 6px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
+        .status-box.error {
+            border-color: var(--error-red);
+            color: var(--error-red);
+        }
 
-    .btn-share:hover {
-      background-color: #30363d;
-    }
-  </style>
+        .status-box h3 {
+            font-size: 1.1rem;
+            margin-bottom: 8px;
+        }
+
+        .status-box p {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .carousel-section {
+            margin-bottom: 32px;
+        }
+
+        .carousel-title {
+            font-size: 1.1rem;
+            font-weight: 800;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #fff;
+        }
+
+        .carousel-grid {
+            display: flex;
+            gap: 16px;
+            overflow-x: auto;
+            scroll-behavior: smooth;
+            padding-bottom: 10px;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        .carousel-grid::-webkit-scrollbar {
+            display: none;
+        }
+
+        .carousel-grid .card {
+            min-width: 220px;
+            max-width: 230px;
+            flex-shrink: 0;
+        }
+
+        /* --- FILTROS E PESQUISA --- */
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            margin-bottom: 24px;
+        }
+
+        .search-input {
+            width: 100%;
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            padding: 12px 16px;
+            border-radius: 8px;
+            color: #fff;
+            font-size: 0.9rem;
+            outline: none;
+        }
+
+        .search-input:focus {
+            border-color: var(--accent-green);
+        }
+
+        .category-chips {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            padding-bottom: 6px;
+            scrollbar-width: none;
+        }
+
+        .category-chips::-webkit-scrollbar {
+            display: none;
+        }
+
+        .chip-btn {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-muted);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.82rem;
+            font-weight: 700;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.2s ease;
+        }
+
+        .chip-btn:hover, .chip-btn.active {
+            background-color: var(--accent-green);
+            color: #000;
+            border-color: var(--accent-green);
+        }
+
+        .category-title-section {
+            font-size: 1.2rem;
+            font-weight: 800;
+            margin: 32px 0 16px 0;
+            color: var(--accent-green);
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 8px;
+        }
+
+        .grid-games {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 18px;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            overflow: hidden;
+            position: relative;
+            transition: all 0.2s ease;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .card:hover {
+            border-color: #353f4e;
+            transform: translateY(-2px);
+        }
+
+        .card.selected {
+            border-color: var(--accent-green);
+            box-shadow: 0 0 18px rgba(0, 230, 118, 0.25);
+        }
+
+        .card-img-container {
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            position: relative;
+            background-color: #1a1e26;
+        }
+
+        .card-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .platform-tag {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background-color: rgba(0,0,0,0.85);
+            color: #fff;
+            font-size: 0.65rem;
+            font-weight: 800;
+            padding: 4px 8px;
+            border-radius: 4px;
+            border: 1px solid rgba(255,255,255,0.2);
+            z-index: 2;
+        }
+
+        .discount-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: var(--badge-discount);
+            color: #fff;
+            font-size: 0.7rem;
+            font-weight: 800;
+            padding: 3px 6px;
+            border-radius: 4px;
+            z-index: 2;
+        }
+
+        .timer-badge {
+            background-color: rgba(255, 170, 0, 0.12);
+            color: var(--timer-orange);
+            border: 1px solid rgba(255, 170, 0, 0.35);
+            font-size: 0.7rem;
+            font-weight: 800;
+            padding: 4px 8px;
+            border-radius: 6px;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            width: fit-content;
+            margin-top: 2px;
+        }
+
+        .card-info {
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            flex-grow: 1;
+            justify-content: space-between;
+        }
+
+        .card-title {
+            font-size: 0.88rem;
+            font-weight: 700;
+            color: #fff;
+            line-height: 1.2;
+            min-height: 2.2em;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .price-container {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .old-price {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-decoration: line-through;
+        }
+
+        .current-price {
+            font-size: 1.05rem;
+            font-weight: 800;
+            color: var(--accent-green);
+        }
+
+        .type-selector {
+            display: flex;
+            gap: 6px;
+            margin-top: 4px;
+        }
+
+        .type-btn {
+            flex: 1;
+            background-color: #1a202c;
+            border: 1px solid var(--border-color);
+            color: #fff;
+            padding: 6px 4px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.68rem;
+            text-align: center;
+            transition: all 0.2s;
+            line-height: 1.3;
+        }
+
+        .type-btn:hover {
+            background-color: #263040;
+        }
+
+        .type-btn.active {
+            background-color: var(--accent-green);
+            color: #000;
+            font-weight: 800;
+            border-color: var(--accent-green);
+        }
+
+        /* --- BOTOES DO CARD --- */
+        .card-actions-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 6px;
+        }
+
+        .btn-buy-direct {
+            flex: 1;
+            background-color: var(--accent-green);
+            color: #000;
+            border: none;
+            border-radius: 8px;
+            padding: 9px 10px;
+            font-size: 0.82rem;
+            font-weight: 800;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            transition: all 0.2s ease;
+        }
+
+        .btn-buy-direct:hover {
+            background-color: var(--accent-green-dark);
+            transform: scale(1.02);
+        }
+
+        .btn-share-circle {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            background-color: var(--whatsapp-bg);
+            color: #000;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            flex-shrink: 0;
+            transition: transform 0.2s ease;
+            box-shadow: 0 2px 8px rgba(37, 211, 102, 0.3);
+        }
+
+        .btn-share-circle:hover {
+            transform: scale(1.1);
+        }
+
+        .bottom-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background-color: #12161d;
+            border-top: 2px solid var(--border-color);
+            padding: 14px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            z-index: 100;
+            transform: translateY(100%);
+            transition: transform 0.3s ease;
+            box-shadow: 0 -10px 25px rgba(0,0,0,0.5);
+        }
+
+        .bottom-bar.active {
+            transform: translateY(0);
+        }
+
+        .selected-info {
+            text-align: center;
+        }
+
+        .selected-info h4 {
+            font-size: 0.9rem;
+            font-weight: 800;
+        }
+
+        .selected-info p {
+            font-size: 1.1rem;
+            color: var(--accent-green);
+            font-weight: 800;
+        }
+
+        .card-fee-note {
+            font-size: 0.65rem;
+            color: var(--text-muted);
+            font-weight: 400;
+        }
+
+        .btn-continue {
+            background-color: var(--accent-green);
+            color: #000;
+            border: none;
+            padding: 12px 32px;
+            border-radius: 8px;
+            font-weight: 800;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.2s, transform 0.2s;
+            width: 100%;
+            max-width: 320px;
+        }
+
+        .btn-continue:hover {
+            background-color: var(--accent-green-dark);
+            transform: scale(1.02);
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.75);
+            backdrop-filter: blur(4px);
+            z-index: 200;
+            display: none;
+        }
+
+        .modal-overlay.active {
+            display: block;
+        }
+
+        .modal-drawer {
+            position: fixed;
+            top: 0;
+            right: -450px;
+            width: 100%;
+            max-width: 420px;
+            height: 100%;
+            background-color: #12151b;
+            z-index: 201;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            transition: right 0.3s ease;
+        }
+
+        .modal-drawer.active {
+            right: 0;
+        }
+
+        .drawer-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 15px;
+        }
+
+        .drawer-header span {
+            color: var(--accent-green);
+            font-size: 0.75rem;
+            font-weight: 800;
+            text-transform: uppercase;
+        }
+
+        .drawer-header h2 {
+            font-size: 1.3rem;
+            margin-top: 2px;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 1.4rem;
+            cursor: pointer;
+        }
+
+        .item-list {
+            flex-grow: 1;
+            overflow-y: auto;
+            margin-bottom: 20px;
+        }
+
+        .selected-item-card {
+            background-color: #1a1e27;
+            padding: 12px 14px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            border: 1px solid var(--border-color);
+        }
+
+        .selected-item-card h5 {
+            font-size: 0.85rem;
+            margin-bottom: 2px;
+        }
+
+        .selected-item-card p {
+            font-size: 0.8rem;
+            color: var(--accent-green);
+            font-weight: 700;
+        }
+
+        .remove-item {
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 1rem;
+            padding: 4px;
+        }
+
+        .drawer-footer {
+            border-top: 1px solid var(--border-color);
+            padding-top: 16px;
+        }
+
+        .price-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-bottom: 16px;
+        }
+
+        .price-row span {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .price-row h3 {
+            color: var(--accent-green);
+            font-size: 1.4rem;
+            font-weight: 800;
+            text-align: right;
+        }
+
+        .btn-whatsapp {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            width: 100%;
+            background-color: var(--accent-green);
+            color: #000;
+            padding: 14px;
+            border-radius: 8px;
+            font-weight: 800;
+            text-decoration: none;
+            font-size: 1rem;
+            transition: background-color 0.2s;
+        }
+
+        .btn-whatsapp:hover {
+            background-color: var(--accent-green-dark);
+        }
+
+        @media (max-width: 600px) {
+            header { padding: 12px 20px; }
+            .grid-games { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+            .modal-drawer { max-width: 100%; }
+            .header-tag { display: none; }
+            .hero-title { font-size: 1.5rem; }
+        }
+    </style>
 </head>
 <body>
 
-  <!-- Abas de Categoria -->
-  <div class="tabs-nav">
-    <button class="tab-btn active" onclick="filterCategory('TODOS')">Todos</button>
-    <button class="tab-btn" onclick="filterCategory('PROMO')">Promoções</button>
-    <button class="tab-btn" onclick="filterCategory('PRE VENDA')">Pré-Venda</button>
-  </div>
-
-  <!-- Contentor dos Jogos -->
-  <div id="cards-grid" class="cards-grid">
-    <p style="grid-column: 1/-1; text-align: center; color: #8b949e; padding: 40px 0;">A carregar jogos da planilha...</p>
-  </div>
-
-  <script>
-    // =========================================================================
-    // COLE AQUI A URL DE EXPORTAÇÃO CSV DA SUA PLANILHA DO GOOGLE SHEETS
-    // =========================================================================
-    const GOOGLE_SHEETS_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTbnddE66aBmhilS8BtFkch5qx41mzkZOiVtVeMxzHJRXljT3qevVZFGf4jU8o1LNZHuHL_3bnIGqRg/pub?output=csv';
-
-    let allGamesData = [];
-    let currentCategory = 'TODOS';
-
-    // 1. LEITOR INTELIGENTE DE CSV (SUPORTA SEPARADORES ';' OU ',')
-    function parseCSV(csvText) {
-      const lines = csvText.split(/\r?\n/).filter(line => line.trim() !== '');
-      if (lines.length === 0) return [];
-
-      // Identifica se a planilha exportou com ';' (padrão Brasil/Portugal) ou ','
-      const firstLine = lines[0];
-      const delimiter = firstLine.includes(';') ? ';' : ',';
-
-      return lines.map(line => {
-        const row = [];
-        let currentCell = '';
-        let insideQuotes = false;
-
-        for (let i = 0; i < line.length; i++) {
-          const char = line[i];
-          if (char === '"') {
-            insideQuotes = !insideQuotes;
-          } else if (char === delimiter && !insideQuotes) {
-            row.push(currentCell.trim().replace(/^"|"$/g, ''));
-            currentCell = '';
-          } else {
-            currentCell += char;
-          }
-        }
-        row.push(currentCell.trim().replace(/^"|"$/g, ''));
-        return row;
-      });
-    }
-
-    // 2. PARSER FLEXÍVEL DE DATAS (DD/MM/AAAA, YYYY-MM-DD ou ISO)
-    function parseTargetDate(dateStr) {
-      if (!dateStr || String(dateStr).trim() === '') return null;
-      dateStr = String(dateStr).trim();
-
-      // Formato DD/MM/AAAA ou DD/MM/AAAA HH:MM:SS
-      if (dateStr.includes('/')) {
-        const parts = dateStr.split(' ');
-        const dateParts = parts[0].split('/');
-        const day = parseInt(dateParts[0], 10);
-        const month = parseInt(dateParts[1], 10) - 1;
-        const year = parseInt(dateParts[2], 10);
-
-        let hours = 23, minutes = 59, seconds = 59;
-        if (parts[1]) {
-          const timeParts = parts[1].split(':');
-          hours = parseInt(timeParts[0], 10) || 0;
-          minutes = parseInt(timeParts[1], 10) || 0;
-          seconds = parseInt(timeParts[2], 10) || 0;
-        }
-        return new Date(year, month, day, hours, minutes, seconds);
-      }
-
-      // Formato ISO / YYYY-MM-DD
-      const parsedDate = new Date(dateStr);
-      return isNaN(parsedDate.getTime()) ? null : parsedDate;
-    }
-
-    // 3. ATUALIZAÇÃO DOS RELÓGIOS DE CONTAGEM REGRESSIVA
-    function updateTimers() {
-      const now = new Date().getTime();
-      const timerElements = document.querySelectorAll('.timer-badge');
-
-      timerElements.forEach(el => {
-        const targetStr = el.getAttribute('data-target');
-        const targetDate = parseTargetDate(targetStr);
-
-        if (!targetDate) {
-          el.style.display = 'none';
-          return;
-        }
-
-        const distance = targetDate.getTime() - now;
-
-        if (distance < 0) {
-          el.innerHTML = "⏳ Lançado";
-          return;
-        }
-
-        const days = Math.floor(distance / (1000 * 60 * 60 * 24));
-        const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-        const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-        const seconds = Math.floor((distance % (1000 * 60)) / 1000);
-
-        let formattedTime = "⏳ ";
-        if (days > 0) formattedTime += `${days}d `;
-        formattedTime += `${String(hours).padStart(2, '0')}h ${String(minutes).padStart(2, '0')}m ${String(seconds).padStart(2, '0')}s`;
-
-        el.innerHTML = formattedTime;
-      });
-    }
-
-    // 4. RENDERIZAÇÃO DOS CARDS DO CATÁLOGO
-    function renderCards() {
-      const container = document.getElementById('cards-grid');
-      container.innerHTML = '';
-
-      const filteredData = allGamesData.filter(row => {
-        if (currentCategory === 'TODOS') return true;
-        const categoria = (row[3] || '').toUpperCase().trim();
-        return categoria === currentCategory;
-      });
-
-      if (filteredData.length === 0) {
-        container.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: #8b949e; padding: 40px 0;">Nenhum jogo encontrado nesta categoria.</p>';
-        return;
-      }
-
-      filteredData.forEach((row, index) => {
-        const title = row[1] || 'Jogo sem título';
-        const imageUrl = row[2] || '';
-        const category = row[3] || '';
-        const oldPrice = row[4] || '';
-        const price = row[5] || '';
-        const buyUrl = row[6] || '#';
-        const targetDateStr = row[9] || '';
-
-        const card = document.createElement('div');
-        card.className = 'game-card';
-        card.id = `card-${index}`;
-
-        card.innerHTML = `
-          <div class="image-wrapper">
-            <img src="${imageUrl}" class="game-cover" alt="${title}" loading="lazy" crossorigin="anonymous" />
-            ${targetDateStr ? `<div class="timer-badge" data-target="${targetDateStr}">Calculando...</div>` : ''}
-          </div>
-          <div class="card-content">
-            <div class="game-title">${title}</div>
-            <div class="price-container">
-              ${oldPrice ? `<div class="old-price">De: ${oldPrice}</div>` : ''}
-              <div class="current-price">A partir de ${price}</div>
+    <header>
+        <div class="brand">
+            <div class="brand-icon">🎮</div>
+            <div>
+                <div class="brand-title">MCO GAMES</div>
+                <div class="brand-subtitle">Sua Loja Digital</div>
             </div>
-            <div class="action-buttons">
-              <a href="${buyUrl}" target="_blank" class="btn-buy">Comprar</a>
-              <button class="btn-share" onclick="shareSingleMessage(this, '${title.replace(/'/g, "\\'")}', '${buyUrl}')" title="Compartilhar">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
-              </button>
+        </div>
+        <div class="header-actions">
+            <a href="https://chat.whatsapp.com/IREOzjw9jh55ekz95Nv3Pd" target="_blank" class="community-btn">
+                💬 Grupo VIP
+            </a>
+            <div class="header-tag">⚡ Ativação Instantânea</div>
+        </div>
+    </header>
+
+    <div class="container">
+
+        <div class="hero-section">
+            <h1 class="hero-title">Encontre seu próximo jogo</h1>
+            <p class="hero-subtitle">Escolha o jogo, selecione o tipo de mídia e conclua pelo WhatsApp.</p>
+        </div>
+
+        <div id="loadingContainer" class="status-box">
+            <h3>⏳ A carregar catálogo completo...</h3>
+            <p>Sincronizando jogos diretamente da sua planilha do Google Sheets.</p>
+        </div>
+
+        <div id="errorContainer" class="status-box error" style="display: none;">
+            <h3>Não foi possível carregar o catálogo.</h3>
+            <p>Verifique se a planilha continua publicada na web como CSV.</p>
+        </div>
+
+        <div id="mainContent" style="display: none;">
+            
+            <div class="carousel-section" id="carouselSection">
+                <div class="carousel-title">🔥 Destaques em Promoção (Deslize ➔)</div>
+                <div id="carouselGrid" class="carousel-grid"></div>
             </div>
-          </div>
-        `;
 
-        container.appendChild(card);
-      });
+            <div class="controls">
+                <input type="text" id="searchInput" class="search-input" placeholder="🔍 Pesquisar jogo pelo nome..." oninput="renderGames()">
+                <div class="category-chips" id="categoryChips"></div>
+            </div>
 
-      updateTimers();
-    }
+            <div id="catalogContainer"></div>
+        </div>
+    </div>
 
-    // 5. TROCA DE ABAS DE CATEGORIA
-    function filterCategory(category) {
-      currentCategory = category;
-      document.querySelectorAll('.tab-btn').forEach(btn => {
-        btn.classList.toggle('active', btn.innerText.toUpperCase().includes(category));
-      });
-      renderCards();
-    }
+    <div class="bottom-bar" id="bottomBar">
+        <div class="selected-info">
+            <h4 id="barSelectedCount">0 item(ns) selecionado(s)</h4>
+            <p id="barSelectedTotal">Total: R$ 0,00</p>
+            <div class="card-fee-note">*Valores para PIX. Cartão de crédito possui taxa da máquina.</div>
+        </div>
+        <button class="btn-continue" onclick="openModal()">Finalizar Pedido ➔</button>
+    </div>
 
-    // 6. BUSCA DADOS NA PLANILHA DO GOOGLE SHEETS
-    async function loadSheetData() {
-      try {
-        const response = await fetch(GOOGLE_SHEETS_CSV_URL);
-        const csvText = await response.text();
+    <div class="modal-overlay" id="modalOverlay" onclick="closeModal()"></div>
+    <div class="modal-drawer" id="modalDrawer">
+        <div>
+            <div class="drawer-header">
+                <div>
+                    <span>CARRINHO DE COMPRAS</span>
+                    <h2>Resumo do Pedido</h2>
+                </div>
+                <button class="close-btn" onclick="closeModal()">✕</button>
+            </div>
 
-        // Processa o CSV detetando colunas corretamente
-        const rows = parseCSV(csvText);
+            <div class="item-list" id="drawerItemList"></div>
+        </div>
 
-        // Remove a primeira linha (cabeçalho da planilha)
-        allGamesData = rows.slice(1);
-        renderCards();
-      } catch (err) {
-        console.error("Erro ao carregar dados da planilha:", err);
-        document.getElementById('cards-grid').innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: #ff5252;">Erro ao carregar a planilha. Verifique se o link CSV está correto e público.</p>';
-      }
-    }
+        <div class="drawer-footer">
+            <div class="price-row">
+                <span>Valor no PIX:</span>
+                <div>
+                    <h3 id="drawerTotalPrice">R$ 0,00</h3>
+                    <div class="card-fee-note" style="text-align: right;">Cartão de crédito com pequeno acréscimo.</div>
+                </div>
+            </div>
+            <a href="#" id="whatsappLink" target="_blank" class="btn-whatsapp">
+                🛒 Concluir Compra no WhatsApp
+            </a>
+        </div>
+    </div>
 
-    // 7. COMPARTILHAR IMAGEM + LEGENDA NA MESMA MENSAGEM
-    async function shareSingleMessage(buttonEl, title, storeUrl) {
-      const cardElement = buttonEl.closest('.game-card');
-      const actionButtons = cardElement.querySelector('.action-buttons');
-      
-      if (actionButtons) actionButtons.style.display = 'none';
+    <script>
+        const PHONE_NUMBER = "5599981810222";
+        const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTbnddE66aBmhilS8BtFkch5qx41mzkZOiVtVeMxzHJRXljT3qevVZFGf4jU8o1LNZHuHL_3bnIGqRg/pub?output=csv";
 
-      try {
-        const canvas = await html2canvas(cardElement, {
-          scale: 2,
-          useCORS: true,
-          allowTaint: true,
-          backgroundColor: '#161b22'
-        });
+        let games = [];
+        let selectedCart = [];
+        let activeCategory = 'ALL';
 
-        if (actionButtons) actionButtons.style.display = 'flex';
+        function parsePrice(val) {
+            if (!val) return 0;
+            let clean = val.toString().replace(/[^\d,\.]/g, '').replace(',', '.');
+            return parseFloat(clean) || 0;
+        }
 
-        canvas.toBlob(async (blob) => {
-          const file = new File([blob], `MCO_GAMES_${title.replace(/\s+/g, '_')}.png`, { type: 'image/png' });
-          const shareCaption = `🎮 *MCO GAMES* - ${title}\n\nEsse e mais jogos acesse:\n${storeUrl}`;
+        function parseTargetDate(dateStr) {
+            if (!dateStr) return null;
+            let str = dateStr.toString().trim();
+            if (!str) return null;
 
-          if (navigator.canShare && navigator.canShare({ files: [file] })) {
-            await navigator.share({
-              files: [file],
-              text: shareCaption
+            if (str.includes('/')) {
+                const parts = str.split(' ');
+                const dateParts = parts[0].split('/');
+                if (dateParts.length === 3) {
+                    const day = parseInt(dateParts[0], 10);
+                    const month = parseInt(dateParts[1], 10) - 1;
+                    const year = parseInt(dateParts[2], 10);
+                    let hours = 23, minutes = 59, seconds = 59;
+
+                    if (parts[1]) {
+                        const timeParts = parts[1].split(':');
+                        hours = parseInt(timeParts[0], 10) || 0;
+                        minutes = parseInt(timeParts[1], 10) || 0;
+                        seconds = parseInt(timeParts[2], 10) || 0;
+                    }
+
+                    return new Date(year, month, day, hours, minutes, seconds);
+                }
+            }
+
+            const parsed = new Date(str);
+            return isNaN(parsed.getTime()) ? null : parsed;
+        }
+
+        function getCountdownString(targetDateStr) {
+            const target = parseTargetDate(targetDateStr);
+            if (!target) return null;
+
+            const now = new Date();
+            const diff = target.getTime() - now.getTime();
+
+            if (diff <= 0) {
+                return "⏳ Lançado";
+            }
+
+            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+            const minutes = Math.floor((diff / (1000 * 60)) % 60);
+            const seconds = Math.floor((diff / 1000) % 60);
+
+            const pad = num => String(num).padStart(2, '0');
+
+            if (days > 0) {
+                return `${days}d ${pad(hours)}h ${pad(minutes)}m ${pad(seconds)}s`;
+            }
+            return `${pad(hours)}h ${pad(minutes)}m ${pad(seconds)}s`;
+        }
+
+        function updateTimers() {
+            const timerElements = document.querySelectorAll('.timer-badge');
+            timerElements.forEach(el => {
+                const targetStr = el.getAttribute('data-target');
+                if (targetStr) {
+                    const countdown = getCountdownString(targetStr);
+                    if (countdown) {
+                        el.innerHTML = `⏳ ${countdown}`;
+                        el.style.display = 'inline-flex';
+                    } else {
+                        el.style.display = 'none';
+                    }
+                }
             });
-          } else {
+        }
+
+        function fetchCatalogFromSheets() {
+            Papa.parse(SHEET_CSV_URL, {
+                download: true,
+                header: false,
+                skipEmptyLines: true,
+                complete: function(results) {
+                    if (results && results.data && results.data.length > 0) {
+                        parseCsvData(results.data);
+                    } else {
+                        showError();
+                    }
+                },
+                error: function(err) {
+                    console.error("Erro ao carregar CSV:", err);
+                    showError();
+                }
+            });
+        }
+
+        function parseCsvData(rows) {
+            games = [];
+
+            for (let i = 1; i < rows.length; i++) {
+                const row = rows[i];
+                if (!row || row.length < 2) continue;
+
+                const name = row[1] ? row[1].trim() : '';
+                if (!name || name.toLowerCase() === 'nome' || name.toLowerCase() === 'jogo') continue;
+
+                // Detecta imagem na coluna 10 ou na coluna 2 flexivelmente
+                let imgUrl = "";
+                if (row[10] && row[10].trim().startsWith('http')) {
+                    imgUrl = row[10].trim();
+                } else if (row[2] && row[2].trim().startsWith('http')) {
+                    imgUrl = row[2].trim();
+                } else {
+                    imgUrl = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTnOXAQFE6SWdIZy6b4OpXDWYJUjkIbnYx7gQLCRunJ3w&s=10";
+                }
+
+                const pricePrimary = parsePrice(row[5]);
+                const stockPrimary = row[6] ? (parseInt(row[6].toString().replace(/\D/g, '')) || 0) : 0;
+
+                const priceSecondary = parsePrice(row[7]);
+                const stockSecondary = row[8] ? (parseInt(row[8].toString().replace(/\D/g, '')) || 0) : 0;
+
+                const oldPrice = parsePrice(row[4]);
+
+                let validPrices = [];
+                if (pricePrimary > 0 && stockPrimary > 0) validPrices.push(pricePrimary);
+                if (priceSecondary > 0 && stockSecondary > 0) validPrices.push(priceSecondary);
+
+                if (validPrices.length === 0) {
+                    if (pricePrimary > 0) validPrices.push(pricePrimary);
+                    if (priceSecondary > 0) validPrices.push(priceSecondary);
+                }
+
+                const mainPrice = validPrices.length > 0 ? Math.min(...validPrices) : (pricePrimary || priceSecondary || 0);
+
+                const targetDate = row[9] ? row[9].trim() : '';
+
+                games.push({
+                    id: row[0] && row[0].trim() ? row[0].trim() : `game-${i}`,
+                    name: name,
+                    platform: row[2] && !row[2].trim().startsWith('http') ? row[2].trim() : 'PS4 / PS5',
+                    category: row[3] ? row[3].trim() : 'Geral',
+                    oldPrice: oldPrice > 0 ? oldPrice : (mainPrice * 1.3),
+                    pricePrimary: pricePrimary,
+                    stockPrimary: stockPrimary,
+                    priceSecondary: priceSecondary,
+                    stockSecondary: stockSecondary,
+                    mainPrice: mainPrice,
+                    targetDate: targetDate,
+                    img: imgUrl
+                });
+            }
+
+            if (games.length === 0) {
+                showError();
+                return;
+            }
+
+            document.getElementById('loadingContainer').style.display = 'none';
+            document.getElementById('mainContent').style.display = 'block';
+
+            populateCategoryChips();
+            renderCarousel();
+            renderGames();
+            startAutoScroll();
+
+            updateTimers();
+            setInterval(updateTimers, 1000);
+        }
+
+        function showError() {
+            document.getElementById('loadingContainer').style.display = 'none';
+            document.getElementById('errorContainer').style.display = 'block';
+        }
+
+        function populateCategoryChips() {
+            const container = document.getElementById('categoryChips');
+            container.innerHTML = '';
+
+            const categories = ['ALL', ...new Set(games.map(g => g.category))];
+            
+            categories.forEach(cat => {
+                const btn = document.createElement('button');
+                btn.className = `chip-btn ${cat === activeCategory ? 'active' : ''}`;
+                btn.innerText = cat === 'ALL' ? 'Todos' : cat;
+                btn.onclick = () => {
+                    activeCategory = cat;
+                    document.querySelectorAll('.chip-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    renderGames();
+                };
+                container.appendChild(btn);
+            });
+        }
+
+        function toggleSelectType(gameId, type) {
+            const game = games.find(g => g.id === gameId);
+            if (!game) return;
+
+            const price = type === 'Primária' ? game.pricePrimary : game.priceSecondary;
+
+            const idx = selectedCart.findIndex(i => i.gameId === gameId && i.type === type);
+            if (idx > -1) {
+                selectedCart.splice(idx, 1);
+            } else {
+                selectedCart = selectedCart.filter(i => i.gameId !== gameId);
+                selectedCart.push({ gameId: gameId, name: game.name, platform: game.platform, type: type, price: price });
+            }
+
+            renderCarousel();
+            renderGames();
+            updateBottomBar();
+        }
+
+        function buyGameDirect(event, gameId) {
+            event.stopPropagation();
+            const game = games.find(g => g.id === gameId);
+            if (!game) return;
+
+            const cartItem = selectedCart.find(i => i.gameId === gameId);
+            let typeStr = cartItem ? cartItem.type : (game.pricePrimary > 0 ? 'Primária' : 'Secundária');
+            let priceVal = cartItem ? cartItem.price : game.mainPrice;
+
+            const message = `🔥 *COMPRA DIRETA - MCO GAMES* 🔥\n\n` +
+                            `Olá! Quero comprar o jogo:\n` +
+                            `🎮 *${game.name}* (${game.platform})\n` +
+                            `📌 Mídia: *${typeStr}*\n` +
+                            `💰 Valor: *R$ ${priceVal.toFixed(2).replace('.', ',')}*\n\n` +
+                            `Como faço para efetuar o pagamento?`;
+
+            window.open(`https://wa.me/${PHONE_NUMBER}?text=${encodeURIComponent(message)}`, '_blank');
+        }
+
+        async function shareCardPrint(event, gameId) {
+            event.stopPropagation();
+            const cardEl = event.currentTarget.closest('.card');
+            if (!cardEl) return;
+
+            const actionsRow = cardEl.querySelector('.card-actions-row');
+            if (actionsRow) actionsRow.style.display = 'none';
+
+            try {
+                const canvas = await html2canvas(cardEl, {
+                    scale: 2,
+                    useCORS: true,
+                    allowTaint: true,
+                    backgroundColor: '#13171d'
+                });
+
+                const game = games.find(g => g.id === gameId);
+                const safeName = game ? game.name.replace(/[^a-zA-Z0-9]/g, '_') : 'jogo';
+                const fileName = `MCO_GAMES_${safeName}.png`;
+
+                canvas.toBlob(async (blob) => {
+                    if (!blob) {
+                        if (actionsRow) actionsRow.style.display = 'flex';
+                        return;
+                    }
+
+                    const file = new File([blob], fileName, { type: 'image/png' });
+
+                    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                        try {
+                            await navigator.share({
+                                files: [file],
+                                title: game ? game.name : 'MCO GAMES',
+                                text: `Confira essa oferta na MCO GAMES: ${game ? game.name : ''}`
+                            });
+                        } catch (shareErr) {
+                            downloadBlob(blob, fileName);
+                        }
+                    } else {
+                        downloadBlob(blob, fileName);
+                    }
+
+                    if (actionsRow) actionsRow.style.display = 'flex';
+                }, 'image/png');
+
+            } catch (err) {
+                console.error("Erro ao gerar print do card:", err);
+                if (actionsRow) actionsRow.style.display = 'flex';
+            }
+        }
+
+        function downloadBlob(blob, fileName) {
             const link = document.createElement('a');
-            link.download = `MCO_GAMES_${title}.png`;
-            link.href = canvas.toDataURL();
+            link.href = URL.createObjectURL(blob);
+            link.download = fileName;
             link.click();
-          }
-        }, 'image/png');
+            URL.revokeObjectURL(link.href);
+        }
 
-      } catch (err) {
-        console.error('Erro ao compartilhar:', err);
-        if (actionButtons) actionButtons.style.display = 'flex';
-      }
-    }
+        function createCardElement(game) {
+            const card = document.createElement('div');
+            card.className = 'card';
 
-    // Atualiza os relógios a cada segundo
-    setInterval(updateTimers, 1000);
+            const primarySelected = selectedCart.some(i => i.gameId === game.id && i.type === 'Primária');
+            const secondarySelected = selectedCart.some(i => i.gameId === game.id && i.type === 'Secundária');
 
-    // Carrega a planilha assim que a página é aberta
-    document.addEventListener('DOMContentLoaded', loadSheetData);
-  </script>
+            if (primarySelected || secondarySelected) {
+                card.classList.add('selected');
+            }
+
+            const discount = (game.oldPrice > game.mainPrice) 
+                ? Math.round(((game.oldPrice - game.mainPrice) / game.oldPrice) * 100) 
+                : 0;
+
+            let buttonsHtml = '';
+            const primaryTxt = `Primária (${game.stockPrimary} Un)<br>R$ ${game.pricePrimary.toFixed(2).replace('.', ',')}`;
+            const secondaryTxt = `Secundária (${game.stockSecondary} Un)<br>R$ ${game.priceSecondary.toFixed(2).replace('.', ',')}`;
+
+            if (game.pricePrimary > 0 && game.priceSecondary > 0) {
+                buttonsHtml = `
+                    <div class="type-selector">
+                        <button class="type-btn ${primarySelected ? 'active' : ''}" onclick="toggleSelectType('${game.id}', 'Primária')">
+                            ${primaryTxt}
+                        </button>
+                        <button class="type-btn ${secondarySelected ? 'active' : ''}" onclick="toggleSelectType('${game.id}', 'Secundária')">
+                            ${secondaryTxt}
+                        </button>
+                    </div>
+                `;
+            } else if (game.pricePrimary > 0) {
+                buttonsHtml = `
+                    <div class="type-selector">
+                        <button class="type-btn ${primarySelected ? 'active' : ''}" style="width:100%" onclick="toggleSelectType('${game.id}', 'Primária')">
+                            ${primaryTxt}
+                        </button>
+                    </div>
+                `;
+            } else if (game.priceSecondary > 0) {
+                buttonsHtml = `
+                    <div class="type-selector">
+                        <button class="type-btn ${secondarySelected ? 'active' : ''}" style="width:100%" onclick="toggleSelectType('${game.id}', 'Secundária')">
+                            ${secondaryTxt}
+                        </button>
+                    </div>
+                `;
+            }
+
+            let timerHtml = '';
+            if (game.targetDate) {
+                timerHtml = `<div class="timer-badge" data-target="${game.targetDate}">⏳ Carregando...</div>`;
+            }
+
+            card.innerHTML = `
+                <div class="card-img-container">
+                    <span class="platform-tag">${game.platform}</span>
+                    ${discount > 0 ? `<span class="discount-badge">-${discount}%</span>` : ''}
+                    <img src="${game.img}" alt="${game.name}" class="card-img" loading="lazy" crossorigin="anonymous" onerror="this.src='https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTnOXAQFE6SWdIZy6b4OpXDWYJUjkIbnYx7gQLCRunJ3w&s=10'">
+                </div>
+                <div class="card-info">
+                    <div class="card-title">${game.name}</div>
+                    ${timerHtml}
+                    <div class="price-container">
+                        ${game.oldPrice > 0 ? `<span class="old-price">R$ ${game.oldPrice.toFixed(2).replace('.', ',')}</span>` : ''}
+                        <span class="current-price">A partir de R$ ${game.mainPrice.toFixed(2).replace('.', ',')}</span>
+                    </div>
+                    ${buttonsHtml}
+                    <div class="card-actions-row">
+                        <button class="btn-buy-direct" onclick="buyGameDirect(event, '${game.id}')">
+                            🛒 Comprar
+                        </button>
+                        <button class="btn-share-circle" onclick="shareCardPrint(event, '${game.id}')" title="Gerar Print / Compartilhar Oferta">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12.012 2c-5.506 0-9.989 4.478-9.99 9.984 0 1.762.459 3.48 1.332 5.001l-1.416 5.17 5.291-1.387c1.467.8 3.123 1.22 4.78 1.22h.005c5.507 0 9.991-4.479 9.992-9.985 0-2.667-1.038-5.175-2.925-7.063C17.195 3.039 14.68 2 12.012 2zm5.833 14.283c-.244.686-1.42 1.309-1.96 1.365-.506.052-1.168.082-3.376-.826-2.825-1.162-4.636-4.04-4.776-4.228-.14-.188-1.141-1.517-1.141-2.893 0-1.376.721-2.054.978-2.336.257-.282.56-.352.747-.352.187 0 .374.002.538.01.176.008.412-.067.644.49.245.589.842 2.052.915 2.202.073.15.122.327.024.524-.098.198-.147.32-.293.491-.147.171-.309.383-.442.514-.148.148-.302.308-.13.603.172.295.766 1.265 1.644 2.047 1.13 1.005 2.083 1.317 2.378 1.464.295.148.467.123.639-.074.172-.197.737-.859.933-1.154.196-.295.393-.246.664-.148.27.098 1.716.81 2.011.957.295.148.491.221.564.344.073.123.073.712-.171 1.398z"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            `;
+            return card;
+        }
+
+        function renderCarousel() {
+            const container = document.getElementById('carouselGrid');
+            if (!container) return;
+            container.innerHTML = '';
+
+            const featuredGames = games.slice(0, 10);
+            featuredGames.forEach(game => {
+                container.appendChild(createCardElement(game));
+            });
+            updateTimers();
+        }
+
+        function startAutoScroll() {
+            const container = document.getElementById('carouselGrid');
+            if (!container) return;
+            const cardWidth = 236;
+
+            setInterval(() => {
+                if (container.scrollLeft + container.clientWidth >= container.scrollWidth - 10) {
+                    container.scrollTo({ left: 0, behavior: 'smooth' });
+                } else {
+                    container.scrollBy({ left: cardWidth, behavior: 'smooth' });
+                }
+            }, 3500);
+        }
+
+        function renderGames() {
+            const catalogContainer = document.getElementById('catalogContainer');
+            if (!catalogContainer) return;
+
+            const searchVal = document.getElementById('searchInput').value.toLowerCase();
+            catalogContainer.innerHTML = '';
+
+            const categories = activeCategory === 'ALL' 
+                ? [...new Set(games.map(g => g.category))]
+                : [activeCategory];
+
+            categories.forEach(category => {
+                const filteredGames = games.filter(g => 
+                    g.category === category &&
+                    g.name.toLowerCase().includes(searchVal)
+                );
+
+                if (filteredGames.length > 0) {
+                    const catTitle = document.createElement('h3');
+                    catTitle.className = 'category-title-section';
+                    catTitle.innerText = category;
+                    catalogContainer.appendChild(catTitle);
+
+                    const grid = document.createElement('div');
+                    grid.className = 'grid-games';
+
+                    filteredGames.forEach(game => {
+                        grid.appendChild(createCardElement(game));
+                    });
+
+                    catalogContainer.appendChild(grid);
+                }
+            });
+            updateTimers();
+        }
+
+        function calculateTotal() {
+            return selectedCart.reduce((acc, item) => acc + item.price, 0);
+        }
+
+        function updateBottomBar() {
+            const bottomBar = document.getElementById('bottomBar');
+            const countText = document.getElementById('barSelectedCount');
+            const totalText = document.getElementById('barSelectedTotal');
+            const total = calculateTotal();
+
+            if (selectedCart.length > 0) {
+                countText.innerText = `${selectedCart.length} item(ns) selecionado(s)`;
+                totalText.innerText = `Total: R$ ${total.toFixed(2).replace('.', ',')}`;
+                bottomBar.classList.add('active');
+            } else {
+                bottomBar.classList.remove('active');
+            }
+        }
+
+        function openModal() {
+            if (selectedCart.length === 0) {
+                closeModal();
+                return;
+            }
+
+            const modalOverlay = document.getElementById('modalOverlay');
+            const modalDrawer = document.getElementById('modalDrawer');
+            const drawerList = document.getElementById('drawerItemList');
+            const totalPriceEl = document.getElementById('drawerTotalPrice');
+            const whatsappBtn = document.getElementById('whatsappLink');
+
+            drawerList.innerHTML = '';
+            let total = 0;
+            let messageItems = [];
+
+            selectedCart.forEach((item, index) => {
+                total += item.price;
+                messageItems.push(`${index + 1}. ${item.name} (${item.platform}) - [${item.type}] — R$ ${item.price.toFixed(2).replace('.', ',')}`);
+
+                const cardEl = document.createElement('div');
+                cardEl.className = 'selected-item-card';
+                cardEl.innerHTML = `
+                    <div>
+                        <h5>${item.name}</h5>
+                        <p>${item.type} — R$ ${item.price.toFixed(2).replace('.', ',')}</p>
+                    </div>
+                    <span class="remove-item" onclick="event.stopPropagation(); toggleSelectType('${item.gameId}', '${item.type}'); openModal();">✕</span>
+                `;
+                drawerList.appendChild(cardEl);
+            });
+
+            totalPriceEl.innerText = `R$ ${total.toFixed(2).replace('.', ',')}`;
+
+            const message = `🔥 *PEDIDO - MCO GAMES* 🔥\n\n` +
+                            `Olá! Quero comprar os seguintes itens do catálogo:\n\n` +
+                            `📦 *Itens Escolhidos:*\n` +
+                            messageItems.join('\n') + `\n\n` +
+                            `💰 *Valor Total (Pix):* R$ ${total.toFixed(2).replace('.', ',')}\n\n` +
+                            `Aguardo as instruções para pagamento!`;
+
+            whatsappBtn.href = `https://wa.me/${PHONE_NUMBER}?text=${encodeURIComponent(message)}`;
+
+            modalOverlay.classList.add('active');
+            modalDrawer.classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('modalOverlay').classList.remove('active');
+            document.getElementById('modalDrawer').classList.remove('active');
+        }
+
+        fetchCatalogFromSheets();
+    </script>
 </body>
 </html>
