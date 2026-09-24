@@ -3,880 +3,401 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MCO GAMES - Loja Oficial</title>
-
-  <!-- Google Fonts & Bibliotecas Externas -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
-  
-  <!-- PapaParse para ler o Google Sheets CSV -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
-  <!-- html2canvas para gerar imagem do card -->
+  <title>MCO GAMES - Catálogo</title>
+  <!-- Biblioteca para conversão de cards em Imagem (html2canvas) -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-
+  
   <style>
-    /* RESET E ESTILOS GERAIS */
+    :root {
+      --bg-color: #0d1117;
+      --card-bg: #161b22;
+      --text-color: #f0f6fc;
+      --accent-green: #00e676;
+      --accent-hover: #00c853;
+      --timer-bg: #ff9800;
+      --timer-text: #000;
+      --border-color: #30363d;
+    }
+
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
-      font-family: 'Inter', sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     }
 
     body {
-      background-color: #0b0d10;
-      color: #f0f2f5;
-      padding-bottom: 90px;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      padding: 20px;
     }
 
-    a { text-decoration: none; color: inherit; }
-
-    /* CABEÇALHO E NAVEGAÇÃO */
-    header {
-      background-color: #12161f;
-      padding: 1rem 1.5rem;
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      border-bottom: 1px solid #1e2430;
+    /* Navegação por Abas */
+    .tabs-nav {
       display: flex;
-      justify-content: space-between;
-      align-items: center;
+      gap: 10px;
+      margin-bottom: 20px;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 10px;
     }
 
-    .logo {
-      font-size: 1.5rem;
-      font-weight: 800;
-      color: #00e676;
-      letter-spacing: 1px;
-    }
-
-    .logo span { color: #fff; }
-
-    /* BARRA DE BUSCA E FILTROS */
-    .filter-container {
-      max-width: 1200px;
-      margin: 1.5rem auto;
-      padding: 0 1rem;
-      display: flex;
-      gap: 1rem;
-      flex-wrap: wrap;
-    }
-
-    .search-input, .category-select {
-      background-color: #161b26;
-      border: 1px solid #2a3245;
-      color: #fff;
-      padding: 0.75rem 1rem;
-      border-radius: 8px;
-      outline: none;
-      font-size: 0.95rem;
-    }
-
-    .search-input { flex: 1; min-width: 220px; }
-    .category-select { min-width: 180px; }
-
-    .search-input:focus, .category-select:focus {
-      border-color: #00e676;
-    }
-
-    /* CONTAINER PRINCIPAL E SEÇÕES */
-    .main-container {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 0 1rem;
-    }
-
-    .category-section {
-      margin-bottom: 3rem;
-    }
-
-    .category-title {
-      font-size: 1.35rem;
-      font-weight: 700;
-      color: #00e676;
-      margin-bottom: 1.2rem;
-      border-bottom: 2px solid #1c2333;
-      padding-bottom: 0.5rem;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-
-    .category-title small {
-      font-size: 0.85rem;
-      color: #8a94a6;
-      font-weight: 400;
-    }
-
-    .product-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-      gap: 1.5rem;
-    }
-
-    .product-grid .card.hidden-card {
-      display: none !important;
-    }
-
-    .btn-expand-category {
-      display: block;
-      width: 100%;
-      max-width: 300px;
-      margin: 1.5rem auto 0 auto;
-      padding: 0.75rem 1rem;
-      background-color: transparent;
-      border: 2px solid #00e676;
-      color: #00e676;
-      border-radius: 8px;
-      font-weight: 700;
+    .tab-btn {
+      background: var(--card-bg);
+      color: var(--text-color);
+      border: 1px solid var(--border-color);
+      padding: 8px 16px;
+      border-radius: 20px;
       cursor: pointer;
-      transition: all 0.25s ease;
-      text-align: center;
+      font-weight: 600;
+      transition: all 0.2s ease;
     }
 
-    .btn-expand-category:hover {
-      background-color: #00e676;
-      color: #0b0d10;
+    .tab-btn.active, .tab-btn:hover {
+      background: var(--accent-green);
+      color: #000;
+      border-color: var(--accent-green);
     }
 
-    /* CARROSSEL DE PRÉ-VENDAS */
-    .pre-venda-section {
-      background: linear-gradient(180deg, #121824 0%, #0b0d10 100%);
-      padding: 1.5rem;
+    /* Grid de Cards */
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 20px;
+    }
+
+    /* Estrutura do Card */
+    .game-card {
+      background-color: var(--card-bg);
       border-radius: 12px;
-      border: 1px solid #1e283d;
-      margin-bottom: 3rem;
-    }
-
-    .carousel-container {
-      overflow-x: auto;
-      scroll-behavior: smooth;
-      padding-bottom: 1rem;
-    }
-
-    .carousel-container::-webkit-scrollbar {
-      height: 6px;
-    }
-    .carousel-container::-webkit-scrollbar-thumb {
-      background: #00e676;
-      border-radius: 10px;
-    }
-
-    .carousel-track {
-      display: flex;
-      gap: 1.5rem;
-    }
-
-    .carousel-track .card {
-      min-width: 260px;
-      max-width: 260px;
-    }
-
-    /* CARD DO JOGO */
-    .card {
-      background-color: #141923;
-      border: 1px solid #1e2536;
-      border-radius: 12px;
+      border: 1px solid var(--border-color);
       overflow: hidden;
       display: flex;
       flex-direction: column;
       position: relative;
-      transition: transform 0.2s, border-color 0.2s;
     }
 
-    .card:hover {
-      transform: translateY(-4px);
-      border-color: #00e676;
-    }
-
-    .card-img-wrapper {
+    /* REGRA 1:1 DA CAPA DOS JOGOS */
+    .image-wrapper {
       position: relative;
       width: 100%;
-      padding-top: 125%;
-      background-color: #0d1017;
+      aspect-ratio: 1 / 1; /* Força Proporção Quadrada 1:1 */
+      overflow: hidden;
+      background-color: #000;
     }
 
-    .card-img {
-      position: absolute;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      object-fit: cover;
+    .game-cover {
+      width: 100%;
+      height: 100%;
+      object-fit: cover; /* Recorta/ajusta sem distorcer a imagem */
+      display: block;
     }
 
-    .card-badge {
-      position: absolute;
-      top: 10px;
-      left: 10px;
-      background-color: rgba(0, 0, 0, 0.75);
-      color: #00e676;
-      font-weight: 700;
-      font-size: 0.75rem;
-      padding: 4px 8px;
-      border-radius: 4px;
-      backdrop-filter: blur(4px);
-    }
-
+    /* Badge do Relógio de Contagem Regressiva */
     .timer-badge {
       position: absolute;
       bottom: 10px;
       right: 10px;
-      background-color: #ff9800;
-      color: #000;
-      font-weight: 800;
-      font-size: 0.7rem;
-      padding: 4px 6px;
-      border-radius: 4px;
+      background-color: rgba(255, 152, 0, 0.95);
+      color: var(--timer-text);
+      font-size: 0.85rem;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 16px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      z-index: 2;
     }
 
+    /* Conteúdo do Card */
     .card-content {
-      padding: 1rem;
+      padding: 15px;
       display: flex;
       flex-direction: column;
       flex: 1;
+      gap: 10px;
     }
 
-    .card-title {
-      font-size: 1rem;
+    .game-title {
+      font-size: 1.1rem;
       font-weight: 700;
-      margin-bottom: 0.5rem;
-      color: #fff;
       line-height: 1.3;
-      height: 2.6em;
-      overflow: hidden;
-      display: -webkit-box;
-      -webkit-line-clamp: 2;
-      -webkit-box-orient: vertical;
+      color: #fff;
     }
 
-    .media-selector {
-      display: flex;
-      gap: 0.5rem;
-      margin-bottom: 0.75rem;
-    }
-
-    .btn-media {
-      flex: 1;
-      padding: 0.4rem;
-      font-size: 0.75rem;
-      font-weight: 700;
-      background-color: #1c2333;
-      color: #a0aec0;
-      border: 1px solid #2d3748;
-      border-radius: 6px;
-      cursor: pointer;
-      text-align: center;
-    }
-
-    .btn-media.active {
-      background-color: #00e676;
-      color: #0b0d10;
-      border-color: #00e676;
-    }
-
-    /* BLOCO DE PREÇO E DESCONTO */
-    .price-box {
+    .price-container {
       margin-top: auto;
-      margin-bottom: 0.75rem;
     }
 
     .old-price {
-      font-size: 0.8rem;
-      color: #718096;
       text-decoration: line-through;
-    }
-
-    .price-row {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      margin-top: 2px;
+      color: #8b949e;
+      font-size: 0.85rem;
     }
 
     .current-price {
-      font-size: 1.3rem;
+      font-size: 1.25rem;
       font-weight: 800;
-      color: #00e676;
+      color: var(--accent-green);
     }
 
-    .discount-badge {
-      background-color: rgba(0, 230, 118, 0.15);
-      color: #00e676;
-      font-size: 0.8rem;
-      font-weight: 800;
-      padding: 2px 6px;
-      border-radius: 4px;
-      border: 1px solid #00e676;
-      display: inline-block;
-    }
-
-    .card-actions {
+    /* Botões de Ação */
+    .action-buttons {
       display: flex;
-      gap: 0.5rem;
-      align-items: center;
+      gap: 8px;
     }
 
     .btn-buy {
       flex: 1;
-      background-color: #00e676;
-      color: #0b0d10;
+      background-color: var(--accent-green);
+      color: #000;
       border: none;
-      padding: 0.6rem;
+      padding: 10px;
+      border-radius: 6px;
       font-weight: 700;
+      cursor: pointer;
+      text-align: center;
+      text-decoration: none;
+    }
+
+    .btn-share {
+      background-color: #21262d;
+      border: 1px solid var(--border-color);
+      color: #fff;
+      padding: 10px;
       border-radius: 6px;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 0.3rem;
     }
 
-    .btn-buy:hover { background-color: #00c865; }
-
-    /* BOTÃO WHATSAPP CIRCULAR */
-    .btn-share-zap {
-      width: 38px;
-      height: 38px;
-      border-radius: 50%;
-      background-color: #25d366;
-      color: #fff;
-      border: none;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      transition: transform 0.2s, background-color 0.2s;
-      flex-shrink: 0;
-    }
-
-    .btn-share-zap:hover {
-      background-color: #1eb956;
-      transform: scale(1.08);
-    }
-
-    /* BARRA INFERIOR DE CARRINHO */
-    .cart-bar {
-      position: fixed;
-      bottom: 0; left: 0; right: 0;
-      background-color: #12161f;
-      border-top: 1px solid #1e2536;
-      padding: 0.8rem 1.5rem;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      z-index: 99;
-    }
-
-    .cart-info { font-weight: 600; }
-    .cart-total { color: #00e676; font-weight: 800; font-size: 1.1rem; }
-
-    .btn-checkout {
-      background-color: #25d366;
-      color: #fff;
-      border: none;
-      padding: 0.75rem 1.2rem;
-      border-radius: 8px;
-      font-weight: 700;
-      cursor: pointer;
-    }
-
-    .no-results {
-      text-align: center;
-      padding: 3rem;
-      color: #718096;
+    /* Layout da Imagem Gerada para Compartilhamento */
+    .share-canvas-target {
+      background-color: var(--card-bg);
+      border-radius: 12px;
+      padding: 0;
+      overflow: hidden;
     }
   </style>
 </head>
 <body>
 
-  <!-- CABEÇALHO -->
-  <header>
-    <div class="logo">MCO <span>GAMES</span></div>
-  </header>
-
-  <!-- FILTROS E BUSCA -->
-  <div class="filter-container">
-    <input type="text" id="searchInput" class="search-input" placeholder="🔍 Pesquisar jogo..." oninput="handleFilter()">
-    <select id="categorySelect" class="category-select" onchange="handleFilter()">
-      <option value="">Todas as Categorias</option>
-    </select>
+  <!-- Abas de Navegação -->
+  <div class="tabs-nav">
+    <button class="tab-btn active" onclick="filterCategory('TODOS')">Todos</button>
+    <button class="tab-btn" onclick="filterCategory('PROMO')">Promoções</button>
+    <button class="tab-btn" onclick="filterCategory('PRE VENDA')">Pré-Venda</button>
   </div>
 
-  <!-- CONTAINER DE JOGOS -->
-  <main class="main-container" id="catalog-container">
-    <p class="no-results">Carregando catálogo...</p>
-  </main>
-
-  <!-- BARRA DE COMPRA FIXA -->
-  <div class="cart-bar" id="cartBar" style="display: none;">
-    <div class="cart-info">
-      <span id="cartCount">0</span> item(ns) selecionado(s) | Total: <span class="cart-total" id="cartTotal">R$ 0,00</span>
-    </div>
-    <button class="btn-checkout" onclick="checkoutWhatsApp()">Finalizar via WhatsApp 📱</button>
-  </div>
+  <!-- Container onde os Cards serão renderizados -->
+  <div id="cards-grid" class="cards-grid"></div>
 
   <script>
-    // CONFIGURAÇÕES E ESTADO GLOBAL
-    const CONFIG = {
-      sheetCsvUrl: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTbnddE66aBmhilS8BtFkch5qx41mzkZOiVtVeMxzHJRXljT3qevVZFGf4jU8o1LNZHuHL_3bnIGqRg/pub?output=csv',
-      whatsappNumber: '5599981810222',
-      storeUrl: 'https://mcogames.github.io/store/',
-      initialLimitPerCategory: 4
-    };
+    // Exemplo de dados vindos da Planilha (Simulação da Row da sua Planilha)
+    // Row Index: 0: ID, 1: Nome, 2: Imagem, 3: Categoria, 4: Preço De, 5: Preço Por, 6: Link, 9: TargetDate
+    const sheetData = [
+      [
+        "1", 
+        "EA SPORTS FC™ 27 Edição Padrão", 
+        "https://via.placeholder.com/600x600/1e293b/ffffff?text=FC+27+Cover", 
+        "PRE VENDA", 
+        "R$ 349,00", 
+        "R$ 237,90", 
+        "https://mcogames.github.io/store/",
+        "", "",
+        "2026-10-15T23:59:59" // Data da Pré-Venda
+      ],
+      [
+        "2", 
+        "Mortal Kombat 2", 
+        "https://via.placeholder.com/600x600/1e293b/ffffff?text=MK+2+Cover", 
+        "PROMO", 
+        "R$ 299,00", 
+        "R$ 149,90", 
+        "https://mcogames.github.io/store/",
+        "", "",
+        "25/09/2026 23:59:59" // Data em formato BR
+      ]
+    ];
 
-    let allGames = [];
-    let selectedCart = [];
-    let carouselInterval = null;
+    let currentCategory = 'TODOS';
 
-    // CARREGAMENTO DOS DADOS (GOOGLE SHEETS)
-    document.addEventListener('DOMContentLoaded', () => {
-      fetchData();
-      setInterval(updateTimers, 1000);
-    });
+    // 1. CONVERTER E VALIDAR DATA FLEXÍVEL (Suporta DD/MM/AAAA, AAAA-MM-DD e ISO)
+    function parseTargetDate(dateStr) {
+      if (!dateStr || String(dateStr).trim() === '') return null;
+      dateStr = String(dateStr).trim();
 
-    function fetchData() {
-      Papa.parse(CONFIG.sheetCsvUrl, {
-        download: true,
-        header: false,
-        skipEmptyLines: true,
-        complete: function(results) {
-          if (results.data && results.data.length > 1) {
-            allGames = results.data.slice(1).map(row => parseCsvRow(row)).filter(g => g.name);
-            populateCategoryDropdown(allGames);
-            renderCatalog(allGames);
-            updateTimers(); // Executa imediatamente após renderizar
-          } else {
-            document.getElementById('catalog-container').innerHTML = '<p class="no-results">Nenhum jogo encontrado na planilha.</p>';
-          }
-        },
-        error: function(err) {
-          console.error("Erro ao carregar CSV:", err);
-          document.getElementById('catalog-container').innerHTML = '<p class="no-results">Erro ao carregar catálogo. Verifique o link da planilha.</p>';
+      // Caso 1: Formato DD/MM/AAAA ou DD/MM/AAAA HH:MM:SS
+      if (dateStr.includes('/')) {
+        const parts = dateStr.split(' ');
+        const dateParts = parts[0].split('/');
+        const day = parseInt(dateParts[0], 10);
+        const month = parseInt(dateParts[1], 10) - 1;
+        const year = parseInt(dateParts[2], 10);
+
+        let hours = 23, minutes = 59, seconds = 59;
+        if (parts[1]) {
+          const timeParts = parts[1].split(':');
+          hours = parseInt(timeParts[0], 10) || 0;
+          minutes = parseInt(timeParts[1], 10) || 0;
+          seconds = parseInt(timeParts[2], 10) || 0;
         }
+        return new Date(year, month, day, hours, minutes, seconds);
+      }
+
+      // Caso 2: Formato ISO ou YYYY-MM-DD
+      const parsedDate = new Date(dateStr);
+      return isNaN(parsedDate.getTime()) ? null : parsedDate;
+    }
+
+    // 2. ATUALIZADOR DOS RELÓGIOS DE CONTAGEM REGRESSIVA
+    function updateTimers() {
+      const now = new Date().getTime();
+      const timerElements = document.querySelectorAll('.timer-badge');
+
+      timerElements.forEach(el => {
+        const targetStr = el.getAttribute('data-target');
+        const targetDate = parseTargetDate(targetStr);
+
+        if (!targetDate) {
+          el.style.display = 'none';
+          return;
+        }
+
+        const distance = targetDate.getTime() - now;
+
+        if (distance < 0) {
+          el.innerHTML = "⏳ Expirado";
+          return;
+        }
+
+        const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+        let formattedTime = "⏳ ";
+        if (days > 0) formattedTime += `${days}d `;
+        formattedTime += `${String(hours).padStart(2, '0')}h ${String(minutes).padStart(2, '0')}m ${String(seconds).padStart(2, '0')}s`;
+
+        el.innerHTML = formattedTime;
       });
     }
 
-    function parseCsvRow(row) {
-      const pricePrim = parseFloat(row[5]?.replace(',', '.')) || 0;
-      const priceSec = parseFloat(row[7]?.replace(',', '.')) || 0;
-      const oldP = parseFloat(row[4]?.replace(',', '.')) || (pricePrim ? pricePrim * 1.3 : 0);
-
-      return {
-        id: row[0] || Math.random().toString(),
-        name: row[1] || '',
-        platform: row[2] || 'PS4/PS5',
-        category: row[3] || 'Geral',
-        oldPrice: oldP,
-        pricePrimary: pricePrim,
-        stockPrimary: parseInt(row[6]) || 0,
-        priceSecondary: priceSec,
-        stockSecondary: parseInt(row[8]) || 0,
-        targetDate: row[9] ? row[9].trim() : '',
-        img: row[10] || 'https://via.placeholder.com/300x375?text=MCO+GAMES',
-        selectedType: pricePrim > 0 ? 'primary' : 'secondary'
-      };
-    }
-
-    function getDiscountPercent(oldPrice, currentPrice) {
-      if (!oldPrice || oldPrice <= currentPrice) return 0;
-      return Math.round(((oldPrice - currentPrice) / oldPrice) * 100);
-    }
-
-    // PREENCHER DROPDOWN DE CATEGORIAS
-    function populateCategoryDropdown(gamesList) {
-      const select = document.getElementById('categorySelect');
-      select.innerHTML = '<option value="">Todas as Categorias</option>';
-      
-      const categories = [...new Set(gamesList.map(g => g.category))];
-      categories.forEach(cat => {
-        if (cat) {
-          const option = document.createElement('option');
-          option.value = cat;
-          option.textContent = cat;
-          select.appendChild(option);
-        }
-      });
-    }
-
-    // RENDERIZAÇÃO DO CATÁLOGO POR CATEGORIA E CARROSSEL
-    function renderCatalog(gamesList) {
-      const container = document.getElementById('catalog-container');
+    // 3. RENDERIZAÇÃO DOS CARDS
+    function renderCards() {
+      const container = document.getElementById('cards-grid');
       container.innerHTML = '';
-      if (carouselInterval) clearInterval(carouselInterval);
 
-      if (!gamesList || gamesList.length === 0) {
-        container.innerHTML = '<p class="no-results">Nenhum jogo encontrado.</p>';
-        return;
-      }
-
-      // 1. Destaque de Pré-Vendas no topo
-      const preVendas = gamesList.filter(g => 
-        g.category.toLowerCase().includes('pré-venda') || 
-        g.category.toLowerCase().includes('pre-venda')
-      );
-
-      if (preVendas.length > 0) {
-        renderPreVendaSection(preVendas, container);
-        startCarouselAutoplay();
-      }
-
-      // 2. Agrupar demais jogos por Categoria
-      const categoriesMap = {};
-      gamesList.forEach(game => {
-        const cat = game.category || 'Outros';
-        if (!categoriesMap[cat]) categoriesMap[cat] = [];
-        categoriesMap[cat].push(game);
+      const filteredData = sheetData.filter(row => {
+        if (currentCategory === 'TODOS') return true;
+        return row[3] === currentCategory;
       });
 
-      // 3. Renderizar cada seção de categoria
-      Object.keys(categoriesMap).forEach(catName => {
-        const categoryGames = categoriesMap[catName];
+      filteredData.forEach((row, index) => {
+        const title = row[1];
+        const imageUrl = row[2];
+        const oldPrice = row[4];
+        const price = row[5];
+        const buyUrl = row[6];
+        const targetDateStr = row[9];
 
-        const section = document.createElement('section');
-        section.className = 'category-section';
+        const card = document.createElement('div');
+        card.className = 'game-card';
+        card.id = `card-${index}`;
 
-        const title = document.createElement('h2');
-        title.className = 'category-title';
-        title.innerHTML = `<span>${catName}</span> <small>(${categoryGames.length} jogos)</small>`;
-        section.appendChild(title);
-
-        const grid = document.createElement('div');
-        grid.className = 'product-grid';
-
-        categoryGames.forEach((game, index) => {
-          const card = createGameCard(game);
-          if (index >= CONFIG.initialLimitPerCategory) {
-            card.classList.add('hidden-card');
-          }
-          grid.appendChild(card);
-        });
-
-        section.appendChild(grid);
-
-        if (categoryGames.length > CONFIG.initialLimitPerCategory) {
-          const expandBtn = document.createElement('button');
-          expandBtn.className = 'btn-expand-category';
-          expandBtn.innerText = `Ver todas as promoções (${categoryGames.length})`;
-          expandBtn.onclick = function() {
-            toggleCategoryCards(grid, this, categoryGames.length);
-          };
-          section.appendChild(expandBtn);
-        }
-
-        container.appendChild(section);
-      });
-    }
-
-    function renderPreVendaSection(games, container) {
-      const section = document.createElement('section');
-      section.className = 'pre-venda-section';
-      section.innerHTML = `
-        <h2 class="category-title" style="color: #ffb703; border-bottom-color: #ffb703;">🔥 Pré-Vendas em Destaque</h2>
-        <div class="carousel-container" id="carouselContainer">
-          <div class="carousel-track" id="preVendaTrack"></div>
-        </div>
-      `;
-
-      const track = section.querySelector('#preVendaTrack');
-      games.forEach(game => {
-        const card = createGameCard(game);
-        track.appendChild(card);
-      });
-
-      container.appendChild(section);
-    }
-
-    // CARROSSEL AUTOMÁTICO
-    function startCarouselAutoplay() {
-      const carouselContainer = document.getElementById('carouselContainer');
-      if (!carouselContainer) return;
-
-      if (carouselInterval) clearInterval(carouselInterval);
-
-      carouselInterval = setInterval(() => {
-        const maxScrollLeft = carouselContainer.scrollWidth - carouselContainer.clientWidth;
-        if (carouselContainer.scrollLeft >= maxScrollLeft - 10) {
-          carouselContainer.scrollTo({ left: 0, behavior: 'smooth' });
-        } else {
-          carouselContainer.scrollBy({ left: 280, behavior: 'smooth' });
-        }
-      }, 3500);
-
-      // Pausa ao passar o mouse
-      carouselContainer.addEventListener('mouseenter', () => clearInterval(carouselInterval));
-      carouselContainer.addEventListener('mouseleave', () => startCarouselAutoplay());
-    }
-
-    function toggleCategoryCards(gridElement, buttonElement, totalCount) {
-      const hiddenCards = gridElement.querySelectorAll('.card.hidden-card');
-      const isExpanded = hiddenCards.length === 0;
-
-      if (isExpanded) {
-        const allCards = gridElement.querySelectorAll('.card');
-        allCards.forEach((card, index) => {
-          if (index >= CONFIG.initialLimitPerCategory) card.classList.add('hidden-card');
-        });
-        buttonElement.innerText = `Ver todas as promoções (${totalCount})`;
-      } else {
-        hiddenCards.forEach(card => card.classList.remove('hidden-card'));
-        buttonElement.innerText = 'Ver menos';
-      }
-    }
-
-    // CONSTRUÇÃO DO CARD DE JOGO (Sem IDs repetidos)
-    function createGameCard(game) {
-      const card = document.createElement('div');
-      card.className = 'card';
-      card.dataset.id = game.id;
-      card.dataset.targetDate = game.targetDate;
-
-      const currentPrice = game.selectedType === 'primary' ? game.pricePrimary : game.priceSecondary;
-      const discount = getDiscountPercent(game.oldPrice, currentPrice);
-
-      card.innerHTML = `
-        <div class="card-img-wrapper">
-          <img src="${game.img}" alt="${game.name}" class="card-img" onerror="this.src='https://via.placeholder.com/300x375?text=MCO+GAMES'">
-          <span class="card-badge">${game.platform}</span>
-          ${game.targetDate ? `<span class="timer-badge">--:--:--</span>` : ''}
-        </div>
-        <div class="card-content">
-          <div class="card-title">${game.name}</div>
-          
-          <div class="media-selector">
-            ${game.pricePrimary > 0 ? `
-              <button class="btn-media ${game.selectedType === 'primary' ? 'active' : ''}" onclick="selectMedia('${game.id}', 'primary', this)">
-                Primária R$ ${game.pricePrimary.toFixed(2)}
-              </button>` : ''}
-            ${game.priceSecondary > 0 ? `
-              <button class="btn-media ${game.selectedType === 'secondary' ? 'active' : ''}" onclick="selectMedia('${game.id}', 'secondary', this)">
-                Secundária R$ ${game.priceSecondary.toFixed(2)}
-              </button>` : ''}
+        // Estrutura do card com a imagem 1:1 e badge de temporizador
+        card.innerHTML = `
+          <div class="image-wrapper">
+            <img src="${imageUrl}" class="game-cover" alt="${title}" loading="lazy" />
+            ${targetDateStr ? `<div class="timer-badge" data-target="${targetDateStr}">Carregando...</div>` : ''}
           </div>
-
-          <div class="price-box">
-            <div class="old-price">De: R$ ${game.oldPrice.toFixed(2)}</div>
-            <div class="price-row">
-              <div class="current-price">R$ ${currentPrice.toFixed(2)}</div>
-              <span class="discount-badge" style="${discount > 0 ? '' : 'display:none;'}">-${discount}%</span>
+          <div class="card-content">
+            <div class="game-title">${title}</div>
+            <div class="price-container">
+              ${oldPrice ? `<div class="old-price">De: ${oldPrice}</div>` : ''}
+              <div class="current-price">A partir de ${price}</div>
+            </div>
+            <div class="action-buttons">
+              <a href="${buyUrl}" target="_blank" class="btn-buy">Comprar</a>
+              <button class="btn-share" onclick="shareSingleMessage('${index}', '${title}', '${buyUrl}')" title="Compartilhar">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+              </button>
             </div>
           </div>
+        `;
 
-          <div class="card-actions">
-            <button class="btn-buy" onclick="addToCart('${game.id}')">🛒 Comprar</button>
-            <button class="btn-share-zap" title="Compartilhar Oferta no WhatsApp" onclick="shareCardPrint(this.closest('.card'), '${game.name.replace(/'/g, "\\'")}')">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.636-.916-2.233-.242-.581-.487-.502-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/>
-              </svg>
-            </button>
-          </div>
-        </div>
-      `;
+        container.appendChild(card);
+      });
 
-      return card;
+      // Sincroniza e força a atualização dos relógios imediatamente após renderizar
+      updateTimers();
     }
 
-    function selectMedia(gameId, type, btnElement) {
-      const game = allGames.find(g => g.id === gameId);
-      if (!game) return;
+    // 4. FILTRAR POR CATEGORIA (ABAS)
+    function filterCategory(category) {
+      currentCategory = category;
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.innerText.toUpperCase().includes(category));
+      });
+      renderCards();
+    }
 
-      game.selectedType = type;
-      const card = btnElement.closest('.card');
+    // 5. COMPARTILHAMENTO UNIFICADO (IMAGEM + LEGENDA NA MESMA MENSAGEM)
+    async function shareSingleMessage(cardIndex, title, storeUrl) {
+      const cardElement = document.getElementById(`card-${cardIndex}`);
       
-      card.querySelectorAll('.btn-media').forEach(b => b.classList.remove('active'));
-      btnElement.classList.add('active');
-
-      const priceDisplay = card.querySelector('.current-price');
-      const newPrice = type === 'primary' ? game.pricePrimary : game.priceSecondary;
-      if (priceDisplay) priceDisplay.textContent = `R$ ${newPrice.toFixed(2)}`;
-
-      const discountBadge = card.querySelector('.discount-badge');
-      const newDiscount = getDiscountPercent(game.oldPrice, newPrice);
-      if (discountBadge) {
-        if (newDiscount > 0) {
-          discountBadge.textContent = `-${newDiscount}%`;
-          discountBadge.style.display = 'inline-block';
-        } else {
-          discountBadge.style.display = 'none';
-        }
-      }
-    }
-
-    // COMPARTILHAMENTO COM LINK DA LOJA
-    async function shareCardPrint(cardElement, gameName) {
-      const shareText = `🎮 *MCO GAMES* - ${gameName}\n\nEsse e mais jogos acesse: ${CONFIG.storeUrl}`;
-
-      const actionRow = cardElement.querySelector('.card-actions');
-      if (actionRow) actionRow.style.visibility = 'hidden';
+      // Esconde temporariamente os botões de ação antes de capturar a imagem
+      const actionButtons = cardElement.querySelector('.action-buttons');
+      actionButtons.style.display = 'none';
 
       try {
+        // Converte o card visual completo em imagem (HTML2Canvas)
         const canvas = await html2canvas(cardElement, {
-          useCORS: true,
           scale: 2,
-          backgroundColor: '#141923'
+          useCORS: true,
+          backgroundColor: '#161b22'
         });
 
-        if (actionRow) actionRow.style.visibility = 'visible';
+        // Restaura os botões de ação na interface
+        actionButtons.style.display = 'flex';
 
+        // Transforma o Canvas em um Arquivo Blob de Imagem
         canvas.toBlob(async (blob) => {
-          if (!blob) return;
+          const file = new File([blob], `MCO_GAMES_${title.replace(/\s+/g, '_')}.png`, { type: 'image/png' });
 
-          const fileName = `${gameName.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.png`;
-          const file = new File([blob], fileName, { type: 'image/png' });
+          // Texto formatado para ser a LEGENDA da imagem
+          const shareCaption = `🎮 *MCO GAMES* - ${title}\n\nEsse e mais jogos acesse:\n${storeUrl}`;
 
+          // Verifica suporte à API Web Share (Celulares/Navegadores modernos)
           if (navigator.canShare && navigator.canShare({ files: [file] })) {
             await navigator.share({
-              title: gameName,
-              text: shareText,
-              files: [file]
-            });
-          } else if (navigator.share) {
-            await navigator.share({
-              title: gameName,
-              text: shareText,
-              url: CONFIG.storeUrl
+              files: [file],
+              text: shareCaption // Envia a legenda ATRELADA à imagem em 1 única mensagem
             });
           } else {
+            // Fallback: Download da imagem caso o navegador no PC não suporte compartilhamento direto
             const link = document.createElement('a');
-            link.download = fileName;
+            link.download = `MCO_GAMES_${title}.png`;
             link.href = canvas.toDataURL();
             link.click();
-
-            if (navigator.clipboard) {
-              await navigator.clipboard.writeText(shareText);
-              alert('Imagem baixada e texto promocional copiado para a área de transferência!');
-            } else {
-              alert(`Imagem baixada!\n\nAcesse: ${CONFIG.storeUrl}`);
-            }
+            alert('Imagem baixada! Copie o link da loja e envie junto com a imagem.');
           }
         }, 'image/png');
 
       } catch (err) {
-        if (actionRow) actionRow.style.visibility = 'visible';
-        console.error('Erro ao gerar compartilhamento:', err);
-        alert('Não foi possível gerar a imagem para compartilhamento.');
+        console.error('Erro ao gerar imagem para compartilhamento:', err);
+        actionButtons.style.display = 'flex';
       }
     }
 
-    // CONTAGEM REGRESSIVA (Atualiza TODOS os relógios presentes no DOM)
-    function updateTimers() {
-      const now = new Date().getTime();
-      const cards = document.querySelectorAll('.card');
+    // Loop continuo para atualizar os relógios a cada 1 segundo
+    setInterval(updateTimers, 1000);
 
-      cards.forEach(card => {
-        const targetDateStr = card.dataset.targetDate;
-        if (!targetDateStr) return;
-
-        const timerEl = card.querySelector('.timer-badge');
-        if (!timerEl) return;
-
-        let target;
-        if (targetDateStr.includes('/')) {
-          const parts = targetDateStr.trim().split(' ');
-          const dateParts = parts[0].split('/');
-          const timeParts = parts[1] ? parts[1].split(':') : [0,0,0];
-          target = new Date(
-            parseInt(dateParts[2]),
-            parseInt(dateParts[1]) - 1,
-            parseInt(dateParts[0]),
-            parseInt(timeParts[0] || 0),
-            parseInt(timeParts[1] || 0),
-            parseInt(timeParts[2] || 0)
-          ).getTime();
-        } else {
-          target = new Date(targetDateStr).getTime();
-        }
-
-        if (isNaN(target)) return;
-
-        const diff = target - now;
-
-        if (diff <= 0) {
-          timerEl.textContent = 'Lançado / Encerrou';
-          timerEl.style.backgroundColor = '#e53e3e';
-          timerEl.style.color = '#fff';
-        } else {
-          const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-          const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-          const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-          const seconds = Math.floor((diff % (1000 * 60)) / 1000);
-
-          timerEl.textContent = `${days > 0 ? days + 'd ' : ''}${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-          timerEl.style.backgroundColor = '#ff9800';
-          timerEl.style.color = '#000';
-        }
-      });
-    }
-
-    // SISTEMA DE CARRINHO E CHECKOUT
-    function addToCart(gameId) {
-      const game = allGames.find(g => g.id === gameId);
-      if (!game) return;
-
-      const price = game.selectedType === 'primary' ? game.pricePrimary : game.priceSecondary;
-      const typeLabel = game.selectedType === 'primary' ? 'Mídia Primária' : 'Mídia Secundária';
-
-      selectedCart.push({
-        id: game.id,
-        name: game.name,
-        platform: game.platform,
-        typeLabel: typeLabel,
-        price: price
-      });
-
-      updateCartBar();
-    }
-
-    function updateCartBar() {
-      const cartBar = document.getElementById('cartBar');
-      const cartCount = document.getElementById('cartCount');
-      const cartTotal = document.getElementById('cartTotal');
-
-      if (selectedCart.length === 0) {
-        cartBar.style.display = 'none';
-        return;
-      }
-
-      cartBar.style.display = 'flex';
-      cartCount.textContent = selectedCart.length;
-
-      const total = selectedCart.reduce((sum, item) => sum + item.price, 0);
-      cartTotal.textContent = `R$ ${total.toFixed(2)}`;
-    }
-
-    function checkoutWhatsApp() {
-      if (selectedCart.length === 0) return;
-
-      let msg = `🎮 *NOVO PEDIDO - MCO GAMES*\n\n`;
-      let total = 0;
-
-      selectedCart.forEach((item, index) => {
-        msg += `${index + 1}. *${item.name}* (${item.platform})\n`;
-        msg += `   └ Tipo: ${item.typeLabel} - R$ ${item.price.toFixed(2)}\n\n`;
-        total += item.price;
-      });
-
-      msg += `💰 *TOTAL: R$ ${total.toFixed(2)}*\n\n`;
-      msg += `Aguardando orientações para pagamento.`;
-
-      const encoded = encodeURIComponent(msg);
-      window.open(`https://wa.me/${CONFIG.whatsappNumber}?text=${encoded}`, '_blank');
-    }
-
-    // FILTRAGEM (PESQUISA + CATEGORIA)
-    function handleFilter() {
-      const query = document.getElementById('searchInput').value.toLowerCase();
-      const selectedCat = document.getElementById('categorySelect').value;
-
-      const filtered = allGames.filter(game => {
-        const matchesName = game.name.toLowerCase().includes(query);
-        const matchesCat = selectedCat === '' || game.category === selectedCat;
-        return matchesName && matchesCat;
-      });
-
-      renderCatalog(filtered);
-      updateTimers();
-    }
+    // Inicialização da página
+    document.addEventListener('DOMContentLoaded', renderCards);
   </script>
 </body>
 </html>
