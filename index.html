@@ -541,6 +541,19 @@
             color: #000;
             font-weight: 800;
             border-color: var(--accent-green);
+            position: relative;
+            z-index: 1;
+            box-shadow: 0 0 0 2px rgba(0, 230, 118, 0.18), 0 0 12px rgba(0, 230, 118, 0.55), 0 0 24px rgba(0, 230, 118, 0.30);
+            animation: selectedTypeAura 1.8s ease-in-out infinite;
+        }
+
+        @keyframes selectedTypeAura {
+            0%, 100% {
+                box-shadow: 0 0 0 2px rgba(0, 230, 118, 0.16), 0 0 10px rgba(0, 230, 118, 0.45), 0 0 20px rgba(0, 230, 118, 0.22);
+            }
+            50% {
+                box-shadow: 0 0 0 3px rgba(0, 230, 118, 0.24), 0 0 16px rgba(0, 230, 118, 0.70), 0 0 30px rgba(0, 230, 118, 0.34);
+            }
         }
 
         /* --- LINHA DE AÇÕES DO CARD (COMPRAR + CIRCULO DO ZAP) --- */
@@ -568,9 +581,18 @@
             transition: all 0.2s ease;
         }
 
-        .btn-buy-direct:hover {
+        .btn-buy-direct:hover:not(:disabled) {
             background-color: var(--accent-green-dark);
             transform: scale(1.02);
+        }
+
+        .btn-buy-direct:disabled {
+            background-color: #252c36;
+            color: #66717e;
+            cursor: not-allowed;
+            opacity: 0.58;
+            box-shadow: none;
+            transform: none;
         }
 
         .btn-share-circle {
@@ -1011,7 +1033,8 @@
 
         @media (prefers-reduced-motion: reduce) {
             .category-expand-btn,
-            .category-expand-btn:not(.expanded) .expand-chevron {
+            .category-expand-btn:not(.expanded) .expand-chevron,
+            .type-btn.active {
                 animation: none !important;
             }
         }
@@ -1292,6 +1315,41 @@
             return isCategory(game, "Pré Venda");
         }
 
+        // Jogos de Pré Venda e Promoção com data de lançamento vencida
+        // deixam de existir na interface automaticamente.
+        function shouldHideExpiredTimedGame(game, now = Date.now()) {
+            if (!game || !game.targetDate) return false;
+
+            const isTimedCategory =
+                isCategory(game, "Pré Venda") ||
+                isCategory(game, "Promoção");
+
+            if (!isTimedCategory) return false;
+
+            const target = parseTargetDate(game.targetDate);
+            return !!target && target.getTime() <= now;
+        }
+
+        function removeExpiredTimedGames() {
+            const now = Date.now();
+            const before = games.length;
+
+            games = games.filter(game => !shouldHideExpiredTimedGame(game, now));
+
+            if (games.length !== before) {
+                // Remove também do carrinho qualquer item que acabou de expirar.
+                const validIds = new Set(games.map(game => game.id));
+                selectedCart = selectedCart.filter(item => validIds.has(item.gameId));
+
+                populateCategories();
+                renderLaunchCarousel();
+                renderPreorderCarousel();
+                renderPromotionCarousel();
+                renderGames();
+                updateBottomBar();
+            }
+        }
+
         function getOrderedCategories(categories) {
             const unique = [...new Set(categories.filter(Boolean))];
             const ordered = [];
@@ -1341,6 +1399,8 @@
         }
 
         function updateTimers() {
+            removeExpiredTimedGames();
+
             const timerElements = document.querySelectorAll('.timer-badge');
             timerElements.forEach(el => {
                 const targetStr = el.getAttribute('data-target');
@@ -1427,6 +1487,9 @@
                 });
             }
 
+            // Remove imediatamente itens vencidos de Pré Venda/Promoção.
+            games = games.filter(game => !shouldHideExpiredTimedGame(game));
+
             // Mantém a ordem da planilha. A organização visual das seções é feita pela coluna D.
 
             if (games.length === 0) {
@@ -1496,8 +1559,13 @@
             if (!game) return;
 
             const cartItem = selectedCart.find(i => i.gameId === gameId);
-            let typeStr = cartItem ? cartItem.type : (game.pricePrimary > 0 ? 'Primária' : 'Secundária');
-            let priceVal = cartItem ? cartItem.price : game.mainPrice;
+
+            if (!cartItem) {
+                return;
+            }
+
+            const typeStr = cartItem.type;
+            const priceVal = cartItem.price;
 
             const message = `🔥 *COMPRA DIRETA - MCO GAMES* 🔥\n\n` +
                             `Olá! Quero comprar o jogo:\n` +
@@ -1834,7 +1902,13 @@
                     </div>
                     ${buttonsHtml}
                     <div class="card-actions-row">
-                        <button class="btn-buy-direct" onclick="buyGameDirect(event, '${game.id}')">
+                        <button
+                            class="btn-buy-direct"
+                            ${primarySelected || secondarySelected ? '' : 'disabled'}
+                            ${primarySelected || secondarySelected ? '' : 'aria-disabled="true"'}
+                            title="${primarySelected || secondarySelected ? 'Comprar este jogo' : 'Selecione Primária ou Secundária primeiro'}"
+                            onclick="buyGameDirect(event, '${game.id}')"
+                        >
                             🛒 Comprar
                         </button>
                         <button class="btn-share-circle" onclick="shareGameOffer(event, '${game.id}')" title="Compartilhar oferta no WhatsApp">
