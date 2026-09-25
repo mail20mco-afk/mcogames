@@ -201,6 +201,24 @@
             display: none;
         }
 
+        .feature-extra-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 18px;
+            margin-top: 18px;
+        }
+
+        .feature-extra-grid[hidden],
+        .feature-expand-row[hidden] {
+            display: none !important;
+        }
+
+        .feature-expand-row {
+            display: flex;
+            justify-content: center;
+            margin-top: 10px;
+        }
+
         .carousel-grid .card {
             min-width: 220px;
             max-width: 230px;
@@ -533,12 +551,43 @@
             transition: all 0.2s;
             line-height: 1.2;
             white-space: nowrap;
-            overflow: visible;
+            overflow: hidden;
         }
 
         .type-btn:hover {
             background-color: #263040;
             transform: translateY(-1px);
+        }
+
+        /* Reflexo curto e discreto, como uma luz passando pelo botão. */
+        .type-btn:not(.active)::before {
+            content: "";
+            position: absolute;
+            top: -20%;
+            bottom: -20%;
+            left: -70%;
+            width: 34%;
+            background: linear-gradient(
+                90deg,
+                transparent,
+                rgba(255,255,255,0.10),
+                rgba(0,230,118,0.12),
+                transparent
+            );
+            transform: skewX(-18deg);
+            pointer-events: none;
+            opacity: 0;
+            animation: typeButtonReflection var(--type-glow-duration, 9s)
+                       var(--type-glow-delay, 0s)
+                       ease-in-out infinite;
+        }
+
+        @keyframes typeButtonReflection {
+            0%, 72% { opacity: 0; transform: translateX(0) skewX(-18deg); }
+            76% { opacity: 0.10; }
+            80% { opacity: 0.22; }
+            84% { opacity: 0.08; }
+            89%, 100% { opacity: 0; transform: translateX(520%) skewX(-18deg); }
         }
 
         .type-btn:not(.active)::after {
@@ -552,7 +601,7 @@
                 transparent 0deg,
                 transparent 250deg,
                 rgba(0, 230, 118, 0.035) 278deg,
-                rgba(0, 230, 118, 0.30) 315deg,
+                rgba(0, 230, 118, 0.16) 315deg,
                 rgba(0, 230, 118, 0.055) 346deg,
                 transparent 360deg
             );
@@ -1105,6 +1154,7 @@
             .category-expand-btn,
             .category-expand-btn:not(.expanded) .expand-chevron,
             .type-btn.active,
+            .type-btn:not(.active)::before,
             .type-btn:not(.active)::after {
                 animation: none !important;
             }
@@ -1160,16 +1210,22 @@
             <div class="carousel-section category-feature-section launch-section" id="launchSection" style="display: none;">
                 <div class="carousel-title">🔥 Lançamento em Oferta <span class="carousel-hint">(Deslize ➜)</span></div>
                 <div id="launchGrid" class="carousel-grid"></div>
+                <div id="launchGridExtra" class="feature-extra-grid" hidden></div>
+                <div id="launchGridExpand" class="feature-expand-row" hidden></div>
             </div>
 
             <div class="carousel-section category-feature-section preorder-section" id="preorderSection" style="display: none;">
                 <div class="carousel-title">🚀 Pré-vendas <span class="carousel-hint">(Deslize ➜)</span></div>
                 <div id="preorderGrid" class="carousel-grid"></div>
+                <div id="preorderGridExtra" class="feature-extra-grid" hidden></div>
+                <div id="preorderGridExpand" class="feature-expand-row" hidden></div>
             </div>
 
             <div class="carousel-section category-feature-section promotion-section" id="promotionSection" style="display: none;">
                 <div class="carousel-title">💥 Promoções <span class="carousel-hint">(Deslize ➜)</span></div>
                 <div id="promotionGrid" class="carousel-grid"></div>
+                <div id="promotionGridExtra" class="feature-extra-grid" hidden></div>
+                <div id="promotionGridExpand" class="feature-expand-row" hidden></div>
             </div>
 
             <div class="controls">
@@ -1291,6 +1347,7 @@
         let games = [];
         let selectedCart = [];
         let expandedCategories = new Set();
+        let expandedFeatureCategories = new Set();
         const carouselIntervals = new Map();
 
         function parsePrice(val) {
@@ -2003,24 +2060,61 @@
             return card;
         }
 
-        function renderCategoryCarousel({ sectionId, gridId, category, maxItems = 12 }) {
+        function toggleFeatureCategoryExpansion(category) {
+            const key = categoryKey(category);
+            if (expandedFeatureCategories.has(key)) {
+                expandedFeatureCategories.delete(key);
+            } else {
+                expandedFeatureCategories.add(key);
+            }
+
+            renderLaunchCarousel();
+            renderPreorderCarousel();
+            renderPromotionCarousel();
+        }
+
+        function renderCategoryCarousel({ sectionId, gridId, category, maxItems = 6 }) {
             const section = document.getElementById(sectionId);
             const container = document.getElementById(gridId);
-            if (!section || !container) return;
+            const extraContainer = document.getElementById(`${gridId}Extra`);
+            const expandRow = document.getElementById(`${gridId}Expand`);
+            if (!section || !container || !extraContainer || !expandRow) return;
 
-            const categoryGames = games
-                .filter(game => isCategory(game, category))
-                .slice(0, maxItems);
+            const allCategoryGames = games.filter(game => isCategory(game, category));
+            const visibleGames = allCategoryGames.slice(0, maxItems);
+            const extraGames = allCategoryGames.slice(maxItems);
+            const isExpanded = expandedFeatureCategories.has(categoryKey(category));
 
             container.innerHTML = '';
+            extraContainer.innerHTML = '';
+            expandRow.innerHTML = '';
 
-            if (categoryGames.length === 0) {
+            if (allCategoryGames.length === 0) {
                 section.style.display = 'none';
+                extraContainer.hidden = true;
+                expandRow.hidden = true;
                 return;
             }
 
             section.style.display = 'block';
-            categoryGames.forEach(game => container.appendChild(createCardElement(game)));
+            visibleGames.forEach(game => container.appendChild(createCardElement(game)));
+
+            if (extraGames.length > 0) {
+                extraGames.forEach(game => extraContainer.appendChild(createCardElement(game)));
+                extraContainer.hidden = !isExpanded;
+
+                const expandBtn = document.createElement('button');
+                expandBtn.type = 'button';
+                expandBtn.className = `category-expand-btn${isExpanded ? ' expanded' : ''}`;
+                expandBtn.innerHTML = getExpandButtonHtml(category, isExpanded);
+                expandBtn.addEventListener('click', () => toggleFeatureCategoryExpansion(category));
+                expandRow.appendChild(expandBtn);
+                expandRow.hidden = false;
+            } else {
+                extraContainer.hidden = true;
+                expandRow.hidden = true;
+            }
+
             updateTimers();
         }
 
