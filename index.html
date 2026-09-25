@@ -185,6 +185,99 @@
             color: #fff;
         }
 
+        .carousel-title .title-main {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .category-share-btn {
+            margin-left: auto;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            border: 1px solid rgba(0, 230, 118, 0.35);
+            background: rgba(0, 230, 118, 0.06);
+            color: var(--accent-green);
+            border-radius: 999px;
+            padding: 6px 10px;
+            font-size: 0.68rem;
+            font-weight: 800;
+            cursor: pointer;
+            transition: transform 0.2s ease, background 0.2s ease, border-color 0.2s ease;
+            white-space: nowrap;
+        }
+
+        .category-share-btn:hover {
+            transform: translateY(-1px);
+            background: rgba(0, 230, 118, 0.12);
+            border-color: rgba(0, 230, 118, 0.65);
+        }
+
+        .category-share-btn:active {
+            transform: translateY(0);
+        }
+
+        .category-share-btn .share-mini-icon {
+            font-size: 0.8rem;
+            line-height: 1;
+        }
+
+        .category-title-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 32px 0 16px 0;
+            padding-bottom: 8px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .category-title-row .category-title-section {
+            flex: 1;
+            margin: 0;
+            border: 0;
+            padding: 0;
+        }
+
+        .category-share-status {
+            position: fixed;
+            left: 50%;
+            bottom: 24px;
+            transform: translateX(-50%) translateY(14px);
+            z-index: 600;
+            background: #12161d;
+            color: #fff;
+            border: 1px solid var(--border-color);
+            border-radius: 999px;
+            padding: 9px 14px;
+            font-size: 0.75rem;
+            font-weight: 800;
+            box-shadow: 0 10px 28px rgba(0,0,0,0.35);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease, transform 0.2s ease;
+        }
+
+        .category-share-status.active {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        @media (max-width: 600px) {
+            .category-share-btn {
+                padding: 6px 9px;
+            }
+
+            .category-share-btn .share-mini-label {
+                display: none;
+            }
+
+            .category-title-row {
+                align-items: flex-start;
+            }
+        }
+
         .carousel-grid {
             display: flex;
             gap: 16px;
@@ -251,36 +344,125 @@
 
         .controls {
             display: flex;
-            gap: 12px;
-            margin-bottom: 24px;
+            gap: 10px;
+            margin: 0 0 26px 0;
             flex-wrap: wrap;
+            align-items: stretch;
+            padding: 10px;
+            background: rgba(19, 23, 29, 0.82);
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+        }
+
+        .search-box {
+            position: relative;
+            flex: 1 1 420px;
+            min-width: 240px;
         }
 
         .search-input {
-            flex: 1;
-            min-width: 200px;
-            background-color: var(--card-bg);
-            border: 1px solid var(--border-color);
-            padding: 12px 16px;
-            border-radius: 8px;
+            width: 100%;
+            height: 48px;
+            background: #0f141a;
+            border: 1px solid #2a323e;
+            padding: 0 46px 0 42px;
+            border-radius: 10px;
             color: #fff;
-            font-size: 0.9rem;
+            font-size: 0.95rem;
             outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+        }
+
+        .search-input::placeholder {
+            color: #7f8a98;
         }
 
         .search-input:focus {
             border-color: var(--accent-green);
+            background: #111820;
+            box-shadow: 0 0 0 3px rgba(0,230,118,0.09);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #7f8a98;
+            font-size: 1rem;
+            pointer-events: none;
+        }
+
+        .search-clear-btn {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 28px;
+            height: 28px;
+            border: none;
+            border-radius: 50%;
+            background: transparent;
+            color: #8b96a4;
+            cursor: pointer;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+        }
+
+        .search-clear-btn:hover {
+            background: rgba(255,255,255,0.07);
+            color: #fff;
         }
 
         .category-select {
-            background-color: var(--card-bg);
-            border: 1px solid var(--border-color);
-            padding: 12px 16px;
-            border-radius: 8px;
+            flex: 0 0 235px;
+            height: 48px;
+            background-color: #0f141a;
+            border: 1px solid #2a323e;
+            padding: 0 14px;
+            border-radius: 10px;
             color: #fff;
             font-size: 0.9rem;
             outline: none;
             cursor: pointer;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .category-select:focus {
+            border-color: var(--accent-green);
+            box-shadow: 0 0 0 3px rgba(0,230,118,0.09);
+        }
+
+        .search-results-title {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            gap: 12px;
+            margin: 8px 0 14px;
+        }
+
+        .search-results-title h3 {
+            font-size: 1.15rem;
+            font-weight: 900;
+            color: #fff;
+        }
+
+        .search-results-title span {
+            color: var(--text-muted);
+            font-size: 0.78rem;
+        }
+
+        .search-empty {
+            background: var(--card-bg);
+            border: 1px dashed var(--border-color);
+            border-radius: 12px;
+            padding: 28px 18px;
+            text-align: center;
+            color: var(--text-muted);
+            margin-bottom: 24px;
         }
 
         .category-title-section {
@@ -1167,6 +1349,10 @@
             .modal-drawer { max-width: 100%; }
             .header-tag { display: none; }
             .hero-title { font-size: 1.5rem; }
+            .controls { padding: 8px; }
+            .search-box { flex-basis: 100%; }
+            .category-select { flex: 1 1 100%; }
+            .search-results-title { align-items: flex-start; flex-direction: column; }
         }
     </style>
 </head>
@@ -1195,6 +1381,17 @@
             <p class="hero-subtitle">Escolha o jogo, selecione o tipo de mídia e conclua pelo WhatsApp.</p>
         </div>
 
+        <div class="controls" aria-label="Busca do catálogo">
+            <div class="search-box">
+                <span class="search-icon">🔎</span>
+                <input type="text" id="searchInput" class="search-input" placeholder="Pesquisar por nome do jogo..." oninput="handleCatalogFilterInput()" autocomplete="off">
+                <button type="button" id="searchClearBtn" class="search-clear-btn" onclick="clearCatalogSearch()" aria-label="Limpar busca">✕</button>
+            </div>
+            <select id="categorySelect" class="category-select" onchange="handleCatalogFilterInput()" aria-label="Filtrar por categoria">
+                <option value="ALL">Todas as Categorias</option>
+            </select>
+        </div>
+
         <div id="loadingContainer" class="status-box">
             <h3>⏳ A carregar catálogo completo...</h3>
             <p>Sincronizando todos os jogos da sua planilha do Google Sheets.</p>
@@ -1208,36 +1405,46 @@
         <div id="mainContent" style="display: none;">
             
             <div class="carousel-section category-feature-section launch-section" id="launchSection" style="display: none;">
-                <div class="carousel-title">🔥 Lançamento em Oferta <span class="carousel-hint">(Deslize ➜)</span></div>
+                <div class="carousel-title">
+                    <span class="title-main">🔥 Lançamento em Oferta <span class="carousel-hint">(Deslize ➜)</span></span>
+                    <button type="button" class="category-share-btn" onclick="shareCategoryOffer('Lançamento em Oferta')" title="Compartilhar Lançamento em Oferta">
+                        <span class="share-mini-icon">↗</span><span class="share-mini-label">Compartilhar</span>
+                    </button>
+                </div>
                 <div id="launchGrid" class="carousel-grid"></div>
                 <div id="launchGridExtra" class="feature-extra-grid" hidden></div>
                 <div id="launchGridExpand" class="feature-expand-row" hidden></div>
             </div>
 
             <div class="carousel-section category-feature-section preorder-section" id="preorderSection" style="display: none;">
-                <div class="carousel-title">🚀 Pré-vendas <span class="carousel-hint">(Deslize ➜)</span></div>
+                <div class="carousel-title">
+                    <span class="title-main">🚀 Pré-vendas <span class="carousel-hint">(Deslize ➜)</span></span>
+                    <button type="button" class="category-share-btn" onclick="shareCategoryOffer('Pré Venda')" title="Compartilhar Pré-vendas">
+                        <span class="share-mini-icon">↗</span><span class="share-mini-label">Compartilhar</span>
+                    </button>
+                </div>
                 <div id="preorderGrid" class="carousel-grid"></div>
                 <div id="preorderGridExtra" class="feature-extra-grid" hidden></div>
                 <div id="preorderGridExpand" class="feature-expand-row" hidden></div>
             </div>
 
             <div class="carousel-section category-feature-section promotion-section" id="promotionSection" style="display: none;">
-                <div class="carousel-title">💥 Promoções <span class="carousel-hint">(Deslize ➜)</span></div>
+                <div class="carousel-title">
+                    <span class="title-main">💥 Promoções <span class="carousel-hint">(Deslize ➜)</span></span>
+                    <button type="button" class="category-share-btn" onclick="shareCategoryOffer('Promoção')" title="Compartilhar Promoções">
+                        <span class="share-mini-icon">↗</span><span class="share-mini-label">Compartilhar</span>
+                    </button>
+                </div>
                 <div id="promotionGrid" class="carousel-grid"></div>
                 <div id="promotionGridExtra" class="feature-extra-grid" hidden></div>
                 <div id="promotionGridExpand" class="feature-expand-row" hidden></div>
             </div>
 
-            <div class="controls">
-                <input type="text" id="searchInput" class="search-input" placeholder="🔍 Pesquisar jogo..." oninput="renderGames()">
-                <select id="categorySelect" class="category-select" onchange="renderGames()">
-                    <option value="ALL">Todas as Categorias</option>
-                </select>
-            </div>
-
             <div id="catalogContainer"></div>
         </div>
     </div>
+
+    <div id="categoryShareStatus" class="category-share-status" role="status" aria-live="polite"></div>
 
     <div class="bottom-bar" id="bottomBar">
         <div class="selected-info">
@@ -1544,6 +1751,55 @@
             });
         }
 
+
+        function applySharedCategoryFromUrl() {
+            const params = new URLSearchParams(window.location.search);
+            const sharedKey = params.get('categoria');
+
+            if (!sharedKey) return;
+
+            const realCategory = games.find(game => categoryKey(game.category) === sharedKey)?.category;
+            if (!realCategory) return;
+
+            const featureSectionMap = {
+                'lancamento-em-oferta': 'launchSection',
+                'pre-venda': 'preorderSection',
+                'promocao': 'promotionSection'
+            };
+
+            const targetId = featureSectionMap[sharedKey];
+
+            if (targetId) {
+                setTimeout(() => {
+                    const section = document.getElementById(targetId);
+                    if (!section) return;
+
+                    section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    section.style.transition = 'filter 0.25s ease, transform 0.25s ease';
+                    section.style.filter = 'drop-shadow(0 0 18px rgba(0, 230, 118, 0.18))';
+                    section.style.transform = 'translateY(-2px)';
+
+                    setTimeout(() => {
+                        section.style.filter = '';
+                        section.style.transform = '';
+                    }, 1800);
+                }, 350);
+            } else {
+                const select = document.getElementById('categorySelect');
+                if (select) {
+                    const option = [...select.options].find(
+                        option => categoryKey(option.value) === sharedKey
+                    );
+
+                    if (option) {
+                        select.value = option.value;
+                        renderGames();
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }
+                }
+            }
+        }
+
         function fetchCatalogFromSheets() {
             Papa.parse(SHEET_CSV_URL, {
                 download: true,
@@ -1633,6 +1889,7 @@
             renderPreorderCarousel();
             renderPromotionCarousel();
             renderGames();
+            applySharedCategoryFromUrl();
             startAutoScroll('launchGrid');
             startAutoScroll('preorderGrid');
             startAutoScroll('promotionGrid');
@@ -2060,6 +2317,292 @@
             return card;
         }
 
+
+        function getCategoryDisplayName(category) {
+            if (isCategory({ category }, 'Lançamento em Oferta')) return 'LANÇAMENTO EM OFERTA';
+            if (isCategory({ category }, 'Pré Venda')) return 'PRÉ-VENDAS';
+            if (isCategory({ category }, 'Promoção')) return 'PROMOÇÕES';
+            if (isCategory({ category }, 'Catálogo')) return 'CATÁLOGO';
+            return String(category || 'CATÁLOGO').toUpperCase();
+        }
+
+        function getCategoryShareUrl(category) {
+            const key = categoryKey(category);
+            return `${SHARE_URL}?categoria=${encodeURIComponent(key)}`;
+        }
+
+        function showCategoryShareStatus(text) {
+            const el = document.getElementById('categoryShareStatus');
+            if (!el) return;
+
+            el.innerText = text;
+            el.classList.add('active');
+
+            clearTimeout(window.__categoryShareToastTimer);
+            window.__categoryShareToastTimer = setTimeout(() => {
+                el.classList.remove('active');
+            }, 2600);
+        }
+
+        async function buildCategoryShareCanvas(category) {
+            const allGames = games.filter(game => isCategory(game, category));
+            const featuredGames = allGames.slice(0, 3);
+
+            const canvas = document.createElement('canvas');
+            canvas.width = 1200;
+            canvas.height = 630;
+
+            const ctx = canvas.getContext('2d');
+            if (!ctx) throw new Error('Canvas não disponível.');
+
+            // Fundo.
+            const bgGradient = ctx.createLinearGradient(0, 0, 1200, 630);
+            bgGradient.addColorStop(0, '#0b0d10');
+            bgGradient.addColorStop(1, '#141a21');
+            ctx.fillStyle = bgGradient;
+            ctx.fillRect(0, 0, 1200, 630);
+
+            // Faixa de destaque.
+            const accentGradient = ctx.createLinearGradient(0, 0, 1200, 0);
+            accentGradient.addColorStop(0, '#00e676');
+            accentGradient.addColorStop(1, '#00b359');
+            ctx.fillStyle = accentGradient;
+            ctx.fillRect(0, 0, 1200, 7);
+
+            // Título.
+            ctx.fillStyle = '#ffffff';
+            ctx.font = '900 42px Inter, Arial, sans-serif';
+            ctx.fillText(getCategoryDisplayName(category), 60, 76);
+
+            ctx.fillStyle = '#8c96a3';
+            ctx.font = '600 19px Inter, Arial, sans-serif';
+            ctx.fillText(`${allGames.length} jogo${allGames.length === 1 ? '' : 's'} disponível${allGames.length === 1 ? '' : 'is'} • PS4 / PS5`, 60, 108);
+
+            const positions = [
+                { x: 60,  w: 320 },
+                { x: 440, w: 320 },
+                { x: 820, w: 320 }
+            ];
+
+            const imageSize = 320;
+            const y = 145;
+
+            for (let i = 0; i < 3; i++) {
+                const pos = positions[i];
+                const game = featuredGames[i];
+
+                ctx.save();
+                ctx.beginPath();
+                ctx.roundRect(pos.x, y, imageSize, imageSize, 18);
+                ctx.clip();
+
+                if (game) {
+                    let dataUrl = await getImageDataUrlForCanvas(game.img);
+
+                    if (!dataUrl) {
+                        dataUrl = game.img;
+                    }
+
+                    try {
+                        const img = new Image();
+                        img.src = dataUrl;
+
+                        await new Promise(resolve => {
+                            img.onload = resolve;
+                            img.onerror = resolve;
+                        });
+
+                        if (img.naturalWidth > 0) {
+                            const scale = Math.max(imageSize / img.naturalWidth, imageSize / img.naturalHeight);
+                            const dw = img.naturalWidth * scale;
+                            const dh = img.naturalHeight * scale;
+                            const dx = pos.x + (imageSize - dw) / 2;
+                            const dy = y + (imageSize - dh) / 2;
+                            ctx.drawImage(img, dx, dy, dw, dh);
+                        } else {
+                            throw new Error('Imagem inválida');
+                        }
+                    } catch (_) {
+                        ctx.fillStyle = '#1a202a';
+                        ctx.fillRect(pos.x, y, imageSize, imageSize);
+                    }
+                } else {
+                    ctx.fillStyle = '#1a202a';
+                    ctx.fillRect(pos.x, y, imageSize, imageSize);
+
+                    ctx.fillStyle = '#66717e';
+                    ctx.font = '700 20px Inter, Arial, sans-serif';
+                    ctx.textAlign = 'center';
+                    ctx.fillText('MCO GAMES', pos.x + imageSize / 2, y + imageSize / 2);
+                    ctx.textAlign = 'left';
+                }
+
+                ctx.restore();
+
+                // Moldura.
+                ctx.strokeStyle = 'rgba(0, 230, 118, 0.18)';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.roundRect(pos.x, y, imageSize, imageSize, 18);
+                ctx.stroke();
+
+                if (game) {
+                    // Tarja discreta com o nome.
+                    ctx.fillStyle = 'rgba(0,0,0,0.74)';
+                    ctx.fillRect(pos.x, y + imageSize - 54, imageSize, 54);
+
+                    ctx.fillStyle = '#ffffff';
+                    ctx.font = '800 17px Inter, Arial, sans-serif';
+
+                    const maxWidth = imageSize - 28;
+                    let title = game.name;
+
+                    while (ctx.measureText(title).width > maxWidth && title.length > 12) {
+                        title = title.slice(0, -2);
+                    }
+
+                    if (title !== game.name) title = title.trim() + '…';
+                    ctx.fillText(title, pos.x + 14, y + imageSize - 21);
+                }
+            }
+
+            // Rodapé.
+            ctx.fillStyle = '#00e676';
+            ctx.font = '800 20px Inter, Arial, sans-serif';
+            ctx.fillText('MCO GAMES', 60, 530);
+
+            ctx.fillStyle = '#8c96a3';
+            ctx.font = '500 18px Inter, Arial, sans-serif';
+            ctx.fillText('Confira a categoria completa no site:', 60, 558);
+
+            ctx.fillStyle = '#ffffff';
+            ctx.font = '700 18px Inter, Arial, sans-serif';
+            ctx.fillText(getCategoryShareUrl(category), 390, 558);
+
+            ctx.fillStyle = '#66717e';
+            ctx.font = '500 14px Inter, Arial, sans-serif';
+            ctx.fillText('Atualizado automaticamente a partir do catálogo MCO GAMES', 60, 592);
+
+            return canvas;
+        }
+
+        async function shareCategoryOffer(category) {
+            const categoryGames = games.filter(game => isCategory(game, category));
+
+            if (categoryGames.length === 0) {
+                showCategoryShareStatus('Nenhum jogo disponível nessa categoria.');
+                return;
+            }
+
+            const shareUrl = getCategoryShareUrl(category);
+            const displayName = getCategoryDisplayName(category);
+
+            const message =
+                `🎮 *MCO GAMES — ${displayName}*\n\n` +
+                `Confira ${categoryGames.length} jogo${categoryGames.length === 1 ? '' : 's'} dessa categoria.\n\n` +
+                `👉 ${shareUrl}`;
+
+            try {
+                showCategoryShareStatus('Preparando a capa para compartilhar…');
+
+                const canvas = await buildCategoryShareCanvas(category);
+                const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+
+                if (!blob) throw new Error('Não foi possível criar a capa.');
+
+                const safeName = displayName
+                    .normalize('NFD')
+                    .replace(/[\u0300-\u036f]/g, '')
+                    .replace(/[^a-zA-Z0-9]+/g, '_')
+                    .replace(/^_+|_+$/g, '');
+
+                const fileName = `MCO_GAMES_${safeName}.png`;
+                const file = new File([blob], fileName, { type: 'image/png' });
+
+                // Celular: compartilhamento nativo com imagem + texto.
+                if (isMobileDevice()) {
+                    const canShareFile = !!(
+                        navigator.share &&
+                        navigator.canShare &&
+                        navigator.canShare({ files: [file] })
+                    );
+
+                    if (canShareFile) {
+                        try {
+                            await navigator.share({
+                                files: [file],
+                                text: message,
+                                title: `MCO GAMES - ${displayName}`
+                            });
+                            showCategoryShareStatus('Pronto.');
+                            return;
+                        } catch (shareError) {
+                            if (shareError && shareError.name === 'AbortError') return;
+                            console.warn('Compartilhamento nativo da categoria falhou:', shareError);
+                        }
+                    }
+
+                    // Fallback mobile.
+                    const url = URL.createObjectURL(blob);
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.download = fileName;
+                    link.click();
+
+                    setTimeout(() => {
+                        URL.revokeObjectURL(url);
+                        window.location.href = `https://wa.me/?text=${encodeURIComponent(message)}`;
+                    }, 700);
+
+                    return;
+                }
+
+                // Computador: copia a capa para o clipboard e abre o WhatsApp Web.
+                const whatsappWindow = window.open(
+                    `https://web.whatsapp.com/send?text=${encodeURIComponent(message)}`,
+                    '_blank'
+                );
+
+                let copied = false;
+
+                if (navigator.clipboard && window.ClipboardItem) {
+                    try {
+                        await navigator.clipboard.write([
+                            new ClipboardItem({ 'image/png': blob })
+                        ]);
+                        copied = true;
+                    } catch (clipboardError) {
+                        console.warn('Não foi possível copiar a capa:', clipboardError);
+                    }
+                }
+
+                if (copied) {
+                    showCategoryShareStatus('Capa copiada. Use Ctrl+V no WhatsApp.');
+                } else {
+                    const url = URL.createObjectURL(blob);
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.download = fileName;
+                    document.body.appendChild(link);
+                    link.click();
+                    link.remove();
+
+                    showCategoryShareStatus('Capa salva. Anexe o PNG no WhatsApp.');
+                    setTimeout(() => URL.revokeObjectURL(url), 5000);
+                }
+
+                if (!whatsappWindow || whatsappWindow.closed) {
+                    window.open(
+                        `https://web.whatsapp.com/send?text=${encodeURIComponent(message)}`,
+                        '_blank'
+                    );
+                }
+            } catch (error) {
+                console.error('Erro ao compartilhar categoria:', error);
+                showCategoryShareStatus('Não foi possível preparar a capa.');
+            }
+        }
+
         function toggleFeatureCategoryExpansion(category) {
             const key = categoryKey(category);
             if (expandedFeatureCategories.has(key)) {
@@ -2207,24 +2750,119 @@
             renderGames();
         }
 
-        function renderGames() {
+        function handleCatalogFilterInput() {
+            updateSearchClearButton();
+            renderGames();
+        }
+
+        function updateSearchClearButton() {
+            const input = document.getElementById('searchInput');
+            const clearBtn = document.getElementById('searchClearBtn');
+            if (!input || !clearBtn) return;
+
+            clearBtn.style.display = input.value.trim() ? 'flex' : 'none';
+        }
+
+        function clearCatalogSearch() {
+            const input = document.getElementById('searchInput');
+            const select = document.getElementById('categorySelect');
+
+            if (input) input.value = '';
+            if (select) select.value = 'ALL';
+
+            updateSearchClearButton();
+            renderGames();
+
+            if (input) input.focus();
+        }
+
+        function setFeatureSectionsVisible(visible) {
+            ['launchSection', 'preorderSection', 'promotionSection'].forEach(id => {
+                const section = document.getElementById(id);
+                if (section) section.style.display = visible ? '' : 'none';
+            });
+        }
+
+        function renderFilteredResults(filteredGames, searchVal, catVal) {
             const catalogContainer = document.getElementById('catalogContainer');
             if (!catalogContainer) return;
 
-            const searchVal = document.getElementById('searchInput').value.toLowerCase().trim();
-            const catVal = document.getElementById('categorySelect').value;
+            setFeatureSectionsVisible(false);
 
+            if (filteredGames.length === 0) {
+                catalogContainer.innerHTML = `
+                    <div class="search-empty">
+                        <div style="font-size:1.8rem; margin-bottom:8px;">🔎</div>
+                        <strong>Nenhum jogo encontrado</strong>
+                        <div style="margin-top:6px;">Tente outro nome ou escolha outra categoria.</div>
+                    </div>
+                `;
+                return;
+            }
+
+            const label = searchVal
+                ? `Resultados para "${escapeHtml(searchVal)}"`
+                : (catVal !== 'ALL' ? `Jogos de ${escapeHtml(catVal)}` : 'Resultados');
+
+            catalogContainer.innerHTML = `
+                <div class="search-results-title">
+                    <h3>${label}</h3>
+                    <span>${filteredGames.length} jogo(s) encontrado(s)</span>
+                </div>
+            `;
+
+            const grid = document.createElement('div');
+            grid.className = 'category-grid';
+
+            filteredGames.forEach(game => {
+                grid.appendChild(createCardElement(game));
+            });
+
+            catalogContainer.appendChild(grid);
+            updateTimers();
+        }
+
+        function renderGames() {
+            const catalogContainer = document.getElementById('catalogContainer');
+            const searchInput = document.getElementById('searchInput');
+            const categorySelect = document.getElementById('categorySelect');
+
+            if (!catalogContainer || !searchInput || !categorySelect) return;
+
+            const searchVal = searchInput.value.toLowerCase().trim();
+            const catVal = categorySelect.value;
+
+            const filtering = searchVal.length > 0 || catVal !== 'ALL';
+
+            if (filtering) {
+                const filteredGames = games.filter(game => {
+                    const matchesCategory =
+                        catVal === 'ALL' ||
+                        categoryKey(game.category) === categoryKey(catVal);
+
+                    const matchesSearch =
+                        !searchVal ||
+                        game.name.toLowerCase().includes(searchVal);
+
+                    return matchesCategory && matchesSearch;
+                });
+
+                renderFilteredResults(filteredGames, searchVal, catVal);
+                return;
+            }
+
+            setFeatureSectionsVisible(true);
             catalogContainer.innerHTML = '';
 
-            const categories = catVal === 'ALL'
-                ? getOrderedCategories(games.map(g => g.category))
-                    .filter(category => !['Lançamento em Oferta', 'Pré Venda', 'Promoção'].some(priority => normalizeCategory(priority) === normalizeCategory(category)))
-                : [catVal];
+            const categories = getOrderedCategories(games.map(g => g.category))
+                .filter(category =>
+                    !['Lançamento em Oferta', 'Pré Venda', 'Promoção']
+                        .some(priority => categoryKey(priority) === categoryKey(category))
+                );
 
             categories.forEach(category => {
                 const filteredGames = games.filter(g =>
-                    normalizeCategory(g.category) === normalizeCategory(category) &&
-                    g.name.toLowerCase().includes(searchVal)
+                    categoryKey(g.category) === categoryKey(category)
                 );
 
                 if (filteredGames.length === 0) return;
@@ -2232,15 +2870,28 @@
                 const categoryBlock = document.createElement('section');
                 categoryBlock.className = 'category-block';
 
+                const catTitleRow = document.createElement('div');
+                catTitleRow.className = 'category-title-row';
+
                 const catTitle = document.createElement('h3');
                 catTitle.className = 'category-title-section';
                 catTitle.innerText = category;
-                categoryBlock.appendChild(catTitle);
+
+                const catShareBtn = document.createElement('button');
+                catShareBtn.type = 'button';
+                catShareBtn.className = 'category-share-btn';
+                catShareBtn.title = `Compartilhar ${category}`;
+                catShareBtn.innerHTML = `<span class="share-mini-icon">↗</span><span class="share-mini-label">Compartilhar</span>`;
+                catShareBtn.addEventListener('click', () => shareCategoryOffer(category));
+
+                catTitleRow.appendChild(catTitle);
+                catTitleRow.appendChild(catShareBtn);
+                categoryBlock.appendChild(catTitleRow);
 
                 const grid = document.createElement('div');
                 grid.className = 'category-grid';
 
-                const showAll = expandedCategories.has(category) || searchVal.length > 0;
+                const showAll = expandedCategories.has(category);
                 const visibleGames = showAll
                     ? filteredGames
                     : filteredGames.slice(0, CATEGORY_VISIBLE_LIMIT);
@@ -2251,7 +2902,7 @@
 
                 categoryBlock.appendChild(grid);
 
-                if (filteredGames.length > CATEGORY_VISIBLE_LIMIT && !searchVal) {
+                if (filteredGames.length > CATEGORY_VISIBLE_LIMIT) {
                     const expandRow = document.createElement('div');
                     expandRow.className = 'category-expand-row';
 
@@ -2259,7 +2910,6 @@
                     const isExpanded = expandedCategories.has(category);
                     expandBtn.className = `category-expand-btn${isExpanded ? ' expanded' : ''}`;
                     expandBtn.innerHTML = getExpandButtonHtml(category, isExpanded);
-
                     expandBtn.addEventListener('click', () => toggleCategoryExpansion(category));
 
                     expandRow.appendChild(expandBtn);
