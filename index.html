@@ -551,9 +551,9 @@
                 from 0deg,
                 transparent 0deg,
                 transparent 250deg,
-                rgba(0, 230, 118, 0.05) 275deg,
-                rgba(0, 230, 118, 0.70) 315deg,
-                rgba(0, 230, 118, 0.12) 345deg,
+                rgba(0, 230, 118, 0.035) 278deg,
+                rgba(0, 230, 118, 0.30) 315deg,
+                rgba(0, 230, 118, 0.055) 346deg,
                 transparent 360deg
             );
             -webkit-mask:
@@ -562,13 +562,34 @@
             -webkit-mask-composite: xor;
             mask-composite: exclude;
             pointer-events: none;
-            animation: typeButtonSweep 2.8s linear infinite;
-            opacity: 0.9;
+            opacity: 0;
+            animation:
+                typeButtonSweep var(--type-glow-duration, 7s)
+                var(--type-glow-delay, 0s)
+                ease-in-out infinite;
         }
 
         @keyframes typeButtonSweep {
-            from { transform: rotate(0deg); }
-            to   { transform: rotate(360deg); }
+            0%, 64% {
+                opacity: 0;
+                transform: rotate(0deg);
+            }
+            68% {
+                opacity: 0.12;
+                transform: rotate(92deg);
+            }
+            72% {
+                opacity: 0.30;
+                transform: rotate(132deg);
+            }
+            76% {
+                opacity: 0.10;
+                transform: rotate(168deg);
+            }
+            82%, 100% {
+                opacity: 0;
+                transform: rotate(360deg);
+            }
         }
 
         .type-btn.active {
@@ -598,10 +619,10 @@
 
         @keyframes selectedTypeAura {
             0%, 100% {
-                box-shadow: 0 0 0 2px rgba(0, 230, 118, 0.16), 0 0 10px rgba(0, 230, 118, 0.45), 0 0 20px rgba(0, 230, 118, 0.22);
+                box-shadow: 0 0 0 2px rgba(0, 230, 118, 0.15), 0 0 9px rgba(0, 230, 118, 0.34), 0 0 16px rgba(0, 230, 118, 0.16);
             }
             50% {
-                box-shadow: 0 0 0 3px rgba(0, 230, 118, 0.24), 0 0 16px rgba(0, 230, 118, 0.70), 0 0 30px rgba(0, 230, 118, 0.34);
+                box-shadow: 0 0 0 2px rgba(0, 230, 118, 0.20), 0 0 12px rgba(0, 230, 118, 0.48), 0 0 22px rgba(0, 230, 118, 0.22);
             }
         }
 
@@ -1969,6 +1990,16 @@
                     </div>
                 </div>
             `;
+
+            // Brilho discreto e dessincronizado: cada botão recebe uma fase/duração
+            // diferente para não parecer uma animação repetitiva.
+            card.querySelectorAll('.type-btn').forEach(btn => {
+                const duration = (5.8 + Math.random() * 4.8).toFixed(2);
+                const delay = (-Math.random() * 8).toFixed(2);
+                btn.style.setProperty('--type-glow-duration', `${duration}s`);
+                btn.style.setProperty('--type-glow-delay', `${delay}s`);
+            });
+
             return card;
         }
 
